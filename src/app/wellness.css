@@ -2,3 +2,37 @@
 
 /* Product palette reference: lime + violet + lilac + warm white + near-black. */
 .well-button{background:#CFFF4C!important;color:#161620!important}.well-button:hover{background:#B9ED35!important}.well-brand-mark{background:#5B40F5!important;color:white!important}.well-auth-tabs button.active{color:#5B40F5!important;border-bottom-color:#CFFF4C!important}.well-field input:focus{border-color:#5B40F5!important;box-shadow:0 0 0 3px rgba(91,64,245,.13)!important}.well-tag{background:#EBEAFE!important;color:#5B40F5!important}.well-info{background:#F0F9D8!important;color:#161620!important}.well-link{color:#5B40F5!important}.well-feature:nth-child(2) .well-feature-icon{background:#F0F9D8;color:#161620}.well-feature:nth-child(3) .well-feature-icon{background:#E8E6FF;color:#5B40F5}
+
+/* WELLNESS APP: two intentionally independent color systems.
+   UI/brand: violet, lime green, warm white, ink black.
+   Data-only: reserved for charts, biomarker reference ranges and clinical indicator markers.
+   Never use data-status colors for global navigation, CTA buttons, page backgrounds or branding. */
+:root{
+ --brand-violet:#5B40F5;
+ --brand-lime:#CFFF4C;
+ --brand-warm-white:#F8F8F5;
+ --brand-black:#161620;
+ --data-chart-blue:#6488FA;
+ --data-chart-cyan:#5BC9D4;
+ --data-chart-teal:#43B6A3;
+ --data-chart-amber:#F6B74A;
+ --data-chart-coral:#F27E77;
+ --data-chart-pink:#E88EB8;
+ --data-chart-lavender:#A2A8FA;
+ --data-chart-lime:#BDF348;
+ --data-reference-low:#6488FA;
+ --data-reference-normal:#86CFA2;
+ --data-reference-high:#F6B74A;
+ --data-reference-alert:#E97373;
+}
+.well-chart{color:var(--brand-black);background:white}
+.well-chart .well-chart-grid{stroke:#E9E9EC}
+.well-chart .well-chart-axis{fill:#666674}
+.well-chart .well-chart-series-a{stroke:var(--data-chart-lavender)}
+.well-chart .well-chart-series-b{stroke:var(--data-chart-lime)}
+.well-chart .well-chart-series-c{stroke:var(--data-chart-blue)}
+.well-chart .well-chart-series-d{stroke:var(--data-chart-amber)}
+.well-indicator-marker[data-range="low"]{background:var(--data-reference-low)}
+.well-indicator-marker[data-range="normal"]{background:var(--data-reference-normal)}
+.well-indicator-marker[data-range="high"]{background:var(--data-reference-high)}
+.well-indicator-marker[data-range="alert"]{background:var(--data-reference-alert)}
