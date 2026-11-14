@@ -1,0 +1,10 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+const data=JSON.parse(readFileSync("src/app/(dashboard)/mi-analisis/catalog-reference.json","utf8"));
+const translated=data.filter(x=>x.name_en);
+const added=[25,31,32,37,38,40,41,43,44,45,46,47,48,49,50,51];
+test("128 indicadores y 32 traducidos, sin duplicación",()=>{assert.equal(data.length,128);assert.equal(new Set(data.map(x=>x.id)).size,128);assert.equal(translated.length,32)});
+for(const id of added)test("código y nombres intactos REF-"+id,()=>{const x=data.find(v=>v.id===id);assert.ok(x.name_en);assert.equal(x.code,"REF-"+String(id).padStart(3,"0"));assert.ok(x.aliases.length>=2);assert.notEqual(x.name,x.name_en)});
+for(const [part,absolute] of [[31,32],[37,38],[43,44],[47,48],[49,50]])test("porcentaje y recuento absoluto distintos",()=>{const a=data.find(x=>x.id===part),b=data.find(x=>x.id===absolute);assert.ok(a.name.includes("(%)"));assert.ok(b.name.includes("absoluto"));assert.notEqual(a.code,b.code)});
+test("no registrar resultados personales ni rangos clínicos",()=>{for(const x of data)for(const field of ["result","value","observed_at","patient_name","clinical_status","reference_range"])assert.equal(Object.hasOwn(x,field),false)});
