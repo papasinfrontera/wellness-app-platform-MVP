@@ -1,11 +1,20 @@
-const sections = [
- {title:"Mis análisis de sangre",message:"Rafael, tus resultados cuentan una historia.",detail:"Descubre cómo evolucionan tus indicadores.",state:"Migración pendiente"},
- {title:"Dispositivos conectados",message:"Rafael, descubre tu ritmo.",detail:"Sueño, actividad y recuperación en una mirada.",state:"Importador WHOOP pendiente"},
- {title:"Hábitos",message:"Rafael, tus decisiones construyen bienestar.",detail:"Conoce tus rutinas y cómo evolucionan.",state:"Módulo pendiente"}
+const sections=[
+ {title:"Mis análisis",description:"Tus indicadores, sus cambios y una perspectiva clara de tu evolución.",icon:"◈",href:"/sprint-6-2/persistencia",state:"Abrir mi espacio"},
+ {title:"Actividad y recuperación",description:"Conoce mejor tu ritmo, tu descanso y la energía que acompaña cada día.",icon:"◎",href:null,state:"Próximamente"},
+ {title:"Mis hábitos",description:"Comprende cómo tus decisiones diarias construyen bienestar a largo plazo.",icon:"✧",href:null,state:"Próximamente"}
 ];
-export default function Home(){return <main style={{maxWidth:1000,margin:"auto",padding:"56px 24px"}}>
-<p style={{fontSize:12,fontWeight:800,letterSpacing:2,color:"#6e49d8"}}>WELLNESS APP · SPRINT 6.1</p>
-<h1 style={{fontSize:"clamp(30px,5vw,52px)",marginBottom:10}}>Fundación de una plataforma longitudinal.</h1>
-<p style={{color:"#6b6880",lineHeight:1.6}}>Entorno de desarrollo aislado. El demo publicado se mantiene sin modificaciones.</p>
-<div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(240px,1fr))",gap:16,marginTop:32}}>{sections.map(s=><section key={s.title} style={{background:"#fff",border:"1px solid #e8e3f4",borderRadius:18,padding:24}}><small style={{color:"#7868a1"}}>{s.title}</small><h2 style={{fontSize:21,lineHeight:1.25}}>{s.message}</h2><p style={{color:"#757083"}}>{s.detail}</p><small style={{color:"#96752b"}}>{s.state}</small></section>)}</div>
-<p style={{marginTop:32,fontSize:12,color:"#777"}}>Este entorno no contiene datos de salud reales ni credenciales.</p></main>}
+export default function Home(){return <main className="well-shell">
+ <section className="well-hero"><span className="well-eyebrow">Bienestar con ciencia</span>
+ <h1 className="well-title" style={{maxWidth:820}}>Tu salud tiene una historia.<br/><span style={{color:"var(--well-green)"}}>Empieza a comprenderla.</span></h1>
+ <p className="well-subtitle">Un espacio personal para conocer tus indicadores, seguir su evolución y tomar decisiones con información clara y fundamentada en ciencia.</p>
+ <div style={{display:"flex",flexWrap:"wrap",gap:12,marginTop:29}}>
+ <a className="well-button" href="/sprint-6-2/persistencia" style={{textDecoration:"none",display:"inline-flex",alignItems:"center"}}>Entrar a mi espacio</a>
+ <a className="well-button-secondary" href="#explorar" style={{textDecoration:"none",display:"inline-flex",alignItems:"center"}}>Explorar la plataforma</a>
+ </div></section>
+ <section id="explorar" aria-label="Áreas de bienestar"><div className="well-grid">{sections.map(s=>
+ <article key={s.title} className="well-card well-feature">
+ <div className="well-feature-icon" aria-hidden="true">{s.icon}</div>
+ <h2>{s.title}</h2><p>{s.description}</p>
+ {s.href?<a className="well-link" href={s.href}>{s.state} →</a>:<span className="well-tag">{s.state}</span>}
+ </article>)}</div></section>
+ </main>}
