@@ -17,4 +17,4 @@ export default function Sprint62(){return <main style={{maxWidth:1020,margin:"au
 <span style={{fontSize:11,color:b.status.startsWith("Pendiente")?"#9a6b20":"#7354b8",fontWeight:700}}>{b.status}</span>
 <h2 style={{fontSize:20,margin:"10px 0 8px",letterSpacing:-.3}}>{b.title}</h2><p style={{fontSize:14,color:"#77718a",lineHeight:1.5,margin:0}}>{b.description}</p></section>)}</div>
 <section style={{background:"#f1edfc",padding:24,borderRadius:16,marginTop:24}}><h2 style={{fontSize:20,margin:"0 0 8px"}}>Siguiente validación</h2><p style={{color:"#57516d",lineHeight:1.6,margin:0}}>Crear el proyecto Supabase, ejecutar las migraciones tras la revisión de seguridad, conectar la aplicación y probar que cada usuario consulta exclusivamente sus propias mediciones.</p></section>
-</main>}
+<p style={{marginTop:24}}><a href="/sprint-6-2/persistencia" style={{background:"#6944e8",color:"white",padding:"12px 18px",display:"inline-block",textDecoration:"none",borderRadius:10}}>Probar autenticación y persistencia ficticia</a></p></main>}
