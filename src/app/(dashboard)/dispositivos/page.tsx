@@ -1,0 +1,2 @@
+import ModulePreview from "../components/ModulePreview";
+export default function Page(){return <ModulePreview eyebrow="Dispositivos" title="Descubre tu ritmo." intro="Sueño, actividad y recuperación en una mirada." items={["Sueño","Recuperación","Esfuerzo","Hábitos contextualizados"]} note="La importación de WHOOP mediante CSV/ZIP y las seis ventanas de consulta se implementarán en una entrega posterior. El origen de los datos conservará su identificación."/>}
