@@ -1,3 +1,4 @@
+import { checkDatabase } from "@/lib/supabase/health";
 export const dynamic = "force-dynamic";
 const checks = [
  {title:"Proyecto Vercel independiente", ok:true,detail:"El entorno de revisión se publica desde la rama del sprint."},
@@ -7,9 +8,10 @@ const checks = [
  {title:"Búsqueda científica RAG",ok:false,detail:"Esquema definido; sin documentos indexados ni embeddings."},
  {title:"Clinical Rules Engine",ok:false,detail:"Versionado conceptual; no activo."}
 ];
-export default function EstadoInfraestructura(){
- const configured=Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL&&process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);
- const rows=[...checks.slice(0,3),{title:"Supabase configurado",ok:configured,detail:configured?"Variables detectadas; conexión y permisos aún sin verificar.":"Faltan variables de entorno y un proyecto autorizado."},...checks.slice(3)];
+export default async function EstadoInfraestructura(){
+ const db = await checkDatabase();
+ const configured = db.configured;
+ const rows=[...checks.slice(0,3),{title:"Supabase configurado",ok:configured,detail:configured?"Las variables están presentes en el entorno de Vercel.":"Faltan variables de entorno y un proyecto autorizado."},{title:"Conexión real a PostgreSQL",ok:db.schemaAccessible,detail:db.schemaAccessible?"API REST y tabla indicators verificadas con credencial publicable y acceso restringido.":"La API REST no confirmó todavía el acceso a la tabla indicators."},...checks.slice(3)];
  return <main style={{maxWidth:900,margin:"auto",padding:"48px 22px 80px"}}>
  <a href="/sprint-6-2" style={{fontSize:13,color:"#6e49d8",textDecoration:"none"}}>← Sprint 6.2</a>
  <p style={{fontSize:12,color:"#6e49d8",fontWeight:800,letterSpacing:2,marginTop:35}}>WELLNESS APP · AUDITORÍA DE FUNDACIONES</p>
