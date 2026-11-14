@@ -1,0 +1,2 @@
+import ModulePreview from "../components/ModulePreview";
+export default function Page(){return <ModulePreview eyebrow="Mis análisis" title="Tus resultados cuentan una historia." intro="Descubre cómo evolucionan tus indicadores." items={["Indicadores de laboratorio","Historial longitudinal","Fichas científicas","Contratar análisis"]} note="La migración del catálogo de 128 indicadores y del historial clínico se realizará en los siguientes sprints. Las compras no están habilitadas; no se presentan resultados privados de la demo como si estuvieran asociados a tu cuenta."/>}
