@@ -2,91 +2,124 @@
 import { useEffect, useState } from "react";
 import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
 
-type Item = { id:string; label:string; value:number; unit:string; created_at:string };
-function client(): SupabaseClient | null {
-  const url=process.env.NEXT_PUBLIC_SUPABASE_URL, key=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  return url&&key?createClient(url,key):null;
+type SampleRecord = {id:string;label:string;value:number;unit:string;created_at:string};
+function getClient():SupabaseClient|null {
+ const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
+ const key=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+ return url&&key?createClient(url,key):null;
 }
-export default function PersistenciaDemo(){
- const [db]=useState(client);
+const inputHint="Usa una contraseña de al menos ocho caracteres.";
+export default function MiEspacio(){
+ const [db]=useState(getClient);
  const [user,setUser]=useState<User|null>(null);
  const [email,setEmail]=useState("");
  const [password,setPassword]=useState("");
- const [message,setMessage]=useState("Si ya confirmaste el correo, entra con tu usuario y contraseña. No necesitas registrarte de nuevo.");
- const [records,setRecords]=useState<Item[]>([]);
- const [busy,setBusy]=useState(false);
- const [mode,setMode]=useState<"signup"|"signin">("signin");
  const [showPassword,setShowPassword]=useState(false);
+ const [mode,setMode]=useState<"signin"|"signup">("signin");
+ const [records,setRecords]=useState<SampleRecord[]>([]);
+ const [notice,setNotice]=useState("");
+ const [busy,setBusy]=useState(false);
+ const [loadingSession,setLoadingSession]=useState(true);
  useEffect(()=>{
-  if(!db)return;
-  db.auth.getUser().then(({data,error})=>{if(!error)setUser(data.user)});
-  const {data:sub}=db.auth.onAuthStateChange((_event,session)=>setUser(session?.user??null));
-  return ()=>sub.subscription.unsubscribe();
+  if(!db){setLoadingSession(false);return}
+  let alive=true;
+  void db.auth.getUser().then(({data})=>{if(alive){setUser(data.user);setLoadingSession(false)}}).catch(()=>{if(alive)setLoadingSession(false)});
+  const {data:auth}=db.auth.onAuthStateChange((_event,session)=>{if(alive){setUser(session?.user??null);setLoadingSession(false)}});
+  return ()=>{alive=false;auth.subscription.unsubscribe()};
  },[db]);
  useEffect(()=>{
   if(!db||!user){setRecords([]);return}
+  let alive=true;
   void db.from("demo_measurements").select("id,label,value,unit,created_at").order("created_at",{ascending:false}).limit(20)
-  .then(({data,error})=>{if(error)setMessage("No se pudo cargar: "+error.message);else setRecords((data??[]) as Item[])});
+  .then(({data,error})=>{if(!alive)return;if(error)setNotice("No fue posible mostrar tus registros. Inténtalo nuevamente.");else setRecords((data??[]) as SampleRecord[])});
+  return ()=>{alive=false};
  },[db,user]);
- async function login(mode:"signin"|"signup"){
-  if(!db||busy)return;
-  setBusy(true);
+ async function authenticate(){
+  if(!db||busy||!email.includes("@")||password.length<8)return;
+  setBusy(true);setNotice("");
   try{
-   const action=mode==="signup"?db.auth.signUp({email:email.trim(),password,options:{emailRedirectTo:window.location.origin+"/sprint-6-2/persistencia"}}):db.auth.signInWithPassword({email:email.trim(),password});
-   const {data,error}=await action;
-   if(error)throw error;
-   setMessage(data.session?"Sesión iniciada correctamente. Ya puedes guardar tu prueba ficticia.":mode==="signup"?"Registro enviado. Revisa tu correo (incluido spam) y confirma el enlace. Después vuelve aquí e inicia sesión.":"No hay sesión activa. Comprueba si falta confirmar el correo.");
-  }catch(e){const raw=e instanceof Error?e.message:"Error de autenticación";setMessage(raw.includes("Email rate limit")?"Límite temporal de correos de Supabase alcanzado. Se necesita un servicio SMTP personalizado o intentarlo más tarde.":raw.includes("Invalid login credentials")?"Correo o contraseña incorrectos, o todavía no has confirmado la cuenta.":raw)}finally{setBusy(false)}
+   const response=mode==="signup"
+    ?await db.auth.signUp({email:email.trim(),password,options:{emailRedirectTo:window.location.origin+"/sprint-6-2/persistencia"}})
+    :await db.auth.signInWithPassword({email:email.trim(),password});
+   if(response.error)throw response.error;
+   setPassword("");
+   setNotice(response.data.session?"¡Bienvenido a tu espacio!":mode==="signup"?"Revisa tu correo y confirma el enlace para activar tu cuenta.":"Si acabas de registrarte, confirma tu correo para acceder.");
+  }catch(e){
+   const raw=e instanceof Error?e.message:"";
+   setNotice(/rate limit|too many requests/i.test(raw)?"Se han realizado demasiados intentos. Inténtalo de nuevo más tarde.":/invalid login|invalid credentials/i.test(raw)?"No pudimos iniciar sesión. Revisa tu correo y contraseña.":"No fue posible completar el acceso. Inténtalo nuevamente.");
+  }finally{setBusy(false)}
  }
- async function saveTest(){
+ async function addSample(){
   if(!db||!user||busy)return;
-  setBusy(true);
-  const {error}=await db.from("demo_measurements").insert({user_id:user.id,label:"TEST SINTÉTICO (NO CLÍNICO)",value:42,unit:"demo"});
-  if(error)setMessage("Error al guardar: "+error.message);
+  setBusy(true);setNotice("");
+  const {error}=await db.from("demo_measurements").insert({user_id:user.id,label:"Ejemplo",value:42,unit:"demo"});
+  if(error)setNotice("No se pudo guardar el ejemplo. Inténtalo nuevamente.");
   else{
-   setMessage("Prueba guardada en PostgreSQL. Puedes recargar la página para comprobar su persistencia.");
-   const r=await db.from("demo_measurements").select("id,label,value,unit,created_at").order("created_at",{ascending:false}).limit(20);
-   if(r.data)setRecords(r.data as Item[]);
+   const {data,error:readError}=await db.from("demo_measurements").select("id,label,value,unit,created_at").order("created_at",{ascending:false}).limit(20);
+   if(!readError)setRecords((data??[]) as SampleRecord[]);
+   setNotice("Ejemplo guardado correctamente.");
   }
   setBusy(false);
  }
- async function remove(id:string){
+ async function removeSample(id:string){
   if(!db||busy)return;
-  setBusy(true);
+  setBusy(true);setNotice("");
   const {error}=await db.from("demo_measurements").delete().eq("id",id);
-  if(error)setMessage(error.message);
-  else setRecords(old=>old.filter(x=>x.id!==id));
+  if(error)setNotice("No se pudo eliminar este registro.");
+  else{setRecords(items=>items.filter(item=>item.id!==id));setNotice("Registro eliminado.");}
   setBusy(false);
  }
- const input={width:"100%",boxSizing:"border-box" as const,border:"1px solid #dcd7ea",padding:12,borderRadius:10,fontSize:15};
- return <main style={{maxWidth:750,margin:"auto",padding:"45px 20px 100px",lineHeight:1.55}}>
- <a href="/sprint-6-2" style={{color:"#6845eb"}}>← Sprint 6.2</a>
- <p style={{fontSize:12,letterSpacing:2,color:"#6944e8",fontWeight:800,marginTop:36}}>WELLNESS APP · PERSISTENCIA</p>
- <h1 style={{fontSize:"clamp(29px,5vw,42px)",lineHeight:1.15}}>Tu información, protegida y disponible.</h1>
- <p style={{color:"#696477"}}>Prueba técnica exclusiva para registros ficticios. Si ya recibiste un correo de confirmación, utiliza la opción «Ya tengo cuenta»; no es necesario volver a registrarte.</p>
- {!db?<p>Falta configurar Supabase en Vercel.</p>:!user?
- <section style={{border:"1px solid #e5e0f2",borderRadius:16,padding:22,background:"#fff",display:"grid",gap:12}}>
- <h2 style={{margin:0,fontSize:22}}>{mode==="signup"?"Paso 1: crea tu usuario":"Paso 1: inicia sesión con tu cuenta confirmada"}</h2>
- <div style={{display:"flex",gap:10,flexWrap:"wrap"}}><button type="button" onClick={()=>{setMode("signup");setMessage("Introduce tu correo y una contraseña de al menos 8 caracteres.")}} style={{padding:"10px 14px",borderRadius:10,border:mode==="signup"?"2px solid #6944e8":"1px solid #ddd",background:mode==="signup"?"#f3efff":"white",color:"#4a319f",cursor:"pointer"}}>1. Crear usuario</button><button type="button" onClick={()=>{setMode("signin");setMessage("Si ya confirmaste tu correo, entra con las credenciales que registraste.")}} style={{padding:"10px 14px",borderRadius:10,border:mode==="signin"?"2px solid #6944e8":"1px solid #ddd",background:mode==="signin"?"#f3efff":"white",color:"#4a319f",cursor:"pointer"}}>2. Ya tengo cuenta</button></div>
- <label>Correo electrónico<input type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} style={input}/></label>
- <label>Contraseña (mínimo 8 caracteres)<input type={showPassword?"text":"password"} autoComplete={mode==="signup"?"new-password":"current-password"} minLength={8} value={password} onChange={e=>setPassword(e.target.value)} style={input}/></label>
- <label style={{display:"flex",alignItems:"center",gap:8,fontSize:13}}><input type="checkbox" checked={showPassword} onChange={e=>setShowPassword(e.target.checked)}/>Mostrar contraseña</label>
- <p style={{fontSize:12,color:"#777",margin:0}}>{password.length<8?"Introduce al menos 8 caracteres.":"Longitud mínima de contraseña cumplida."} {mode==="signup"?"Puede que Supabase te pida confirmar tu correo antes de entrar.":""}</p>
- <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
- <button disabled={busy||!email.includes("@")||password.length<8} onClick={()=>void login(mode)} style={{padding:"12px 18px",border:0,borderRadius:10,background:"#6944e8",color:"white",cursor:"pointer",opacity:busy||!email.includes("@")||password.length<8?0.5:1}}>{busy?"Procesando...":mode==="signup"?"Crear mi usuario":"Iniciar sesión"}</button>
+ async function signOut(){
+  if(!db||busy)return;
+  setBusy(true);
+  const {error}=await db.auth.signOut();
+  if(error)setNotice("No fue posible cerrar sesión.");else{setRecords([]);setNotice("");}
+  setBusy(false);
+ }
+ return <main className="well-shell">
+ <div className="well-signin">
+ <div style={{marginBottom:30}}><span className="well-eyebrow">Mi bienestar</span>
+ <h1 className="well-title" style={{fontSize:"clamp(32px,5vw,48px)",margin:"12px 0 14px"}}>{user?"Tu espacio personal.":"Bienvenido a WELLNESS APP."}</h1>
+ <p className="well-subtitle" style={{margin:0}}>{user?"Tus datos, organizados para acompañarte en cada etapa.":"Ingresa a tu espacio y comienza a conocer tu bienestar."}</p></div>
+ {!db?<div className="well-card well-signin-card"><p>El acceso no está disponible en este momento.</p></div>
+ :loadingSession?<div className="well-card well-signin-card"><p>Cargando tu espacio…</p></div>
+ :!user?
+ <section className="well-card well-signin-card">
+ <div className="well-auth-tabs" role="tablist" aria-label="Acceso">
+ <button type="button" role="tab" aria-selected={mode==="signin"} className={mode==="signin"?"active":""} onClick={()=>{setMode("signin");setNotice("");}}>Iniciar sesión</button>
+ <button type="button" role="tab" aria-selected={mode==="signup"} className={mode==="signup"?"active":""} onClick={()=>{setMode("signup");setNotice("");}}>Crear cuenta</button>
  </div>
- </section>:
- <section style={{border:"1px solid #e5e0f2",borderRadius:16,padding:22,background:"#fff"}}>
- <p style={{fontSize:13,color:"#737086"}}>Cuenta autenticada: {user.email??"Sesión activa"}</p>
- <button onClick={()=>void saveTest()} disabled={busy} style={{padding:"13px 20px",background:"#6944e8",border:0,color:"white",borderRadius:11,cursor:"pointer"}}>Guardar medición ficticia de 42 demo</button>
- <button onClick={()=>void db.auth.signOut()} style={{padding:"13px 17px",border:0,color:"#6944e8",background:"transparent",cursor:"pointer"}}>Cerrar sesión</button>
- <h2 style={{fontSize:19,marginTop:25}}>Registros guardados</h2>
- {records.length===0?<p>Aún no hay registros ficticios.</p>:records.map(r=><div key={r.id} style={{display:"flex",justifyContent:"space-between",gap:10,padding:"12px 0",borderBottom:"1px solid #eee8f5"}}>
- <span><strong>{r.value} {r.unit}</strong><div style={{fontSize:12,color:"#777"}}>{r.label} · {new Date(r.created_at).toLocaleString("es")}</div></span>
- <button disabled={busy} onClick={()=>void remove(r.id)} style={{border:0,background:"transparent",color:"#8555ca",cursor:"pointer"}}>Borrar</button></div>)}
+ <form onSubmit={e=>{e.preventDefault();void authenticate()}} style={{display:"grid",gap:19}}>
+ <label className="well-field">Correo electrónico
+ <input type="email" value={email} onChange={e=>setEmail(e.target.value)} autoComplete="email" placeholder="tu@correo.com" required/></label>
+ <label className="well-field">Contraseña
+ <input type={showPassword?"text":"password"} value={password} onChange={e=>setPassword(e.target.value)}
+ autoComplete={mode==="signup"?"new-password":"current-password"} minLength={8} required placeholder="Mínimo 8 caracteres"/></label>
+ <label style={{display:"flex",gap:9,alignItems:"center",fontSize:13,color:"var(--well-muted)"}}><input type="checkbox" checked={showPassword} onChange={e=>setShowPassword(e.target.checked)}/> Mostrar contraseña</label>
+ {mode==="signup"&&<p style={{margin:"-8px 0 0",fontSize:12,color:"var(--well-muted)"}}>{inputHint}</p>}
+ <button type="submit" className="well-button" disabled={busy||!email.includes("@")||password.length<8}>{busy?"Un momento…":mode==="signin"?"Entrar a mi espacio":"Crear mi cuenta"}</button>
+ </form>
+ </section>
+ :<section className="well-card well-signin-card">
+ <div style={{display:"flex",flexWrap:"wrap",gap:12,alignItems:"center",justifyContent:"space-between"}}>
+ <div><span className="well-eyebrow">Mi cuenta</span><p style={{fontSize:14,margin:"9px 0",overflowWrap:"anywhere",color:"var(--well-muted)"}}>{user.email}</p></div>
+ <button className="well-button-secondary" onClick={()=>void signOut()} disabled={busy}>Cerrar sesión</button>
+ </div>
+ <div style={{height:1,background:"var(--well-line)",margin:"24px 0"}}/>
+ <div style={{display:"flex",alignItems:"start",justifyContent:"space-between",gap:14,flexWrap:"wrap"}}>
+ <div><h2 style={{fontSize:22,letterSpacing:"-.02em",margin:"0 0 5px"}}>Mis registros</h2>
+ <p style={{color:"var(--well-muted)",fontSize:13,margin:"0 0 19px"}}>Conoce cómo se presenta tu información en este espacio.</p></div>
+ <span className="well-tag">Datos de ejemplo</span></div>
+ <button className="well-button" disabled={busy} onClick={()=>void addSample()}>Agregar ejemplo</button>
+ <div style={{marginTop:21}}>
+ {records.length===0?<div className="well-empty"><div style={{fontSize:25,color:"var(--well-violet)",marginBottom:10}}>◇</div><strong style={{display:"block",color:"var(--well-ink)",marginBottom:5}}>Aún no hay registros</strong>Los registros que agregues aparecerán aquí.</div>
+ :records.map(record=><div key={record.id} style={{borderBottom:"1px solid var(--well-line)",padding:"15px 0",display:"flex",alignItems:"center",justifyContent:"space-between",gap:15}}>
+ <div><strong style={{fontSize:20}}>{record.value} <span style={{fontSize:13,fontWeight:400,color:"var(--well-muted)"}}>{record.unit}</span></strong>
+ <p style={{margin:"4px 0 0",fontSize:12,color:"var(--well-muted)"}}>Ejemplo · {new Date(record.created_at).toLocaleDateString("es",{day:"2-digit",month:"short",year:"numeric"})}</p></div>
+ <button type="button" disabled={busy} onClick={()=>void removeSample(record.id)} className="well-button-secondary" style={{minHeight:36,padding:"7px 12px",fontSize:12}}>Eliminar</button></div>)}
+ </div>
  </section>}
- <p aria-live="polite" style={{background:"#f1effb",padding:14,borderRadius:10,fontSize:13}}>{message}</p>
- <p style={{fontSize:13,color:"#777"}}>Si el correo anterior te envió a localhost, no intentes abrirlo otra vez: vuelve aquí e inicia sesión con la cuenta registrada. La URL de retorno debe actualizarse en Supabase para futuros registros.</p>
- <p style={{fontSize:12,color:"#777"}}>La validación entre dos cuentas diferentes y la configuración final de correo de Supabase se comprobarán antes de utilizar información real.</p>
+ {notice&&<p className="well-info" role="status" aria-live="polite">{notice}</p>}
+ </div>
  </main>;
 }
