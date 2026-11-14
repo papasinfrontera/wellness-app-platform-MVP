@@ -1,7 +1,15 @@
 [
   {
     "id": 1,
-    "name": "Apolipoprotein B (ApoB)"
+    "name": "Apolipoproteína B (ApoB)",
+    "name_en": "Apolipoprotein B (ApoB)",
+    "aliases": [
+      "Apolipoproteína B",
+      "Apolipoprotein B",
+      "ApoB",
+      "Apo B"
+    ],
+    "code": "REF-001"
   },
   {
     "id": 2,
@@ -65,7 +73,15 @@
   },
   {
     "id": 17,
-    "name": "Glucose"
+    "name": "Glucosa",
+    "name_en": "Glucose",
+    "aliases": [
+      "Glicemia",
+      "Glucemia",
+      "Blood glucose",
+      "Glucosa en sangre"
+    ],
+    "code": "REF-017"
   },
   {
     "id": 18,
