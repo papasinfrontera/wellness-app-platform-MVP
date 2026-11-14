@@ -1,73 +1,103 @@
 "use client";
 import {useEffect,useState} from "react";
-import {createClient,type User} from "@supabase/supabase-js";
+import {createClient,type SupabaseClient} from "@supabase/supabase-js";
 
-const sections=[
-{name:"Usuarios",icon:"users",description:"Cuentas, estados y gestión autorizada"},
-{name:"Profesionales",icon:"stethoscope",description:"Marketplace, validación y agenda"},
-{name:"Membresías y tarifas",icon:"credit-card",description:"Planes, precios y beneficios"},
-{name:"Paquetes de análisis",icon:"layers",description:"Composición y disponibilidad comercial"},
-{name:"Pruebas adicionales",icon:"flask-conical",description:"Catálogo de pruebas contratables"},
-{name:"Promociones",icon:"ticket",description:"Descuentos y vigencias"},
-{name:"Órdenes y pagos",icon:"receipt",description:"Contrataciones y conciliación"},
-{name:"Ciencia",icon:"book-open-check",description:"Reglas y contenido sujetos a validación"},
-{name:"Inteligencia",icon:"brain-circuit",description:"Evaluaciones, evidencias y límites"},
-{name:"Seguridad",icon:"shield-check",description:"Permisos y auditoría"}
-];
-type Status="checking"|"unauthenticated"|"denied"|"allowed"|"error";
-export default function AdminHome(){
- const [status,setStatus]=useState<Status>("checking");
+type State="loading"|"login"|"denied"|"mfa"|"ready"|"error";
+const blocks=[
+ ["Usuarios","Cuentas y operaciones"],["Profesionales","Directorio y credenciales"],
+ ["Membresías y tarifas","Planes, precios y beneficios"],["Paquetes de análisis","Productos y composición"],
+ ["Pruebas adicionales","Catálogo comercial"],["Promociones","Cupones y campañas"],
+ ["Órdenes y pagos","Contratación y conciliación"],["Ciencia","Contenido y reglas aprobadas"],
+ ["Inteligencia","Evaluaciones y configuraciones"],["Seguridad","Roles, permisos y auditoría"]];
+const client=()=>{const u=process.env.NEXT_PUBLIC_SUPABASE_URL;const k=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;return u&&k?createClient(u,k):null};
+const pane={padding:24,borderRadius:18,background:"#fff",border:"1px solid #E7E6EF"};
+const btn={background:"#5B40F5",color:"#fff",border:0,borderRadius:11,padding:"12px 18px",fontWeight:700,cursor:"pointer"} as const;
+export default function AdminPage(){
+ const [db]=useState<SupabaseClient|null>(client);
+ const [state,setState]=useState<State>("loading");
  const [role,setRole]=useState("");
  const [email,setEmail]=useState("");
- useEffect(()=>{
-  let alive=true;
-  const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if(!url||!key){setStatus("error");return}
-  const supabase=createClient(url,key);
-  void (async()=>{
-   try{
-    const {data:{user},error}=await supabase.auth.getUser();
-    if(!alive)return;
-    if(error||!user){setStatus("unauthenticated");return}
-    setEmail(user.email||"");
-    const res=await supabase.from("platform_admin_roles").select("role,is_active").eq("user_id",user.id).maybeSingle();
-    if(!alive)return;
-    if(res.error){setStatus("error");return}
-    if(!res.data?.is_active){setStatus("denied");return}
-    setRole(res.data.role);
-    setStatus("allowed");
-   }catch{if(alive)setStatus("error")}
-  })();
-  return()=>{alive=false};
- },[]);
- const box={border:"1px solid #E9E7EF",background:"#FFFFFF",borderRadius:20,padding:24} as const;
- return <main style={{maxWidth:1140,margin:"0 auto",padding:"54px 22px 100px",color:"#161620"}}>
-   <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:15}}>
-    <span style={{display:"grid",placeItems:"center",width:42,height:42,borderRadius:13,background:"#5B40F5",color:"white",fontWeight:800}}>W</span>
-    <strong style={{letterSpacing:".07em",fontSize:12}}>WELLNESS ADMIN</strong>
+ const [factor,setFactor]=useState("");
+ const [qr,setQr]=useState("");
+ const [code,setCode]=useState("");
+ const [busy,setBusy]=useState(false);
+ const [message,setMessage]=useState("");
+ async function check(){
+  if(!db){setState("error");return}
+  const {data:{user},error}=await db.auth.getUser();
+  if(error||!user){setState("login");return}
+  setEmail(user.email||"");
+  const {data:roleData,error:roleError}=await db.from("platform_admin_roles").select("role,is_active").eq("user_id",user.id).maybeSingle();
+  if(roleError){setState("error");return}
+  if(!roleData?.is_active){setState("denied");return}
+  setRole(roleData.role);
+  const {data:aal,error:aalError}=await db.auth.mfa.getAuthenticatorAssuranceLevel();
+  if(aalError){setState("error");return}
+  if(aal.currentLevel==="aal2"){setState("ready");return}
+  const {data:factors,error:factorsError}=await db.auth.mfa.listFactors();
+  if(factorsError){setState("error");return}
+  const verified=factors.totp.find(f=>f.status==="verified");
+  if(verified)setFactor(verified.id);
+  setState("mfa");
+ }
+ useEffect(()=>{void check().catch(()=>setState("error"))},[]);
+ async function enroll(){
+  if(!db||busy)return;
+  setBusy(true);setMessage("");
+  const {data,error}=await db.auth.mfa.enroll({factorType:"totp",friendlyName:"WELLNESS ADMIN"});
+  if(error||!data){setMessage("No fue posible iniciar la verificación. Inténtalo nuevamente.");setBusy(false);return}
+  setFactor(data.id);
+  const image=data.totp.qr_code;
+  setQr(image.startsWith("data:")?image:"data:image/svg+xml;charset=utf-8,"+encodeURIComponent(image));
+  setBusy(false);
+ }
+ async function verify(){
+  if(!db||!factor||busy)return;
+  if(!/^\d{6}$/.test(code.trim())){setMessage("Introduce el código de seis dígitos.");return}
+  setBusy(true);setMessage("");
+  const {error}=await db.auth.mfa.challengeAndVerify({factorId:factor,code:code.trim()});
+  if(error){setMessage("Código incorrecto o vencido. Inténtalo de nuevo.");setBusy(false);return}
+  setCode("");setQr("");setBusy(false);
+  await check();
+ }
+ return <main style={{maxWidth:1080,margin:"0 auto",padding:"54px 22px 90px",color:"#161620"}}>
+   <div style={{display:"flex",alignItems:"center",gap:12}}>
+     <span style={{display:"grid",placeItems:"center",width:41,height:41,background:"#5B40F5",color:"white",fontWeight:800,borderRadius:12}}>W</span>
+     <strong style={{letterSpacing:"0.08em",fontSize:12}}>WELLNESS ADMIN</strong>
    </div>
-   <h1 style={{fontSize:"clamp(30px,4vw,48px)",letterSpacing:"-.04em",margin:"14px 0 12px"}}>Administración de la plataforma</h1>
-   <p style={{color:"#75727D",maxWidth:650,lineHeight:1.6,marginBottom:30}}>Un espacio reservado para supervisar el funcionamiento de WELLNESS APP. Los datos personales de salud no se muestran en esta consola.</p>
-   {status==="checking"&&<div style={box} role="status">Verificando autorización…</div>}
-   {status==="unauthenticated"&&<div style={box}><h2 style={{fontSize:19}}>Acceso protegido</h2><p>Inicia sesión con una cuenta autorizada para acceder.</p><a href="/sprint-6-2/persistencia" style={{color:"#5B40F5",fontWeight:700}}>Ir a iniciar sesión →</a></div>}
-   {status==="denied"&&<div style={box}><h2 style={{fontSize:19}}>Sin permisos administrativos</h2><p>Tu cuenta no tiene un rol administrativo activo. Este acceso debe ser concedido a través del proceso de seguridad de la plataforma.</p><a href="/" style={{color:"#5B40F5"}}>Volver al inicio</a></div>}
-   {status==="error"&&<div style={box}><h2 style={{fontSize:19}}>No se pudo verificar el acceso</h2><p>No mostraremos la consola hasta confirmar tus permisos. Inténtalo de nuevo más tarde.</p></div>}
-   {status==="allowed"&&<div>
-     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:12,marginBottom:24}}>
-       <div><span style={{fontSize:12,color:"#777"}}>Sesión autorizada</span><div style={{fontWeight:700}}>{email}</div></div>
-       <div style={{padding:"9px 14px",borderRadius:99,background:"#CFFF4C",fontSize:12,fontWeight:800}}>Rol: {role.replaceAll("_"," ")}</div>
-     </div>
-     <div style={{...box,marginBottom:25,background:"#F7F6FC"}}><strong>Vista inicial</strong><p style={{color:"#6C6B78",margin:"9px 0 0",fontSize:14,lineHeight:1.6}}>La estructura de gestión está preparada. Los controles operativos estarán disponibles tras completar permisos, auditoría y pruebas específicas. No se presentan cifras simuladas.</p></div>
-     <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(230px,1fr))",gap:13}}>
-       {sections.map(s=><article key={s.name} style={{...box,minHeight:145,display:"flex",flexDirection:"column",gap:11}}>
-         <div style={{width:34,height:5,borderRadius:99,background:"#5B40F5"}}/>
-         <strong style={{fontSize:16}}>{s.name}</strong>
-         <p style={{color:"#77747F",fontSize:13,lineHeight:1.5,margin:0}}>{s.description}</p>
-         <span style={{fontSize:11,color:"#8A8792",marginTop:"auto"}}>Próxima implementación</span>
-       </article>)}
-     </div>
+   <h1 style={{fontSize:"clamp(28px,4vw,45px)",letterSpacing:"-.04em",margin:"24px 0 10px"}}>Administración de la plataforma</h1>
+   <p style={{color:"#777480",maxWidth:620,lineHeight:1.65,marginBottom:28}}>Espacio privado de administración. El acceso requiere autorización y verificación en dos pasos.</p>
+   {state==="loading"&&<div style={pane} role="status">Verificando tu identidad…</div>}
+   {state==="login"&&<div style={pane}><h2>Inicia sesión</h2><p>Necesitas iniciar sesión con una cuenta administrativa.</p><a href="/sprint-6-2/persistencia" style={{color:"#5B40F5"}}>Ir al acceso de mi cuenta</a></div>}
+   {state==="denied"&&<div style={pane}><h2>Acceso restringido</h2><p>Esta cuenta no tiene un rol administrativo activo.</p></div>}
+   {state==="error"&&<div style={pane}><h2>No se pudo confirmar el acceso</h2><p>La consola permanecerá protegida hasta verificar los permisos.</p><button style={btn} onClick={()=>void check()}>Reintentar</button></div>}
+   {state==="mfa"&&<div style={{...pane,maxWidth:520}}>
+    <h2 style={{marginTop:0,fontSize:21}}>Protege tu cuenta administrativa</h2>
+    <p style={{fontSize:14,color:"#777480",lineHeight:1.65}}>Para entrar necesitas un código temporal de tu aplicación autenticadora. Esta medida protege las operaciones de la plataforma.</p>
+    {!factor&&<button style={btn} disabled={busy} onClick={()=>void enroll()}>{busy?"Preparando…":"Configurar autenticación en dos pasos"}</button>}
+    {qr&&<div style={{display:"grid",gap:12,justifyItems:"start",margin:"20px 0"}}><img alt="Código QR para configurar el autenticador" src={qr} style={{width:190,height:190,background:"#fff"}}/><p style={{fontSize:12,color:"#777480"}}>Escanea este código desde tu aplicación autenticadora.</p></div>}
+    {factor&&<div style={{display:"grid",gap:10,maxWidth:340}}>
+      <label htmlFor="mfa-code" style={{fontSize:13,fontWeight:700}}>Código de seis dígitos</label>
+      <input id="mfa-code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={e=>setCode(e.target.value.replace(/\D/g,""))} style={{border:"1px solid #DAD8E6",borderRadius:10,padding:"12px 14px",fontSize:18,letterSpacing:4,color:"#161620"}}/>
+      <button style={btn} disabled={busy} onClick={()=>void verify()}>{busy?"Verificando…":"Verificar y entrar"}</button>
+    </div>}
+    {message&&<p role="alert" style={{color:"#7F3D34",fontSize:13}}>{message}</p>}
    </div>}
-   <p style={{marginTop:28,fontSize:12,color:"#8A8792"}}>La administración comercial no modifica reglas científicas. El acceso a información médica requiere permisos separados y justificados.</p>
- </main>;
+   {state==="ready"&&<div>
+    <div style={{...pane,background:"#F5F3FC",marginBottom:20}}>
+      <strong>Sesión administrativa verificada</strong><p style={{margin:"7px 0",fontSize:13}}>{email}</p>
+      <span style={{fontSize:12}}>Rol: {role.replaceAll("_"," ")} · MFA activado</span>
+    </div>
+    <p style={{color:"#777480",fontSize:13}}>Estructura operativa inicial. Los módulos de gestión se habilitarán progresivamente; no se muestran métricas ficticias ni datos médicos individuales.</p>
+    <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(220px,1fr))",gap:12,marginTop:18}}>
+      {blocks.map(([name,description])=><article key={name} style={{...pane,minHeight:132}}>
+       <div style={{width:32,height:5,borderRadius:10,background:"#5B40F5",marginBottom:14}}/>
+       <strong>{name}</strong>
+       <p style={{fontSize:13,color:"#777480",lineHeight:1.5}}>{description}</p>
+       <span style={{fontSize:11,color:"#92909A"}}>Próxima implementación</span>
+      </article>)}
+    </div>
+   </div>}
+   <p style={{fontSize:12,color:"#92909A",marginTop:30}}>El rol administrativo no autoriza acceso indiscriminado a datos clínicos. Las operaciones sensibles necesitarán controles adicionales en servidor y auditoría.</p>
+ </main>
 }
