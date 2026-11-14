@@ -13,63 +13,149 @@
   },
   {
     "id": 2,
-    "name": "Atherogenic Index of Plasma (AIP)"
+    "name": "Índice aterogénico del plasma (AIP)",
+    "name_en": "Atherogenic Index of Plasma (AIP)",
+    "aliases": [
+      "Índice aterogénico plasmático",
+      "AIP"
+    ],
+    "code": "REF-002"
   },
   {
     "id": 3,
-    "name": "BUN/Creatinine Ratio"
+    "name": "Relación nitrógeno ureico/creatinina (BUN/creatinina)",
+    "name_en": "BUN/Creatinine Ratio",
+    "aliases": [
+      "Relación BUN/creatinina",
+      "Cociente BUN/creatinina"
+    ],
+    "code": "REF-003"
   },
   {
     "id": 4,
-    "name": "Blood Urea Nitrogen"
+    "name": "Nitrógeno ureico en sangre (BUN)",
+    "name_en": "Blood Urea Nitrogen",
+    "aliases": [
+      "BUN",
+      "Nitrógeno ureico"
+    ],
+    "code": "REF-004"
   },
   {
     "id": 5,
-    "name": "LDL Cholesterol"
+    "name": "Colesterol LDL",
+    "name_en": "LDL Cholesterol",
+    "aliases": [
+      "LDL-C",
+      "Colesterol de lipoproteínas de baja densidad"
+    ],
+    "code": "REF-005"
   },
   {
     "id": 6,
-    "name": "LDL/HDL Ratio"
+    "name": "Relación colesterol LDL/HDL",
+    "name_en": "LDL/HDL Ratio",
+    "aliases": [
+      "Cociente LDL/HDL",
+      "LDL/HDL"
+    ],
+    "code": "REF-006"
   },
   {
     "id": 7,
-    "name": "Lipoprotein (a)"
+    "name": "Lipoproteína(a) [Lp(a)]",
+    "name_en": "Lipoprotein (a)",
+    "aliases": [
+      "Lipoproteína (a)",
+      "Lp(a)"
+    ],
+    "code": "REF-007"
   },
   {
     "id": 8,
-    "name": "Mean Corpuscular Hemoglobin (MCH)"
+    "name": "Hemoglobina corpuscular media (HCM)",
+    "name_en": "Mean Corpuscular Hemoglobin (MCH)",
+    "aliases": [
+      "HCM",
+      "MCH"
+    ],
+    "code": "REF-008"
   },
   {
     "id": 9,
-    "name": "Mean Corpuscular Hemoglobin Concentration (MCHC)"
+    "name": "Concentración de hemoglobina corpuscular media (CHCM)",
+    "name_en": "Mean Corpuscular Hemoglobin Concentration (MCHC)",
+    "aliases": [
+      "CHCM",
+      "MCHC"
+    ],
+    "code": "REF-009"
   },
   {
     "id": 10,
-    "name": "Non-HDL Cholesterol"
+    "name": "Colesterol no HDL",
+    "name_en": "Non-HDL Cholesterol",
+    "aliases": [
+      "Colesterol no-HDL",
+      "No-HDL-C"
+    ],
+    "code": "REF-010"
   },
   {
     "id": 11,
-    "name": "Plasma Osmolality"
+    "name": "Osmolalidad plasmática",
+    "name_en": "Plasma Osmolality",
+    "aliases": [
+      "Osmolalidad del plasma"
+    ],
+    "code": "REF-011"
   },
   {
     "id": 12,
-    "name": "Remnant Cholesterol"
+    "name": "Colesterol remanente",
+    "name_en": "Remnant Cholesterol",
+    "aliases": [
+      "Colesterol de remanentes"
+    ],
+    "code": "REF-012"
   },
   {
     "id": 13,
-    "name": "Total Cholesterol"
+    "name": "Colesterol total",
+    "name_en": "Total Cholesterol",
+    "aliases": [
+      "Colesterol sérico total"
+    ],
+    "code": "REF-013"
   },
   {
     "id": 14,
-    "name": "Triglycerides"
+    "name": "Triglicéridos",
+    "name_en": "Triglycerides",
+    "aliases": [
+      "Triglicéridos séricos"
+    ],
+    "code": "REF-014"
   },
   {
     "id": 15,
-    "name": "Triglycerides/HDL Ratio"
+    "name": "Relación triglicéridos/HDL",
+    "name_en": "Triglycerides/HDL Ratio",
+    "aliases": [
+      "Cociente triglicéridos/HDL",
+      "TG/HDL"
+    ],
+    "code": "REF-015"
   },
   {
     "id": 16,
-    "name": "Estimated Average Glucose (eAG)"
+    "name": "Glucosa media estimada (eAG)",
+    "name_en": "Estimated Average Glucose (eAG)",
+    "aliases": [
+      "Glucemia media estimada",
+      "eAG"
+    ],
+    "code": "REF-016"
   },
   {
     "id": 17,
@@ -85,7 +171,13 @@
   },
   {
     "id": 18,
-    "name": "HDL Cholesterol"
+    "name": "Colesterol HDL",
+    "name_en": "HDL Cholesterol",
+    "aliases": [
+      "HDL-C",
+      "Colesterol de lipoproteínas de alta densidad"
+    ],
+    "code": "REF-018"
   },
   {
     "id": 19,
