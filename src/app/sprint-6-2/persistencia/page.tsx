@@ -12,10 +12,10 @@ export default function PersistenciaDemo(){
  const [user,setUser]=useState<User|null>(null);
  const [email,setEmail]=useState("");
  const [password,setPassword]=useState("");
- const [message,setMessage]=useState("Primero crea un usuario con tu correo electrónico y una contraseña nueva.");
+ const [message,setMessage]=useState("Si ya confirmaste el correo, entra con tu usuario y contraseña. No necesitas registrarte de nuevo.");
  const [records,setRecords]=useState<Item[]>([]);
  const [busy,setBusy]=useState(false);
- const [mode,setMode]=useState<"signup"|"signin">("signup");
+ const [mode,setMode]=useState<"signup"|"signin">("signin");
  const [showPassword,setShowPassword]=useState(false);
  useEffect(()=>{
   if(!db)return;
@@ -63,10 +63,10 @@ export default function PersistenciaDemo(){
  <a href="/sprint-6-2" style={{color:"#6845eb"}}>← Sprint 6.2</a>
  <p style={{fontSize:12,letterSpacing:2,color:"#6944e8",fontWeight:800,marginTop:36}}>WELLNESS APP · PERSISTENCIA</p>
  <h1 style={{fontSize:"clamp(29px,5vw,42px)",lineHeight:1.15}}>Tu información, protegida y disponible.</h1>
- <p style={{color:"#696477"}}>Prueba técnica exclusiva para registros ficticios. No subas aquí resultados médicos ni contraseñas de otras plataformas.</p>
+ <p style={{color:"#696477"}}>Prueba técnica exclusiva para registros ficticios. Si ya recibiste un correo de confirmación, utiliza la opción «Ya tengo cuenta»; no es necesario volver a registrarte.</p>
  {!db?<p>Falta configurar Supabase en Vercel.</p>:!user?
  <section style={{border:"1px solid #e5e0f2",borderRadius:16,padding:22,background:"#fff",display:"grid",gap:12}}>
- <h2 style={{margin:0,fontSize:22}}>{mode==="signup"?"Paso 1: crea tu usuario":"Accede a tu usuario existente"}</h2>
+ <h2 style={{margin:0,fontSize:22}}>{mode==="signup"?"Paso 1: crea tu usuario":"Paso 1: inicia sesión con tu cuenta confirmada"}</h2>
  <div style={{display:"flex",gap:10,flexWrap:"wrap"}}><button type="button" onClick={()=>{setMode("signup");setMessage("Introduce tu correo y una contraseña de al menos 8 caracteres.")}} style={{padding:"10px 14px",borderRadius:10,border:mode==="signup"?"2px solid #6944e8":"1px solid #ddd",background:mode==="signup"?"#f3efff":"white",color:"#4a319f",cursor:"pointer"}}>1. Crear usuario</button><button type="button" onClick={()=>{setMode("signin");setMessage("Si ya confirmaste tu correo, entra con las credenciales que registraste.")}} style={{padding:"10px 14px",borderRadius:10,border:mode==="signin"?"2px solid #6944e8":"1px solid #ddd",background:mode==="signin"?"#f3efff":"white",color:"#4a319f",cursor:"pointer"}}>2. Ya tengo cuenta</button></div>
  <label>Correo electrónico<input type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} style={input}/></label>
  <label>Contraseña (mínimo 8 caracteres)<input type={showPassword?"text":"password"} autoComplete={mode==="signup"?"new-password":"current-password"} minLength={8} value={password} onChange={e=>setPassword(e.target.value)} style={input}/></label>
@@ -86,7 +86,7 @@ export default function PersistenciaDemo(){
  <button disabled={busy} onClick={()=>void remove(r.id)} style={{border:0,background:"transparent",color:"#8555ca",cursor:"pointer"}}>Borrar</button></div>)}
  </section>}
  <p aria-live="polite" style={{background:"#f1effb",padding:14,borderRadius:10,fontSize:13}}>{message}</p>
- <p style={{fontSize:13,color:"#777"}}>¿El correo te envía a localhost o no llega? Debe configurarse la URL de retorno autorizada en Supabase Authentication → URL Configuration. Si el correo no sale, revisa los límites de SMTP.</p>
+ <p style={{fontSize:13,color:"#777"}}>Si el correo anterior te envió a localhost, no intentes abrirlo otra vez: vuelve aquí e inicia sesión con la cuenta registrada. La URL de retorno debe actualizarse en Supabase para futuros registros.</p>
  <p style={{fontSize:12,color:"#777"}}>La validación entre dos cuentas diferentes y la configuración final de correo de Supabase se comprobarán antes de utilizar información real.</p>
  </main>;
 }
