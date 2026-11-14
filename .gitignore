@@ -1,0 +1,16 @@
+node_modules/
+.next/
+out/
+.env
+.env.*
+!.env.example
+*.pdf
+*.zip
+*.csv
+*.xlsx
+*.xls
+*.jpeg
+*.jpg
+*.png
+*.webp
+*.log
