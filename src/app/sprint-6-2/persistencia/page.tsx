@@ -12,9 +12,11 @@ export default function PersistenciaDemo(){
  const [user,setUser]=useState<User|null>(null);
  const [email,setEmail]=useState("");
  const [password,setPassword]=useState("");
- const [message,setMessage]=useState("Inicia sesión para probar registros ficticios.");
+ const [message,setMessage]=useState("Primero crea un usuario con tu correo electrónico y una contraseña nueva.");
  const [records,setRecords]=useState<Item[]>([]);
  const [busy,setBusy]=useState(false);
+ const [mode,setMode]=useState<"signup"|"signin">("signup");
+ const [showPassword,setShowPassword]=useState(false);
  useEffect(()=>{
   if(!db)return;
   db.auth.getUser().then(({data,error})=>{if(!error)setUser(data.user)});
@@ -30,11 +32,11 @@ export default function PersistenciaDemo(){
   if(!db||busy)return;
   setBusy(true);
   try{
-   const action=mode==="signup"?db.auth.signUp({email,password}):db.auth.signInWithPassword({email,password});
+   const action=mode==="signup"?db.auth.signUp({email:email.trim(),password,options:{emailRedirectTo:window.location.origin+"/sprint-6-2/persistencia"}}):db.auth.signInWithPassword({email:email.trim(),password});
    const {data,error}=await action;
    if(error)throw error;
-   setMessage(data.session?"Sesión iniciada. Solo verás tus registros.":"Revisa tu correo para confirmar la cuenta y vuelve a iniciar sesión.");
-  }catch(e){setMessage(e instanceof Error?e.message:"Error de autenticación")}finally{setBusy(false)}
+   setMessage(data.session?"Sesión iniciada correctamente. Ya puedes guardar tu prueba ficticia.":mode==="signup"?"Registro enviado. Revisa tu correo (incluido spam) y confirma el enlace. Después vuelve aquí e inicia sesión.":"No hay sesión activa. Comprueba si falta confirmar el correo.");
+  }catch(e){const raw=e instanceof Error?e.message:"Error de autenticación";setMessage(raw.includes("Email rate limit")?"Límite temporal de correos de Supabase alcanzado. Se necesita un servicio SMTP personalizado o intentarlo más tarde.":raw.includes("Invalid login credentials")?"Correo o contraseña incorrectos, o todavía no has confirmado la cuenta.":raw)}finally{setBusy(false)}
  }
  async function saveTest(){
   if(!db||!user||busy)return;
@@ -64,12 +66,14 @@ export default function PersistenciaDemo(){
  <p style={{color:"#696477"}}>Prueba técnica exclusiva para registros ficticios. No subas aquí resultados médicos ni contraseñas de otras plataformas.</p>
  {!db?<p>Falta configurar Supabase en Vercel.</p>:!user?
  <section style={{border:"1px solid #e5e0f2",borderRadius:16,padding:22,background:"#fff",display:"grid",gap:12}}>
- <h2 style={{margin:0,fontSize:22}}>Accede a tu cuenta de prueba</h2>
+ <h2 style={{margin:0,fontSize:22}}>{mode==="signup"?"Paso 1: crea tu usuario":"Accede a tu usuario existente"}</h2>
+ <div style={{display:"flex",gap:10,flexWrap:"wrap"}}><button type="button" onClick={()=>{setMode("signup");setMessage("Introduce tu correo y una contraseña de al menos 8 caracteres.")}} style={{padding:"10px 14px",borderRadius:10,border:mode==="signup"?"2px solid #6944e8":"1px solid #ddd",background:mode==="signup"?"#f3efff":"white",color:"#4a319f",cursor:"pointer"}}>1. Crear usuario</button><button type="button" onClick={()=>{setMode("signin");setMessage("Si ya confirmaste tu correo, entra con las credenciales que registraste.")}} style={{padding:"10px 14px",borderRadius:10,border:mode==="signin"?"2px solid #6944e8":"1px solid #ddd",background:mode==="signin"?"#f3efff":"white",color:"#4a319f",cursor:"pointer"}}>2. Ya tengo cuenta</button></div>
  <label>Correo electrónico<input type="email" autoComplete="email" value={email} onChange={e=>setEmail(e.target.value)} style={input}/></label>
- <label>Contraseña<input type="password" autoComplete="current-password" minLength={8} value={password} onChange={e=>setPassword(e.target.value)} style={input}/></label>
+ <label>Contraseña (mínimo 8 caracteres)<input type={showPassword?"text":"password"} autoComplete={mode==="signup"?"new-password":"current-password"} minLength={8} value={password} onChange={e=>setPassword(e.target.value)} style={input}/></label>
+ <label style={{display:"flex",alignItems:"center",gap:8,fontSize:13}}><input type="checkbox" checked={showPassword} onChange={e=>setShowPassword(e.target.checked)}/>Mostrar contraseña</label>
+ <p style={{fontSize:12,color:"#777",margin:0}}>{password.length<8?"Introduce al menos 8 caracteres.":"Longitud mínima de contraseña cumplida."} {mode==="signup"?"Puede que Supabase te pida confirmar tu correo antes de entrar.":""}</p>
  <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>
- <button disabled={busy||!email||password.length<8} onClick={()=>void login("signin")} style={{padding:"12px 18px",border:0,borderRadius:10,background:"#6944e8",color:"white",cursor:"pointer"}}>Entrar</button>
- <button disabled={busy||!email||password.length<8} onClick={()=>void login("signup")} style={{padding:"12px 18px",border:"1px solid #6944e8",borderRadius:10,background:"white",color:"#6944e8",cursor:"pointer"}}>Crear cuenta de prueba</button>
+ <button disabled={busy||!email.includes("@")||password.length<8} onClick={()=>void login(mode)} style={{padding:"12px 18px",border:0,borderRadius:10,background:"#6944e8",color:"white",cursor:"pointer",opacity:busy||!email.includes("@")||password.length<8?0.5:1}}>{busy?"Procesando...":mode==="signup"?"Crear mi usuario":"Iniciar sesión"}</button>
  </div>
  </section>:
  <section style={{border:"1px solid #e5e0f2",borderRadius:16,padding:22,background:"#fff"}}>
@@ -82,6 +86,7 @@ export default function PersistenciaDemo(){
  <button disabled={busy} onClick={()=>void remove(r.id)} style={{border:0,background:"transparent",color:"#8555ca",cursor:"pointer"}}>Borrar</button></div>)}
  </section>}
  <p aria-live="polite" style={{background:"#f1effb",padding:14,borderRadius:10,fontSize:13}}>{message}</p>
+ <p style={{fontSize:13,color:"#777"}}>¿El correo te envía a localhost o no llega? Debe configurarse la URL de retorno autorizada en Supabase Authentication → URL Configuration. Si el correo no sale, revisa los límites de SMTP.</p>
  <p style={{fontSize:12,color:"#777"}}>La validación entre dos cuentas diferentes y la configuración final de correo de Supabase se comprobarán antes de utilizar información real.</p>
  </main>;
 }
