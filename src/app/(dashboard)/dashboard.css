@@ -61,3 +61,35 @@ body:has(.wb-app){background:#F8F8F5}
 @media(max-width:810px){.wb-app{display:block}.wb-sidebar{position:relative;height:auto;padding:14px 18px;border-right:0;border-bottom:1px solid #E9E8EC}.wb-sidebar-label,.wb-sidebar-bottom{display:none}.wb-navigation{display:flex;overflow-x:auto;gap:7px;margin-top:14px;padding-bottom:4px}.wb-nav-link{flex-shrink:0;padding:11px 13px;white-space:nowrap;font-size:12px}.wb-nav-symbol{width:auto}.wb-future-dot{display:none}.wb-topbar{display:none}.wb-view{padding:28px 19px 50px}.wb-overview-top{flex-direction:column;gap:14px}.wb-summary-grid{grid-template-columns:1fr}.wb-summary-card{min-height:190px}.wb-lower-grid{grid-template-columns:1fr}.wb-ai-card{flex-wrap:wrap}.wb-ai-card a{margin-left:0}.wb-updated{white-space:normal}}
 @media(min-width:811px) and (max-width:1060px){.wb-summary-grid{grid-template-columns:1fr}.wb-summary-card{min-height:160px}.wb-lower-grid{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.wb-app *{transition:none!important;animation:none!important}}
+
+
+/* Sprint 6.5-C — reversible sidebar, preserving approved brand and navigation */
+.wb-app{transition:grid-template-columns .22s ease}
+.wb-sidebar-heading{display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:0}
+.wb-sidebar-heading .wb-logo{min-width:0;overflow:hidden;padding:2px 4px;gap:8px}
+.wb-logo-mark{flex:0 0 37px}
+.wb-logo-text{overflow:hidden;text-overflow:clip}
+.wb-sidebar-toggle{width:34px;height:34px;flex:0 0 34px;border:1px solid #e9e8ec;background:#fff;border-radius:10px;color:#5B40F5;display:grid;place-items:center;font-size:23px;line-height:1;font-weight:700;cursor:pointer}
+.wb-sidebar-toggle:hover{background:#efedfe}
+.wb-app.wb-collapsed{grid-template-columns:76px minmax(0,1fr)}
+.wb-app.wb-collapsed .wb-sidebar{padding-left:12px;padding-right:12px}
+.wb-app.wb-collapsed .wb-sidebar-heading{flex-direction:column;gap:12px}
+.wb-app.wb-collapsed .wb-logo{padding:0}
+.wb-app.wb-collapsed .wb-logo-text,.wb-app.wb-collapsed .wb-sidebar-label,.wb-app.wb-collapsed .wb-nav-text,.wb-app.wb-collapsed .wb-sidebar-bottom p,.wb-app.wb-collapsed .wb-future-dot{display:none}
+.wb-app.wb-collapsed .wb-navigation{margin-top:22px}
+.wb-app.wb-collapsed .wb-nav-link{justify-content:center;padding:13px 8px}
+.wb-app.wb-collapsed .wb-nav-symbol{width:26px}
+.wb-app.wb-collapsed .wb-sidebar-bottom{display:block}
+@media(max-width:1100px) and (min-width:811px){
+ .wb-app.wb-collapsed{grid-template-columns:76px minmax(0,1fr)}
+}
+@media(max-width:810px){
+ .wb-app.wb-collapsed{display:block}
+ .wb-sidebar-heading{width:100%;flex-direction:row!important}
+ .wb-app.wb-collapsed .wb-logo-text{display:inline}
+ .wb-app.wb-collapsed .wb-sidebar{padding:14px 18px}
+ .wb-app.wb-collapsed .wb-navigation{display:none}
+ .wb-app.wb-collapsed .wb-sidebar-bottom{display:none}
+ .wb-sidebar-toggle{width:40px;height:40px}
+}
+@media(prefers-reduced-motion:reduce){.wb-app{transition:none}}
