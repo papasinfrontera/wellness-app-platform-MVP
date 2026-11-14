@@ -1,0 +1,2 @@
+import ModulePreview from "../components/ModulePreview";
+export default function Page(){return <ModulePreview eyebrow="Doctor Connect" title="Conecta con profesionales de salud." intro="Un lugar para descubrir médicos, solicitar citas y compartir información con autorización." items={["Directorio de profesionales","Perfiles verificados","Contacto y citas","Compartir con permisos"]} note="El marketplace de profesionales está contemplado en el PRD V2.1. Su funcionamiento y sus condiciones se definirán y validarán en la fase específica de Doctor Connect."/>}
