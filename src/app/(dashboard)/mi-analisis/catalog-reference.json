@@ -1,1 +1,514 @@
-[]
+[
+  {
+    "id": 1,
+    "name": "Apolipoprotein B (ApoB)"
+  },
+  {
+    "id": 2,
+    "name": "Atherogenic Index of Plasma (AIP)"
+  },
+  {
+    "id": 3,
+    "name": "BUN/Creatinine Ratio"
+  },
+  {
+    "id": 4,
+    "name": "Blood Urea Nitrogen"
+  },
+  {
+    "id": 5,
+    "name": "LDL Cholesterol"
+  },
+  {
+    "id": 6,
+    "name": "LDL/HDL Ratio"
+  },
+  {
+    "id": 7,
+    "name": "Lipoprotein (a)"
+  },
+  {
+    "id": 8,
+    "name": "Mean Corpuscular Hemoglobin (MCH)"
+  },
+  {
+    "id": 9,
+    "name": "Mean Corpuscular Hemoglobin Concentration (MCHC)"
+  },
+  {
+    "id": 10,
+    "name": "Non-HDL Cholesterol"
+  },
+  {
+    "id": 11,
+    "name": "Plasma Osmolality"
+  },
+  {
+    "id": 12,
+    "name": "Remnant Cholesterol"
+  },
+  {
+    "id": 13,
+    "name": "Total Cholesterol"
+  },
+  {
+    "id": 14,
+    "name": "Triglycerides"
+  },
+  {
+    "id": 15,
+    "name": "Triglycerides/HDL Ratio"
+  },
+  {
+    "id": 16,
+    "name": "Estimated Average Glucose (eAG)"
+  },
+  {
+    "id": 17,
+    "name": "Glucose"
+  },
+  {
+    "id": 18,
+    "name": "HDL Cholesterol"
+  },
+  {
+    "id": 19,
+    "name": "Hemoglobin A1c (HbA1c)"
+  },
+  {
+    "id": 20,
+    "name": "High-Sensitivity C-Reactive Protein (hs-CRP)"
+  },
+  {
+    "id": 21,
+    "name": "Phosphorus"
+  },
+  {
+    "id": 22,
+    "name": "Potassium"
+  },
+  {
+    "id": 23,
+    "name": "Red Blood Cell Count (RBC)"
+  },
+  {
+    "id": 24,
+    "name": "Uric Acid (UA)"
+  },
+  {
+    "id": 25,
+    "name": "White Blood Cells (WBC)"
+  },
+  {
+    "id": 26,
+    "name": "Alanine Aminotransferase (ALT)"
+  },
+  {
+    "id": 27,
+    "name": "Albumin"
+  },
+  {
+    "id": 28,
+    "name": "Albumin/Globulin Ratio"
+  },
+  {
+    "id": 29,
+    "name": "Alkaline Phosphatase (ALP)"
+  },
+  {
+    "id": 30,
+    "name": "Aspartate Aminotransferase (AST)"
+  },
+  {
+    "id": 31,
+    "name": "Basophil %"
+  },
+  {
+    "id": 32,
+    "name": "Basophils"
+  },
+  {
+    "id": 33,
+    "name": "Calcium"
+  },
+  {
+    "id": 34,
+    "name": "Chloride"
+  },
+  {
+    "id": 35,
+    "name": "Corrected Calcium"
+  },
+  {
+    "id": 36,
+    "name": "Creatinine"
+  },
+  {
+    "id": 37,
+    "name": "Eosinophil %"
+  },
+  {
+    "id": 38,
+    "name": "Eosinophils"
+  },
+  {
+    "id": 39,
+    "name": "FIB-4 Index"
+  },
+  {
+    "id": 40,
+    "name": "Globulin"
+  },
+  {
+    "id": 41,
+    "name": "Hematocrit"
+  },
+  {
+    "id": 42,
+    "name": "Hemoglobin"
+  },
+  {
+    "id": 43,
+    "name": "Lymphocyte %"
+  },
+  {
+    "id": 44,
+    "name": "Lymphocytes"
+  },
+  {
+    "id": 45,
+    "name": "Mean Corpuscular Volume (MCV)"
+  },
+  {
+    "id": 46,
+    "name": "Mean Platelet Volume (MPV)"
+  },
+  {
+    "id": 47,
+    "name": "Monocyte %"
+  },
+  {
+    "id": 48,
+    "name": "Monocytes"
+  },
+  {
+    "id": 49,
+    "name": "Neutrophil %"
+  },
+  {
+    "id": 50,
+    "name": "Neutrophils"
+  },
+  {
+    "id": 51,
+    "name": "Platelets"
+  },
+  {
+    "id": 52,
+    "name": "Red Cell Distribution Width (RDW)"
+  },
+  {
+    "id": 53,
+    "name": "Sodium"
+  },
+  {
+    "id": 54,
+    "name": "Systemic Immune-Inflammation Index (SII)"
+  },
+  {
+    "id": 55,
+    "name": "Total Bilirubin"
+  },
+  {
+    "id": 56,
+    "name": "Total Protein"
+  },
+  {
+    "id": 57,
+    "name": "1,5-Anhydroglucitol (1,5-AG)"
+  },
+  {
+    "id": 58,
+    "name": "Adiponectin"
+  },
+  {
+    "id": 59,
+    "name": "Adiponectin / Leptin Ratio (LAR)"
+  },
+  {
+    "id": 60,
+    "name": "Anion Gap"
+  },
+  {
+    "id": 61,
+    "name": "Anti-Müllerian Hormone (AMH)"
+  },
+  {
+    "id": 62,
+    "name": "Arachidonic Acid (AA)"
+  },
+  {
+    "id": 63,
+    "name": "Arachidonic Acid/EPA Ratio (AA/EPA)"
+  },
+  {
+    "id": 64,
+    "name": "Asymmetric Dimethylarginine (ADMA)"
+  },
+  {
+    "id": 65,
+    "name": "C-Peptide"
+  },
+  {
+    "id": 66,
+    "name": "Carbon Dioxide"
+  },
+  {
+    "id": 67,
+    "name": "Cholesterol / HDL Ratio"
+  },
+  {
+    "id": 68,
+    "name": "Copper (serum)"
+  },
+  {
+    "id": 69,
+    "name": "Cortisol"
+  },
+  {
+    "id": 70,
+    "name": "Creatine Kinase (CK)"
+  },
+  {
+    "id": 71,
+    "name": "Cystatin C"
+  },
+  {
+    "id": 72,
+    "name": "Cystatin C eGFR"
+  },
+  {
+    "id": 73,
+    "name": "DHEA Sulfate"
+  },
+  {
+    "id": 74,
+    "name": "Dihydrotestosterone (DHT)"
+  },
+  {
+    "id": 75,
+    "name": "Docosahexaenoic Acid (DHA)"
+  },
+  {
+    "id": 76,
+    "name": "Docosapentaenoic Acid (DPA)"
+  },
+  {
+    "id": 77,
+    "name": "Eicosapentaenoic Acid (EPA)"
+  },
+  {
+    "id": 78,
+    "name": "Estimated Glomerular Filtration Rate (eGFR)"
+  },
+  {
+    "id": 79,
+    "name": "Estradiol"
+  },
+  {
+    "id": 80,
+    "name": "Ferritin"
+  },
+  {
+    "id": 81,
+    "name": "Folate (Vitamin B9)"
+  },
+  {
+    "id": 82,
+    "name": "Follicle Stimulating Hormone (FSH)"
+  },
+  {
+    "id": 83,
+    "name": "Free T3 (FT3)"
+  },
+  {
+    "id": 84,
+    "name": "Free T4 (FT4)"
+  },
+  {
+    "id": 85,
+    "name": "Free Testosterone"
+  },
+  {
+    "id": 86,
+    "name": "Free Testosterone Calculated"
+  },
+  {
+    "id": 87,
+    "name": "Fructosamine"
+  },
+  {
+    "id": 88,
+    "name": "Gamma-Glutamyl Transferase (GGT)"
+  },
+  {
+    "id": 89,
+    "name": "HDL Large"
+  },
+  {
+    "id": 90,
+    "name": "HOMA-IR Score"
+  },
+  {
+    "id": 91,
+    "name": "Homocysteine"
+  },
+  {
+    "id": 92,
+    "name": "IGF-1"
+  },
+  {
+    "id": 93,
+    "name": "Insulin"
+  },
+  {
+    "id": 94,
+    "name": "Iodine"
+  },
+  {
+    "id": 95,
+    "name": "Iron"
+  },
+  {
+    "id": 96,
+    "name": "Iron % Saturation"
+  },
+  {
+    "id": 97,
+    "name": "LDL Medium"
+  },
+  {
+    "id": 98,
+    "name": "LDL Particle Number"
+  },
+  {
+    "id": 99,
+    "name": "LDL Pattern"
+  },
+  {
+    "id": 100,
+    "name": "LDL Peak Size"
+  },
+  {
+    "id": 101,
+    "name": "LDL Small"
+  },
+  {
+    "id": 102,
+    "name": "Leptin"
+  },
+  {
+    "id": 103,
+    "name": "Linoleic Acid (LA)"
+  },
+  {
+    "id": 104,
+    "name": "Lipoprotein-Associated Phospholipase A₂ (LP-PLA₂)"
+  },
+  {
+    "id": 105,
+    "name": "Luteinizing Hormone (LH)"
+  },
+  {
+    "id": 106,
+    "name": "Magnesium"
+  },
+  {
+    "id": 107,
+    "name": "Myeloperoxidase (MPO)"
+  },
+  {
+    "id": 108,
+    "name": "Omega-3 Total"
+  },
+  {
+    "id": 109,
+    "name": "Omega-6 Total"
+  },
+  {
+    "id": 110,
+    "name": "Omega-6/Omega-3 Ratio"
+  },
+  {
+    "id": 111,
+    "name": "PSA %, Free"
+  },
+  {
+    "id": 112,
+    "name": "PSA, Free"
+  },
+  {
+    "id": 113,
+    "name": "PSA, Total"
+  },
+  {
+    "id": 114,
+    "name": "Progesterone"
+  },
+  {
+    "id": 115,
+    "name": "Prolactin"
+  },
+  {
+    "id": 116,
+    "name": "Reticulocyte Count (RET)"
+  },
+  {
+    "id": 117,
+    "name": "Reticulocyte Index (RI)"
+  },
+  {
+    "id": 118,
+    "name": "Selenium"
+  },
+  {
+    "id": 119,
+    "name": "Sex Hormone Binding Globulin (SHBG)"
+  },
+  {
+    "id": 120,
+    "name": "Symmetric Dimethylarginine (SDMA)"
+  },
+  {
+    "id": 121,
+    "name": "Testosterone"
+  },
+  {
+    "id": 122,
+    "name": "Testosterone Immunoassay"
+  },
+  {
+    "id": 123,
+    "name": "Thyroid Peroxidase Antibodies (TPOAb)"
+  },
+  {
+    "id": 124,
+    "name": "Thyroid-Stimulating Hormone (TSH)"
+  },
+  {
+    "id": 125,
+    "name": "Total Iron-Binding Capacity (TIBC)"
+  },
+  {
+    "id": 126,
+    "name": "Vitamin B12 (cobalamin)"
+  },
+  {
+    "id": 127,
+    "name": "Vitamin D"
+  },
+  {
+    "id": 128,
+    "name": "Zinc (serum)"
+  }
+]
