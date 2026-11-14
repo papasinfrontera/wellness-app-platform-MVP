@@ -1,0 +1,2 @@
+import ModulePreview from "../components/ModulePreview";
+export default function Page(){return <ModulePreview eyebrow="WELLNESS Intelligence" title="Ciencia para comprender tu bienestar." intro="Explicaciones fundamentadas en evidencia y contexto autorizado." items={["Reglas científicas","Conocimiento aprobado","Contexto autorizado","Propuestas que requieren aprobación"]} note="El asistente se habilitará tras validación de evidencia, reglas y permisos granulares. No se realizan diagnósticos ni recomendaciones automáticas en este módulo."/>}
