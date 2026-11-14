@@ -274,7 +274,13 @@
   },
   {
     "id": 28,
-    "name": "Albumin/Globulin Ratio"
+    "name": "Relación albúmina/globulina",
+    "name_en": "Albumin/Globulin Ratio",
+    "aliases": [
+      "Cociente albúmina/globulina",
+      "Relación A/G"
+    ],
+    "code": "REF-028"
   },
   {
     "id": 29,
@@ -339,7 +345,13 @@
   },
   {
     "id": 35,
-    "name": "Corrected Calcium"
+    "name": "Calcio corregido",
+    "name_en": "Corrected Calcium",
+    "aliases": [
+      "Calcio ajustado por albúmina",
+      "Calcio total corregido"
+    ],
+    "code": "REF-035"
   },
   {
     "id": 36,
@@ -372,7 +384,13 @@
   },
   {
     "id": 39,
-    "name": "FIB-4 Index"
+    "name": "Índice FIB-4",
+    "name_en": "FIB-4 Index",
+    "aliases": [
+      "Puntuación FIB-4",
+      "FIB-4"
+    ],
+    "code": "REF-039"
   },
   {
     "id": 40,
@@ -496,55 +514,128 @@
   },
   {
     "id": 52,
-    "name": "Red Cell Distribution Width (RDW)"
+    "name": "Amplitud de distribución eritrocitaria (RDW)",
+    "name_en": "Red Cell Distribution Width (RDW)",
+    "aliases": [
+      "RDW",
+      "Ancho de distribución de eritrocitos"
+    ],
+    "code": "REF-052"
   },
   {
     "id": 53,
-    "name": "Sodium"
+    "name": "Sodio",
+    "name_en": "Sodium",
+    "aliases": [
+      "Sodio sérico"
+    ],
+    "code": "REF-053"
   },
   {
     "id": 54,
-    "name": "Systemic Immune-Inflammation Index (SII)"
+    "name": "Índice de inflamación inmunitaria sistémica (SII)",
+    "name_en": "Systemic Immune-Inflammation Index (SII)",
+    "aliases": [
+      "Índice inmunoinflamatorio sistémico",
+      "SII"
+    ],
+    "code": "REF-054"
   },
   {
     "id": 55,
-    "name": "Total Bilirubin"
+    "name": "Bilirrubina total",
+    "name_en": "Total Bilirubin",
+    "aliases": [
+      "Bilirrubina sérica total"
+    ],
+    "code": "REF-055"
   },
   {
     "id": 56,
-    "name": "Total Protein"
+    "name": "Proteínas totales",
+    "name_en": "Total Protein",
+    "aliases": [
+      "Proteína total"
+    ],
+    "code": "REF-056"
   },
   {
     "id": 57,
-    "name": "1,5-Anhydroglucitol (1,5-AG)"
+    "name": "1,5-anhidroglucitol (1,5-AG)",
+    "name_en": "1,5-Anhydroglucitol (1,5-AG)",
+    "aliases": [
+      "1,5-AG",
+      "1,5-anhidro-D-glucitol"
+    ],
+    "code": "REF-057"
   },
   {
     "id": 58,
-    "name": "Adiponectin"
+    "name": "Adiponectina",
+    "name_en": "Adiponectin",
+    "aliases": [
+      "Adiponectina sérica"
+    ],
+    "code": "REF-058"
   },
   {
     "id": 59,
-    "name": "Adiponectin / Leptin Ratio (LAR)"
+    "name": "Relación adiponectina/leptina (LAR)",
+    "name_en": "Adiponectin / Leptin Ratio (LAR)",
+    "aliases": [
+      "Cociente adiponectina/leptina",
+      "LAR"
+    ],
+    "code": "REF-059"
   },
   {
     "id": 60,
-    "name": "Anion Gap"
+    "name": "Brecha aniónica",
+    "name_en": "Anion Gap",
+    "aliases": [
+      "Anion gap",
+      "Diferencia aniónica"
+    ],
+    "code": "REF-060"
   },
   {
     "id": 61,
-    "name": "Anti-Müllerian Hormone (AMH)"
+    "name": "Hormona antimülleriana (AMH)",
+    "name_en": "Anti-Müllerian Hormone (AMH)",
+    "aliases": [
+      "Hormona anti-Müller",
+      "AMH"
+    ],
+    "code": "REF-061"
   },
   {
     "id": 62,
-    "name": "Arachidonic Acid (AA)"
+    "name": "Ácido araquidónico (AA)",
+    "name_en": "Arachidonic Acid (AA)",
+    "aliases": [
+      "Ácido araquidónico",
+      "AA"
+    ],
+    "code": "REF-062"
   },
   {
     "id": 63,
-    "name": "Arachidonic Acid/EPA Ratio (AA/EPA)"
+    "name": "Relación ácido araquidónico/EPA (AA/EPA)",
+    "name_en": "Arachidonic Acid/EPA Ratio (AA/EPA)",
+    "aliases": [
+      "Cociente AA/EPA",
+      "AA/EPA"
+    ],
+    "code": "REF-063"
   },
   {
     "id": 64,
-    "name": "Asymmetric Dimethylarginine (ADMA)"
+    "name": "Dimetilarginina asimétrica (ADMA)",
+    "name_en": "Asymmetric Dimethylarginine (ADMA)",
+    "aliases": [
+      "ADMA"
+    ],
+    "code": "REF-064"
   },
   {
     "id": 65,
