@@ -1,0 +1,2 @@
+import ModulePreview from "../components/ModulePreview";
+export default function Page(){return <ModulePreview eyebrow="Hábitos" title="Tus decisiones construyen bienestar." intro="Conoce tus rutinas y cómo evolucionan." items={["Diario personal","Objetivos","Planes de 4, 8 y 12 semanas","Revisión cada siete días"]} note="Los registros manuales y las fuentes automáticas permanecerán independientes en origen, con consolidación controlada para cálculos. Todavía no hay un motor de seguimiento operativo en esta versión."/>}
