@@ -150,7 +150,15 @@
   },
   {
     "id": 25,
-    "name": "White Blood Cells (WBC)"
+    "name": "Recuento de glóbulos blancos (WBC)",
+    "name_en": "White Blood Cells (WBC)",
+    "aliases": [
+      "Leucocitos",
+      "Recuento de leucocitos",
+      "Glóbulos blancos",
+      "WBC"
+    ],
+    "code": "REF-025"
   },
   {
     "id": 26,
@@ -200,11 +208,23 @@
   },
   {
     "id": 31,
-    "name": "Basophil %"
+    "name": "Basófilos (%)",
+    "name_en": "Basophil %",
+    "aliases": [
+      "Porcentaje de basófilos",
+      "Basófilos relativos"
+    ],
+    "code": "REF-031"
   },
   {
     "id": 32,
-    "name": "Basophils"
+    "name": "Basófilos (recuento absoluto)",
+    "name_en": "Basophils",
+    "aliases": [
+      "Recuento de basófilos",
+      "Basófilos absolutos"
+    ],
+    "code": "REF-032"
   },
   {
     "id": 33,
@@ -240,11 +260,23 @@
   },
   {
     "id": 37,
-    "name": "Eosinophil %"
+    "name": "Eosinófilos (%)",
+    "name_en": "Eosinophil %",
+    "aliases": [
+      "Porcentaje de eosinófilos",
+      "Eosinófilos relativos"
+    ],
+    "code": "REF-037"
   },
   {
     "id": 38,
-    "name": "Eosinophils"
+    "name": "Eosinófilos (recuento absoluto)",
+    "name_en": "Eosinophils",
+    "aliases": [
+      "Recuento de eosinófilos",
+      "Eosinófilos absolutos"
+    ],
+    "code": "REF-038"
   },
   {
     "id": 39,
@@ -252,11 +284,22 @@
   },
   {
     "id": 40,
-    "name": "Globulin"
+    "name": "Globulina",
+    "name_en": "Globulin",
+    "aliases": [
+      "Globulinas"
+    ],
+    "code": "REF-040"
   },
   {
     "id": 41,
-    "name": "Hematocrit"
+    "name": "Hematocrito",
+    "name_en": "Hematocrit",
+    "aliases": [
+      "Hto",
+      "Hct"
+    ],
+    "code": "REF-041"
   },
   {
     "id": 42,
@@ -270,39 +313,94 @@
   },
   {
     "id": 43,
-    "name": "Lymphocyte %"
+    "name": "Linfocitos (%)",
+    "name_en": "Lymphocyte %",
+    "aliases": [
+      "Porcentaje de linfocitos",
+      "Linfocitos relativos"
+    ],
+    "code": "REF-043"
   },
   {
     "id": 44,
-    "name": "Lymphocytes"
+    "name": "Linfocitos (recuento absoluto)",
+    "name_en": "Lymphocytes",
+    "aliases": [
+      "Recuento de linfocitos",
+      "Linfocitos absolutos"
+    ],
+    "code": "REF-044"
   },
   {
     "id": 45,
-    "name": "Mean Corpuscular Volume (MCV)"
+    "name": "Volumen corpuscular medio (VCM)",
+    "name_en": "Mean Corpuscular Volume (MCV)",
+    "aliases": [
+      "VCM",
+      "MCV"
+    ],
+    "code": "REF-045"
   },
   {
     "id": 46,
-    "name": "Mean Platelet Volume (MPV)"
+    "name": "Volumen plaquetario medio (VPM)",
+    "name_en": "Mean Platelet Volume (MPV)",
+    "aliases": [
+      "VPM",
+      "MPV"
+    ],
+    "code": "REF-046"
   },
   {
     "id": 47,
-    "name": "Monocyte %"
+    "name": "Monocitos (%)",
+    "name_en": "Monocyte %",
+    "aliases": [
+      "Porcentaje de monocitos",
+      "Monocitos relativos"
+    ],
+    "code": "REF-047"
   },
   {
     "id": 48,
-    "name": "Monocytes"
+    "name": "Monocitos (recuento absoluto)",
+    "name_en": "Monocytes",
+    "aliases": [
+      "Recuento de monocitos",
+      "Monocitos absolutos"
+    ],
+    "code": "REF-048"
   },
   {
     "id": 49,
-    "name": "Neutrophil %"
+    "name": "Neutrófilos (%)",
+    "name_en": "Neutrophil %",
+    "aliases": [
+      "Porcentaje de neutrófilos",
+      "Neutrófilos relativos"
+    ],
+    "code": "REF-049"
   },
   {
     "id": 50,
-    "name": "Neutrophils"
+    "name": "Neutrófilos (recuento absoluto)",
+    "name_en": "Neutrophils",
+    "aliases": [
+      "Recuento de neutrófilos",
+      "Neutrófilos absolutos"
+    ],
+    "code": "REF-050"
   },
   {
     "id": 51,
-    "name": "Platelets"
+    "name": "Plaquetas (recuento)",
+    "name_en": "Platelets",
+    "aliases": [
+      "Recuento de plaquetas",
+      "Plaquetas",
+      "PLT"
+    ],
+    "code": "REF-051"
   },
   {
     "id": 52,
