@@ -5,7 +5,7 @@ const sections=[
 ];
 export default function Home(){return <main className="well-shell">
  <section className="well-hero"><span className="well-eyebrow">Bienestar con ciencia</span>
- <h1 className="well-title" style={{maxWidth:820}}>Tu salud tiene una historia.<br/><span style={{color:"var(--well-green)"}}>Empieza a comprenderla.</span></h1>
+ <h1 className="well-title" style={{maxWidth:820}}>Tu salud tiene una historia.<br/><span style={{color:"var(--well-violet)"}}>Empieza a comprenderla.</span></h1>
  <p className="well-subtitle">Un espacio personal para conocer tus indicadores, seguir su evolución y tomar decisiones con información clara y fundamentada en ciencia.</p>
  <div style={{display:"flex",flexWrap:"wrap",gap:12,marginTop:29}}>
  <a className="well-button" href="/sprint-6-2/persistencia" style={{textDecoration:"none",display:"inline-flex",alignItems:"center"}}>Entrar a mi espacio</a>
