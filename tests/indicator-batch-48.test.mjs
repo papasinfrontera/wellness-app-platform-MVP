@@ -1,0 +1,10 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+const all=JSON.parse(readFileSync("src/app/(dashboard)/mi-analisis/catalog-reference.json","utf8"));
+const ids=[2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,18];
+test("128 original identifiers, 48 translated",()=>{assert.equal(all.length,128);assert.equal(new Set(all.map(x=>x.id)).size,128);assert.equal(all.filter(x=>x.name_en).length,48)});
+for(const id of ids)test("bilingual REF-"+id,()=>{const x=all.find(x=>x.id===id);assert.equal(x.code,"REF-"+String(id).padStart(3,"0"));assert.ok(x.name&&x.name_en&&x.name!==x.name_en);assert.ok(x.aliases.length)});
+test("estimated glucose differs from measured glucose",()=>{const x=all.find(x=>x.id===16),y=all.find(x=>x.id===17);assert.equal(x.name,"Glucosa media estimada (eAG)");assert.equal(y.name,"Glucosa");assert.notEqual(x.code,y.code)});
+test("LDL and HDL and total cholesterol are independent",()=>{assert.equal(new Set([5,10,13,18].map(id=>all.find(x=>x.id===id).code)).size,4)});
+test("no patient data or clinical thresholds",()=>{for(const x of all)for(const k of ["result","value","observed_at","patient_name","clinical_status","reference_range"])assert.equal(Object.hasOwn(x,k),false)});
