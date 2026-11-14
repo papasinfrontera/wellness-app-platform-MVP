@@ -6,7 +6,7 @@ import catalogNames from "../catalog-reference.json";
 import "../analisis.css";
 type Metric={name:string;code?:string};
 type Point={value:number;unit:string;observed_at:string};
-const names=catalogNames as {id:number;name:string}[];
+const names=catalogNames as {id:number;name:string;name_en?:string;aliases?:string[];code?:string}[];
 const tabs=["Impacto en Healthspan","Qué es","Por qué es importante","Otros indicadores","Dispositivos conectados","Cómo mejorar","Fuentes científicas"];
 const date=(s:string)=>new Intl.DateTimeFormat("es",{day:"numeric",month:"short",year:"numeric"}).format(new Date(s));
 const val=(n:number)=>n.toLocaleString("es",{maximumFractionDigits:2});
@@ -32,7 +32,7 @@ export default function IndicatorDetail(){
   const db=createClient(url,key),{data:{user},error}=await db.auth.getUser();
   if(!alive)return;
   if(error||!user){setMode("denied");return}
-  const {data:possible,error:lookupError}=await db.from("indicators").select("id,name_es").ilike("name_es",item.name).limit(1);
+  const {data:possible,error:lookupError}=await db.from("indicators").select("id,code,name_es").eq("code","REF-"+String(item.id).padStart(3,"0")).limit(1);
   if(!alive)return;
   if(lookupError){setMode("error");return}
   if(!possible?.length){setPoints([]);setMode("ready");return}
@@ -45,7 +45,7 @@ export default function IndicatorDetail(){
  const difference=last&&prior?last.value-prior.value:null;
  const percent=difference!==null&&prior&&prior.value!==0?difference/prior.value*100:null;
  const text=useMemo(()=>{
-  if(active==="Qué es")return item?.name.match(/apolipoprotein b|apob/i)?"La apolipoproteína B es una proteína presente en las principales partículas que transportan colesterol y otros lípidos. Su medición contribuye a la valoración del riesgo cardiovascular.":"Este indicador forma parte del catálogo de análisis. Su descripción científica específica está pendiente de revisión.";
+  if(active==="Qué es")return (item?.name_en||item?.name)?.match(/apolipoprotein b|apob/i)?"La apolipoproteína B es una proteína presente en las principales partículas que transportan colesterol y otros lípidos. Su medición contribuye a la valoración del riesgo cardiovascular.":"Este indicador forma parte del catálogo de análisis. Su descripción científica específica está pendiente de revisión.";
   if(active==="Fuentes científicas")return "Las referencias individuales y sus fechas de revisión se incorporarán tras la auditoría del Consejo Médico-Científico.";
   if(active==="Dispositivos conectados")return "Las posibles relaciones con datos de dispositivos se evaluarán cuando estén disponibles y exista autorización para utilizarlos.";
   if(active==="Cómo mejorar")return "Las recomendaciones personalizadas requieren información validada, contexto clínico y revisión del motor científico. No se generan indicaciones médicas automáticas.";
@@ -56,7 +56,7 @@ export default function IndicatorDetail(){
  return <main className="wa-page wa-detail-shell"><a className="wa-back" href="/mi-analisis">‹ Volver a mis análisis</a>
   {!item?<div className="wb-state">El indicador solicitado no está disponible en el catálogo de referencia.</div>:mode==="denied"?<div className="wb-state"><h2>Acceso privado</h2><p>Inicia sesión para consultar tu historial.</p><a className="wb-action" href="/sprint-6-2/persistencia">Iniciar sesión</a></div>:<>
   <span className="wa-eyebrow">FICHA INDIVIDUAL · HISTORIAL DE RESULTADOS</span><h1 className="wa-detail-title">{item.name}</h1>
-  <p className="wa-subtitle">{item.name.match(/apolipoprotein b|apob/i)?"La ApoB es una proteína presente en las principales partículas que transportan colesterol y otros lípidos. Su medición ayuda a evaluar el riesgo cardiovascular.":"Información del indicador y evolución personal cuando se disponga de resultados asociados."}</p>
+  <p className="wa-subtitle">{(item.name_en||item.name).match(/apolipoprotein b|apob/i)?"La ApoB es una proteína presente en las principales partículas que transportan colesterol y otros lípidos. Su medición ayuda a evaluar el riesgo cardiovascular.":"Información del indicador y evolución personal cuando se disponga de resultados asociados."}</p>
   <div className="wa-tags"><span className="wa-tag">Análisis de laboratorio</span><span className="wa-tag">Historial personal</span><span className="wa-tag">Fuentes en validación</span></div>
   <section className="wa-detail-metrics">
    <article className="wa-detail-metric"><h3>Resultado seleccionado {last?"· "+date(last.observed_at):""}</h3><strong>{last?val(last.value):"—"}</strong> {last?.unit||""}<p className="wa-future">{last?"Interpretación pendiente de validación":"Sin datos disponibles"}</p></article>
