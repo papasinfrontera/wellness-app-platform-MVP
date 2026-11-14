@@ -89,27 +89,64 @@
   },
   {
     "id": 19,
-    "name": "Hemoglobin A1c (HbA1c)"
+    "name": "Hemoglobina glucosilada (HbA1c)",
+    "name_en": "Hemoglobin A1c (HbA1c)",
+    "aliases": [
+      "Hemoglobina glicosilada",
+      "Hemoglobina A1c",
+      "HbA1c"
+    ],
+    "code": "REF-019"
   },
   {
     "id": 20,
-    "name": "High-Sensitivity C-Reactive Protein (hs-CRP)"
+    "name": "Proteína C reactiva de alta sensibilidad (PCR-us)",
+    "name_en": "High-Sensitivity C-Reactive Protein (hs-CRP)",
+    "aliases": [
+      "PCR ultrasensible",
+      "PCR de alta sensibilidad",
+      "hs-CRP"
+    ],
+    "code": "REF-020"
   },
   {
     "id": 21,
-    "name": "Phosphorus"
+    "name": "Fósforo",
+    "name_en": "Phosphorus",
+    "aliases": [
+      "Fósforo sérico"
+    ],
+    "code": "REF-021"
   },
   {
     "id": 22,
-    "name": "Potassium"
+    "name": "Potasio",
+    "name_en": "Potassium",
+    "aliases": [
+      "Potasio sérico"
+    ],
+    "code": "REF-022"
   },
   {
     "id": 23,
-    "name": "Red Blood Cell Count (RBC)"
+    "name": "Recuento de glóbulos rojos (RBC)",
+    "name_en": "Red Blood Cell Count (RBC)",
+    "aliases": [
+      "Recuento de eritrocitos",
+      "Hematíes",
+      "RBC"
+    ],
+    "code": "REF-023"
   },
   {
     "id": 24,
-    "name": "Uric Acid (UA)"
+    "name": "Ácido úrico",
+    "name_en": "Uric Acid (UA)",
+    "aliases": [
+      "Uricemia",
+      "Urato"
+    ],
+    "code": "REF-024"
   },
   {
     "id": 25,
@@ -117,11 +154,23 @@
   },
   {
     "id": 26,
-    "name": "Alanine Aminotransferase (ALT)"
+    "name": "Alanina aminotransferasa (ALT)",
+    "name_en": "Alanine Aminotransferase (ALT)",
+    "aliases": [
+      "ALT",
+      "TGP",
+      "Transaminasa glutámico-pirúvica"
+    ],
+    "code": "REF-026"
   },
   {
     "id": 27,
-    "name": "Albumin"
+    "name": "Albúmina",
+    "name_en": "Albumin",
+    "aliases": [
+      "Albúmina sérica"
+    ],
+    "code": "REF-027"
   },
   {
     "id": 28,
@@ -129,11 +178,25 @@
   },
   {
     "id": 29,
-    "name": "Alkaline Phosphatase (ALP)"
+    "name": "Fosfatasa alcalina (ALP)",
+    "name_en": "Alkaline Phosphatase (ALP)",
+    "aliases": [
+      "Fosfatasa alcalina",
+      "ALP",
+      "FA"
+    ],
+    "code": "REF-029"
   },
   {
     "id": 30,
-    "name": "Aspartate Aminotransferase (AST)"
+    "name": "Aspartato aminotransferasa (AST)",
+    "name_en": "Aspartate Aminotransferase (AST)",
+    "aliases": [
+      "AST",
+      "TGO",
+      "Transaminasa glutámico-oxalacética"
+    ],
+    "code": "REF-030"
   },
   {
     "id": 31,
@@ -145,11 +208,22 @@
   },
   {
     "id": 33,
-    "name": "Calcium"
+    "name": "Calcio",
+    "name_en": "Calcium",
+    "aliases": [
+      "Calcio total"
+    ],
+    "code": "REF-033"
   },
   {
     "id": 34,
-    "name": "Chloride"
+    "name": "Cloruro",
+    "name_en": "Chloride",
+    "aliases": [
+      "Cloro sérico",
+      "Cloruros"
+    ],
+    "code": "REF-034"
   },
   {
     "id": 35,
@@ -157,7 +231,12 @@
   },
   {
     "id": 36,
-    "name": "Creatinine"
+    "name": "Creatinina",
+    "name_en": "Creatinine",
+    "aliases": [
+      "Creatinina sérica"
+    ],
+    "code": "REF-036"
   },
   {
     "id": 37,
@@ -181,7 +260,13 @@
   },
   {
     "id": 42,
-    "name": "Hemoglobin"
+    "name": "Hemoglobina",
+    "name_en": "Hemoglobin",
+    "aliases": [
+      "Hb",
+      "Hgb"
+    ],
+    "code": "REF-042"
   },
   {
     "id": 43,
