@@ -5,7 +5,7 @@ import {useWellnessAuth} from "../../components/WellnessAuthProvider";
 
 type Mode="signin"|"signup"|"recover";
 export default function Acceso(){
- const {client:db,user,status,refreshAuth}=useWellnessAuth();
+ const {client:db,user,status,refreshAuth,signOut}=useWellnessAuth();
  const router=useRouter();
  const [mode,setMode]=useState<Mode>("signin");
  const [email,setEmail]=useState("");
@@ -37,6 +37,15 @@ export default function Acceso(){
      setNotice(/rate limit|too many requests/i.test(raw)?"Se han realizado demasiados intentos. Inténtalo más tarde.":mode==="recover"?"No se pudo enviar el enlace. Inténtalo más tarde.":/invalid login|invalid credentials/i.test(raw)?"No pudimos iniciar sesión. Revisa tus datos.":"No fue posible completar la solicitud. Inténtalo de nuevo.");
    }finally{setBusy(false)}
  }
+ async function leaveAccount(){
+   if(busy)return;
+   setBusy(true);setNotice("");
+   try{
+     const success=await signOut();
+     if(!success){setNotice("No se pudo cerrar sesión. Inténtalo nuevamente.");return}
+     setPassword("");setMode("signin");router.replace("/sprint-6-2/persistencia");router.refresh();
+   }finally{setBusy(false)}
+ }
  function changeMode(next:Mode){setMode(next);setNotice("");setPassword("");}
  return <main className="well-shell" style={{maxWidth:980,paddingTop:44,paddingBottom:75}}>
   <div className="well-signin" style={{maxWidth:480,margin:"0 auto"}}>
@@ -48,6 +57,7 @@ export default function Acceso(){
       <strong>Tu sesión está activa.</strong><p style={{margin:0,color:"var(--well-muted)",fontSize:13}}>Ya puedes continuar con tu espacio personal.</p>
       <a className="well-button" href="/mi-bienestar" style={{textAlign:"center",textDecoration:"none"}}>Ir a Mi bienestar</a>
       <a className="well-link" href="/mi-perfil">Consultar mi perfil</a>
+      <button type="button" className="well-button-secondary" disabled={busy} onClick={()=>void leaveAccount()}>{busy?"Cerrando sesión…":"Cerrar sesión y acceder con otra cuenta"}</button>
     </div>:
     <section className="well-card well-signin-card">
      {mode!=="recover"&&<div className="well-auth-tabs" role="group" aria-label="Acceso">
