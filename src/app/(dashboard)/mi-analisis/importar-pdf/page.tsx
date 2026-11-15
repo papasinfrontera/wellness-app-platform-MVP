@@ -25,6 +25,7 @@ export default function PdfPilotPage(){
  const [report,setReport]=useState<(PdfReview&{pages:number})|null>(null),[rows,setRows]=useState<Row[]>([]);
  const [search,setSearch]=useState<Record<string,string>>({}),[filter,setFilter]=useState("all"),[finished,setFinished]=useState(false),[bulkReviewed,setBulkReviewed]=useState(false);
  const [collectionDate,setCollectionDate]=useState("");
+ const [laboratoryName,setLaboratoryName]=useState("");
  const [saveBusy,setSaveBusy]=useState(false),[saveNotice,setSaveNotice]=useState(""),[saved,setSaved]=useState(false);
  const [identity,setIdentity]=useState<"loading"|"signed_in"|"signed_out">("loading");
  const [recognized,setRecognized]=useState<string[]>([]);
@@ -82,15 +83,15 @@ export default function PdfPilotPage(){
      const digest=await crypto.subtle.digest("SHA-256",await file.arrayBuffer());
      const sha=[...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,"0")).join("");
      const payload=rows.map(r=>({decision:r.decision,code:r.indicatorCode,original:r.original,value:r.value,unit:r.unit,numeric_value:r.decision==="confirmed"?asNumber(r.value):null,kind:classifyUnmatchedReading(r.original,r.value)}));
-     const {data,error}=await db.rpc("save_lab_review_v2",{p_rows:payload,p_observed_on:collectionDate,p_sha256:sha});
+     const {data,error}=await db.rpc("save_lab_review_v3",{p_rows:payload,p_observed_on:collectionDate,p_sha256:sha,p_filename:file.name,p_lab_name:laboratoryName.trim()||null});
      if(error)throw new Error("No se pudo completar el guardado seguro. No se registró una importación parcial.");
      setSaved(true);
      const result=data as {confirmed_saved?:number;confirmed_existing?:number;pending_saved?:number;pending_existing?:number;excluded?:number}|null;
-     setSaveNotice("Guardado seguro: "+(result?.confirmed_saved??0)+" resultados nuevos, "+(result?.confirmed_existing??0)+" ya existentes; "+(result?.pending_saved??0)+" lecturas pendientes nuevas y "+(result?.pending_existing??0)+" pendientes existentes. "+(result?.excluded??0)+" excluidas por decisión explícita.");
+     setSaveNotice("Documento registrado. Guardado seguro: "+(result?.confirmed_saved??0)+" resultados nuevos, "+(result?.confirmed_existing??0)+" ya existentes; "+(result?.pending_saved??0)+" lecturas pendientes nuevas y "+(result?.pending_existing??0)+" pendientes existentes. "+(result?.excluded??0)+" excluidas por decisión explícita.");
    }catch(e){setSaveNotice(e instanceof Error?e.message:"No fue posible guardar los análisis.");}
    finally{setSaveBusy(false)}
  }
- const reset=()=>{setSelectedIds([]);setBulkPreview(false);setBulkMessage("");setGroupSelection([]);setGroupAcknowledged(false);setFile(null);setReport(null);setRows([]);setRecognized([]);setRecognizedDate("");setReconcileMessage("");setSaved(false);setSaveNotice("");setCollectionDate("");setError("");setSearch({});setFinished(false);setBulkReviewed(false);setFilter("all");if(input.current)input.current.value=""};
+ const reset=()=>{setSelectedIds([]);setBulkPreview(false);setBulkMessage("");setGroupSelection([]);setGroupAcknowledged(false);setFile(null);setReport(null);setRows([]);setRecognized([]);setRecognizedDate("");setReconcileMessage("");setSaved(false);setSaveNotice("");setCollectionDate("");setLaboratoryName("");setError("");setSearch({});setFinished(false);setBulkReviewed(false);setFilter("all");if(input.current)input.current.value=""};
  async function analyze(){
   if(!file)return;
   if(file.size>5*1024*1024){setError("El tamaño máximo es 5 MB.");return}
@@ -248,6 +249,10 @@ export default function PdfPilotPage(){
    <div style={{marginTop:17,padding:15,border:"1px solid #e4def7",borderRadius:12,background:"#faf9ff"}}>
     <h3 style={{margin:"0 0 9px",fontSize:15}}>3. Guardar resultados en mi historial</h3>
     <p style={{fontSize:12,color:"#645d7d",margin:"0 0 12px"}}>Se conservarán {confirmed} mediciones confirmadas y {deferred} lecturas pendientes en tu cuenta. Las {excluded} excluidas no se guardarán. Para conservar las tres lecturas que faltaban, márcalas como «Pendiente» antes de finalizar. El PDF original no se almacena en esta fase.</p>
+    <div style={{fontSize:11,color:"#716788",marginBottom:9}}>Documento: <strong>{file?.name||"No seleccionado"}</strong>. Se guarda el nombre y la huella digital; no el PDF original.</div>
+    <label style={{display:"grid",gap:5,fontSize:12,fontWeight:700,marginBottom:10,maxWidth:360}}>Laboratorio (opcional)
+      <input aria-label="Nombre del laboratorio" value={laboratoryName} onChange={e=>setLaboratoryName(e.target.value)} disabled={saved} maxLength={120} placeholder="Laboratorio indicado en el informe" style={fieldStyle}/>
+    </label>
     <label style={{display:"grid",gap:5,fontSize:12,fontWeight:700}}>Fecha de toma de muestra
       <input type="date" aria-label="Fecha de toma de muestra" max={new Date().toISOString().slice(0,10)} value={collectionDate} onChange={e=>setCollectionDate(e.target.value)} disabled={saved} style={{...fieldStyle,maxWidth:280}}/>
     </label>
