@@ -28,8 +28,8 @@ test("ambiguous labels are mapped by catalog code, not by substring",()=>{
 });
 test("clinical optimization labels remain disabled until clinically approved rules are available",()=>{
  const page=readFileSync("src/app/(dashboard)/mi-analisis/page.tsx","utf8");
- assert.match(page,/Confirmado · sin evaluar/);
- assert.ok(page.includes('disabled={(i>=2&&i<=4)'),"Clinical filters remain disabled");
+ assert.ok(page.includes('"Suficiente"'),"The lab-reference filter label is present");
+ assert.ok(page.includes('disabled={i===2'),"Only optimal remains disabled pending scientific validation");
  assert.ok(page.includes('const filters=["Todos","Con resultado","Óptimo","Suficiente","Fuera de rango","Sin resultado"]'),"Exactly four state names");
  assert.ok(page.includes('auth==="ready"?measured:null'),"No false zero without authentication");
  assert.match(page,/categoryForId\(item\.id\)/);
