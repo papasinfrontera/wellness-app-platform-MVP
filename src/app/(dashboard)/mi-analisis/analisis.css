@@ -31,3 +31,19 @@
  .wa-catalog-shell{grid-template-columns:1fr}
 }
 @media(max-width:420px){.wa-metric.wa-lime{flex-basis:220px}.wa-metric{flex-basis:117px}}
+
+/* Sprint 6.6-C: desktop reference layout, six distinct columns. */
+.wa-results{min-width:800px}
+.wa-result-head,.wa-result-row{
+ grid-template-columns:minmax(185px,2.35fr) minmax(73px,.72fr) minmax(69px,.75fr) minmax(158px,1.5fr) minmax(143px,1.42fr) 17px;
+ gap:10px;
+}
+.wa-result-head{padding:12px 13px;min-height:39px}
+.wa-result-row{padding:12px 13px;min-height:49px}
+.wa-result-value{font-weight:800;font-variant-numeric:tabular-nums}
+.wa-result-row .wa-result-unit{margin-left:0;font-size:11px;color:#77718d}
+.wa-result-category{font-size:11px;color:#514c70;line-height:1.4}
+.wa-result-status{font-size:10px;white-space:normal;line-height:1.2}
+.wa-result-status-confirmed{background:#eeeafd;color:#51408e}
+@media(min-width:1180px){.wa-catalog-shell{grid-template-columns:210px minmax(0,1fr)}}
+@media(max-width:900px){.wa-results{min-width:800px}}
