@@ -1,17 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
-import { createClient, type SupabaseClient, type User } from "@supabase/supabase-js";
+import {useWellnessAuth} from "../../components/WellnessAuthProvider";
 
 type SampleRecord = {id:string;label:string;value:number;unit:string;created_at:string};
-function getClient():SupabaseClient|null {
- const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
- const key=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
- return url&&key?createClient(url,key):null;
-}
 const inputHint="Usa una contraseña de al menos ocho caracteres.";
 export default function MiEspacio(){
- const [db]=useState(getClient);
- const [user,setUser]=useState<User|null>(null);
+ const {client:db,user,status,refreshAuth,signOut:globalSignOut}=useWellnessAuth();
  const [email,setEmail]=useState("");
  const [password,setPassword]=useState("");
  const [showPassword,setShowPassword]=useState(false);
@@ -19,14 +13,7 @@ export default function MiEspacio(){
  const [records,setRecords]=useState<SampleRecord[]>([]);
  const [notice,setNotice]=useState("");
  const [busy,setBusy]=useState(false);
- const [loadingSession,setLoadingSession]=useState(true);
- useEffect(()=>{
-  if(!db){setLoadingSession(false);return}
-  let alive=true;
-  void db.auth.getUser().then(({data})=>{if(alive){setUser(data.user);setLoadingSession(false)}}).catch(()=>{if(alive)setLoadingSession(false)});
-  const {data:auth}=db.auth.onAuthStateChange((_event,session)=>{if(alive){setUser(session?.user??null);setLoadingSession(false)}});
-  return ()=>{alive=false;auth.subscription.unsubscribe()};
- },[db]);
+ const loadingSession=status==="loading";
  useEffect(()=>{
   if(!db||!user){setRecords([]);return}
   let alive=true;
@@ -43,6 +30,7 @@ export default function MiEspacio(){
     :await db.auth.signInWithPassword({email:email.trim(),password});
    if(response.error)throw response.error;
    setPassword("");
+   if(response.data.session)await refreshAuth();
    setNotice(response.data.session?"¡Bienvenido a tu espacio!":mode==="signup"?"Revisa tu correo y confirma el enlace para activar tu cuenta.":"Si acabas de registrarte, confirma tu correo para acceder.");
   }catch(e){
    const raw=e instanceof Error?e.message:"";
@@ -72,8 +60,9 @@ export default function MiEspacio(){
  async function signOut(){
   if(!db||busy)return;
   setBusy(true);
-  const {error}=await db.auth.signOut();
-  if(error)setNotice("No fue posible cerrar sesión.");else{setRecords([]);setNotice("");}
+  const success=await globalSignOut();
+  if(!success)setNotice("No fue posible cerrar sesión.");
+  else{setRecords([]);setNotice("");}
   setBusy(false);
  }
  return <main className="well-shell">
