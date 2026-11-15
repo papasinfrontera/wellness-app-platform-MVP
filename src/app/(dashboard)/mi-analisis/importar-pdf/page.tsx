@@ -21,24 +21,24 @@ function candidateList(query:string,code:string){
 export default function PdfPilotPage(){
  const [file,setFile]=useState<File|null>(null),[busy,setBusy]=useState(false),[error,setError]=useState("");
  const [report,setReport]=useState<(PdfReview&{pages:number})|null>(null),[rows,setRows]=useState<Row[]>([]);
- const [search,setSearch]=useState<Record<string,string>>({}),[filter,setFilter]=useState("all"),[finished,setFinished]=useState(false);
+ const [search,setSearch]=useState<Record<string,string>>({}),[filter,setFilter]=useState("all"),[finished,setFinished]=useState(false),[bulkReviewed,setBulkReviewed]=useState(false);
  const input=useRef<HTMLInputElement>(null);
- const reset=()=>{setFile(null);setReport(null);setRows([]);setError("");setSearch({});setFinished(false);setFilter("all");if(input.current)input.current.value=""};
+ const reset=()=>{setFile(null);setReport(null);setRows([]);setError("");setSearch({});setFinished(false);setBulkReviewed(false);setFilter("all");if(input.current)input.current.value=""};
  async function analyze(){
   if(!file)return;
   if(file.size>5*1024*1024){setError("El tamaño máximo es 5 MB.");return}
-  setBusy(true);setError("");setReport(null);setRows([]);setFinished(false);
+  setBusy(true);setError("");setReport(null);setRows([]);setFinished(false);setBulkReviewed(false);setBulkReviewed(false);
   try{const body=new FormData();body.append("file",file);const response=await fetch("/api/lab-pdf-preview",{method:"POST",body,cache:"no-store"});const json=await response.json();
    if(!response.ok)throw new Error(json.error||"No se pudo analizar el PDF");
    setReport(json);setRows((json.rows||[]).map((x:PdfRow)=>({...x,decision:"pending"})));
   }catch(e){setError(e instanceof Error?e.message:"Error al leer PDF");}finally{setBusy(false)}
  }
- function edit(i:number,patch:Partial<Row>){setRows(prev=>prev.map((r,j)=>j===i?{...r,...patch,decision:"pending"}:r))}
+ function edit(i:number,patch:Partial<Row>){setBulkReviewed(false);setRows(prev=>prev.map((r,j)=>j===i?{...r,...patch,decision:"pending"}:r))}
  function decide(i:number,decision:Decision){setRows(prev=>prev.map((r,j)=>j===i?{...r,decision}:r))}
  const confirmed=rows.filter(r=>r.decision==="confirmed").length,excluded=rows.filter(r=>r.decision==="excluded").length,deferred=rows.filter(r=>r.decision==="deferred").length;
  const pending=rows.length-confirmed-excluded-deferred,done=rows.length>0&&pending===0&&!report?.truncated;
  const visible=rows.map((row,index)=>({row,index})).filter(({row})=>filter==="all"||(filter==="pending"?row.decision==="pending":filter==="candidates"?row.decision==="pending"&&row.status==="candidate":row.decision===filter));
- function confirmCandidates(){setRows(prev=>prev.map(r=>r.decision==="pending"&&r.status==="candidate"&&valid(r)?{...r,decision:"confirmed"}:r))}
+ function confirmCandidates(){if(!bulkReviewed)return;setBulkReviewed(false);setRows(prev=>prev.map(r=>r.decision==="pending"&&r.status==="candidate"&&valid(r)?{...r,decision:"confirmed"}:r))}
  const summary=()=>{
   if(!done)return;setFinished(true);window.scrollTo({top:0,behavior:"smooth"});
  };
@@ -79,7 +79,7 @@ export default function PdfPilotPage(){
     </div>
     <div style={{background:"#eeeaf7",height:7,borderRadius:8,marginTop:9,overflow:"hidden"}}><div style={{height:"100%",width:(rows.length?100*(confirmed+deferred+excluded)/rows.length:0)+"%",background:primary}}/></div>
     <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:12,alignItems:"center"}}>
-     <button type="button" onClick={confirmCandidates} style={{...buttonStyle,background:"#eeeaff",color:primary}}>Confirmar candidatos revisados</button>
+     <label style={{fontSize:11,display:"flex",alignItems:"center",gap:5}}><input type="checkbox" checked={bulkReviewed} onChange={e=>setBulkReviewed(e.target.checked)}/> Revisé las coincidencias candidatas</label><button type="button" disabled={!bulkReviewed} onClick={confirmCandidates} style={{...buttonStyle,background:"#eeeaff",color:primary,opacity:bulkReviewed?1:.45}}>Confirmar candidatos revisados</button>
      <button type="button" onClick={summary} disabled={!done} style={{...buttonStyle,background:primary,color:"white",opacity:done?1:.4}}>Finalizar revisión</button>
      <label style={{fontSize:11,fontWeight:700,marginLeft:"auto"}}>Mostrar <select aria-label="Filtrar resultados" value={filter} onChange={e=>setFilter(e.target.value)} style={{...fieldStyle,width:"auto",marginLeft:5}}><option value="all">Todos</option><option value="pending">Por revisar</option><option value="candidates">Candidatos</option><option value="confirmed">Confirmados</option><option value="deferred">Pendientes declarados</option><option value="excluded">Excluidos</option></select></label>
     </div>
