@@ -13,6 +13,7 @@ const fieldStyle={width:"100%",minWidth:0,border:"1px solid #e3def3",borderRadiu
 const buttonStyle={border:0,borderRadius:9,padding:"9px 12px",fontSize:11,fontWeight:750 as const,cursor:"pointer"};
 const normalize=(s:string)=>s.normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 const numerical=/^[<>≤≥]?\s*[+-]?\d+(?:[.,]\d+)?$/;
+const kindFor=(label:string):"unmapped"|"qualitative"|"complementary"=>{const k=normalize(label);return /total de celularidad/.test(k)?"complementary":/proteina c reactiva|pcr/.test(k)?"qualitative":"unmapped"};
 const valid=(r:Row)=>!!r.indicatorCode&&!!r.value.trim()&&(!!r.unit.trim()||r.indicatorCode==="REF-028")&&numerical.test(r.value.trim());
 function candidateList(query:string,code:string){
  const q=normalize(query.trim());
@@ -59,9 +60,8 @@ export default function PdfPilotPage(){
  async function saveReviewed(){
    if(!file||!done||saveBusy||saved||!collectionDate||identity!=="signed_in")return;
    const confirmedRows=rows.filter(r=>r.decision==="confirmed");
-   const payload=confirmedRows.map(r=>({code:r.indicatorCode,original:r.original,unit:r.unit,value:asNumber(r.value)}));
-   const invalid=payload.map((p,i)=>p.value===null?confirmedRows[i].original:null).filter((x):x is string=>x!==null);
-   if(!payload.length||invalid.length){setSaveNotice("No se pudo interpretar el valor de: "+invalid.join(", ")+". Vuelve a editar esos resultados antes de guardar.");return}
+   const invalid=confirmedRows.filter(r=>asNumber(r.value)===null).map(r=>r.original);
+   if(invalid.length){setSaveNotice("No se pudo interpretar el valor de: "+invalid.join(", ")+". Vuelve a editar esos resultados antes de guardar.");return}
    setSaveBusy(true);setSaveNotice("");
    try{
      const u=process.env.NEXT_PUBLIC_SUPABASE_URL,k=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -71,11 +71,12 @@ export default function PdfPilotPage(){
      if(authError||!user){setIdentity("signed_out");throw new Error("Inicia sesión de nuevo para guardar.");}
      const digest=await crypto.subtle.digest("SHA-256",await file.arrayBuffer());
      const sha=[...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,"0")).join("");
-     const {data,error}=await db.rpc("save_lab_review",{p_rows:payload,p_observed_on:collectionDate,p_sha256:sha});
+     const payload=rows.map(r=>({decision:r.decision,code:r.indicatorCode,original:r.original,value:r.value,unit:r.unit,numeric_value:r.decision==="confirmed"?asNumber(r.value):null,kind:kindFor(r.original)}));
+     const {data,error}=await db.rpc("save_lab_review_v2",{p_rows:payload,p_observed_on:collectionDate,p_sha256:sha});
      if(error)throw new Error("No se pudo completar el guardado seguro. No se registró una importación parcial.");
      setSaved(true);
-     const result=data as {saved?:number;already_present?:number}|null;
-     setSaveNotice("Importación verificada: "+(result?.saved??0)+" nuevos y "+(result?.already_present??0)+" existentes. Puedes verlos en Mis análisis.");
+     const result=data as {confirmed_saved?:number;confirmed_existing?:number;pending_saved?:number;pending_existing?:number;excluded?:number}|null;
+     setSaveNotice("Guardado seguro: "+(result?.confirmed_saved??0)+" resultados nuevos, "+(result?.confirmed_existing??0)+" ya existentes; "+(result?.pending_saved??0)+" lecturas pendientes nuevas y "+(result?.pending_existing??0)+" pendientes existentes. "+(result?.excluded??0)+" excluidas por decisión explícita.");
    }catch(e){setSaveNotice(e instanceof Error?e.message:"No fue posible guardar los análisis.");}
    finally{setSaveBusy(false)}
  }
@@ -102,7 +103,7 @@ export default function PdfPilotPage(){
  <a className="wa-back" href="/mi-analisis">‹ Volver a Mis análisis</a>
  <span className="wa-eyebrow">SPRINT 6.6-A.2 · REVISIÓN DE PDF</span>
  <h1 className="wa-title">Importa tus análisis</h1>
- <p className="wa-subtitle">Identifica, corrige y clasifica los resultados del PDF. La revisión es temporal; después podrás guardar solo los resultados confirmados en tu cuenta.</p>
+ <p className="wa-subtitle">Identifica, corrige y clasifica los resultados del PDF. La revisión es temporal; al guardar, las mediciones confirmadas entran en tu historial y las lecturas sin equivalencia quedan en una bandeja privada de pendientes.</p>
  <section className="wa-explorer" style={{marginTop:17,padding:18}}>
   <h2>1. Selecciona el PDF</h2><p className="wa-subtitle">Máximo 5 MB y 12 páginas · PDF digital con texto seleccionable · Sin OCR</p>
   <input ref={input} type="file" accept=".pdf,application/pdf" aria-label="Archivo PDF de laboratorio" style={{...fieldStyle,marginTop:12}} onChange={e=>{setFile(e.target.files?.[0]||null);setRows([]);setReport(null);setFinished(false);setError("")}}/>
@@ -116,14 +117,14 @@ export default function PdfPilotPage(){
   {finished?<div>
    <span className="wa-eyebrow">REVISIÓN FINALIZADA · SOLO EN ESTA SESIÓN</span>
    <h2 style={{fontSize:23,marginTop:7}}>Resumen de revisión</h2>
-   <p className="wa-subtitle">Se clasificaron {rows.length} filas: {confirmed} confirmadas, {deferred} pendientes para revisión futura y {excluded} excluidas. Ninguna medición ha sido guardada.</p>
+   <p className="wa-subtitle">Se clasificaron {rows.length} filas: {confirmed} confirmadas, {deferred} pendientes para revisión futura y {excluded} excluidas. Todavía no se ha enviado la revisión a la base de datos.</p>
    <div style={{overflowX:"auto",marginTop:14}}><table style={{width:"100%",minWidth:620,borderCollapse:"collapse",fontSize:12}}>
     <thead><tr style={{background:"#f4f0ff"}}>{["N.º","Nombre original","Indicador revisado","Resultado","Decisión"].map(x=><th key={x} style={{textAlign:"left",padding:10}}>{x}</th>)}</tr></thead>
     <tbody>{rows.map((r,i)=><tr key={r.id} style={{borderBottom:"1px solid #eeeaf7"}}><td style={{padding:9}}>{i+1}</td><td style={{padding:9}}>{r.original}</td><td style={{padding:9}}>{r.indicatorName||"Sin asignar"}</td><td style={{padding:9}}>{r.value} {r.unit}</td><td style={{padding:9,fontWeight:700}}>{r.decision==="confirmed"?"Confirmado":r.decision==="excluded"?"Excluido":"Pendiente"}</td></tr>)}</tbody>
    </table></div>
    <div style={{marginTop:17,padding:15,border:"1px solid #e4def7",borderRadius:12,background:"#faf9ff"}}>
     <h3 style={{margin:"0 0 9px",fontSize:15}}>3. Guardar resultados en mi historial</h3>
-    <p style={{fontSize:12,color:"#645d7d",margin:"0 0 12px"}}>Se guardarán exclusivamente los {confirmed} resultados confirmados. Los {excluded} excluidos no se guardan. El PDF original no se almacena en esta fase.</p>
+    <p style={{fontSize:12,color:"#645d7d",margin:"0 0 12px"}}>Se conservarán {confirmed} mediciones confirmadas y {deferred} lecturas pendientes en tu cuenta. Las {excluded} excluidas no se guardarán. Para conservar las tres lecturas que faltaban, márcalas como «Pendiente» antes de finalizar. El PDF original no se almacena en esta fase.</p>
     <label style={{display:"grid",gap:5,fontSize:12,fontWeight:700}}>Fecha de toma de muestra
       <input type="date" aria-label="Fecha de toma de muestra" max={new Date().toISOString().slice(0,10)} value={collectionDate} onChange={e=>setCollectionDate(e.target.value)} disabled={saved} style={{...fieldStyle,maxWidth:280}}/>
     </label>
@@ -131,7 +132,7 @@ export default function PdfPilotPage(){
     {identity==="loading"&&<p style={{fontSize:12}}>Verificando sesión…</p>}
     {saveNotice&&<p role="status" style={{fontSize:12,color:saved?"#286c39":"#9b303b"}}>{saveNotice}</p>}
     <div style={{display:"flex",gap:9,flexWrap:"wrap",marginTop:12}}>
-      <button type="button" onClick={()=>void saveReviewed()} disabled={identity!=="signed_in"||!collectionDate||saveBusy||saved||confirmed===0} style={{...buttonStyle,background:primary,color:"white",opacity:identity==="signed_in"&&collectionDate&&!saveBusy&&!saved&&confirmed?1:.45}}>{saveBusy?"Guardando…":saved?"Guardado correctamente":"Guardar "+confirmed+" resultados en mi historial"}</button>
+      <button type="button" onClick={()=>void saveReviewed()} disabled={identity!=="signed_in"||!collectionDate||saveBusy||saved||(confirmed+deferred===0)} style={{...buttonStyle,background:primary,color:"white",opacity:identity==="signed_in"&&collectionDate&&!saveBusy&&!saved&&(confirmed+deferred)?1:.45}}>{saveBusy?"Guardando…":saved?"Guardado correctamente":"Guardar "+confirmed+" resultados y "+deferred+" pendientes"}</button>
       {saved&&<a href="/mi-analisis" style={{...buttonStyle,background:"#ede9fe",color:primary,textDecoration:"none"}}>Abrir Mis análisis →</a>}
     </div>
   </div>
@@ -187,6 +188,6 @@ export default function PdfPilotPage(){
    </div>
   </>}
  </section>}
- <section className="wa-explorer" style={{marginTop:15,padding:17}}><h2>Seguridad del piloto</h2><p className="wa-subtitle">PDF procesado temporalmente en servidor. Los resultados, las decisiones y el resumen quedan solo en memoria de esta pantalla. Solo se guardan en Supabase al confirmar la importación con sesión autenticada y fecha de muestra. No se generan diagnósticos ni se activan importaciones automáticas.</p></section>
+ <section className="wa-explorer" style={{marginTop:15,padding:17}}><h2>Seguridad del piloto</h2><p className="wa-subtitle">PDF procesado temporalmente en servidor. Los resultados, las decisiones y el resumen quedan solo en memoria de esta pantalla. Al guardar con sesión autenticada y fecha de muestra, las mediciones confirmadas se conservan en el historial y las lecturas pendientes en una bandeja privada. No se generan diagnósticos ni se activan importaciones automáticas.</p></section>
  </main>;
 }
