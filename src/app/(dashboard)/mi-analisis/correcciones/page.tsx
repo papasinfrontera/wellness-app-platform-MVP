@@ -1,6 +1,6 @@
 "use client";
 import {useEffect,useMemo,useState} from "react";
-import {useWellnessAuth} from "../../components/WellnessAuthProvider";
+import {useWellnessAuth} from "../../../components/WellnessAuthProvider";
 import {applyLabCorrections,type LabCorrection} from "@/lib/lab-corrections";
 import "../analisis.css";
 
