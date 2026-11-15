@@ -1,6 +1,5 @@
 "use client";
-import {useEffect,useState,useCallback} from "react";
-import {type SupabaseClient} from "@supabase/supabase-js";
+import {useEffect,useState} from "react";
 import {useWellnessAuth} from "../components/WellnessAuthProvider";
 
 type Profile={
@@ -27,34 +26,29 @@ function normalize(row:Record<string,unknown>):Profile{
  return v;
 }
 export default function Perfil(){
- const {client:db,user,status,refreshProfile}=useWellnessAuth();
+ const {client:db,user,status,identity,refreshProfile}=useWellnessAuth();
  const [profile,setProfile]=useState<Profile>(empty);
  const [step,setStep]=useState(1);
  const [overview,setOverview]=useState(true);
  const [loading,setLoading]=useState(true);
  const [busy,setBusy]=useState(false);
  const [note,setNote]=useState("");
- const [avatar,setAvatar]=useState<string|null>(null);
+ const avatar=identity.avatarUrl;
  const set=(k:keyof Profile,v:unknown)=>setProfile(p=>({...p,[k]:v}));
- const signed=useCallback(async(path:string|null)=>{
-   if(!db||!path){setAvatar(null);return}
-   const {data,error}=await db.storage.from("wellness-avatars").createSignedUrl(path,3600);
-   setAvatar(!error&&data?.signedUrl?data.signedUrl:null);
- },[db]);
  useEffect(()=>{
    if(!db||status==="error"){setLoading(false);return}
    if(status==="loading"){setLoading(true);return}
-   if(!user){setProfile(empty);setAvatar(null);setLoading(false);return}
+   if(!user){setProfile(empty);setLoading(false);return}
    let active=true;
    setLoading(true);
    void Promise.resolve(db.from("wellness_profiles").select("*").eq("user_id",user.id).maybeSingle()).then(res=>{
      if(!active)return;
-     if(!res.error&&res.data){const p=normalize(res.data as Record<string,unknown>);setProfile(p);setStep(p.completed_step);void signed(p.photo_path)}
+     if(!res.error&&res.data){const p=normalize(res.data as Record<string,unknown>);setProfile(p);setStep(p.completed_step)}
      if(res.error)setNote("No pudimos cargar tu perfil. Actualiza la página para intentarlo nuevamente.");
      setLoading(false);
    }).catch(()=>{if(active){setNote("No pudimos cargar tu perfil.");setLoading(false)}});
    return()=>{active=false};
- },[db,user,status,signed]);
+ },[db,user,status]);
  async function save(target=step){
    if(!db||!user||busy)return false;
    const height=profile.height_cm.trim()?Number(profile.height_cm):null;
@@ -99,7 +93,7 @@ export default function Perfil(){
   const old=profile.photo_path;
   const {error:dbError}=await db.from("wellness_profiles").upsert({user_id:user.id,photo_path:path,completed_step:step},{onConflict:"user_id"});
   if(dbError){await db.storage.from("wellness-avatars").remove([path]);setNote("No se pudo guardar la fotografía.");setBusy(false);return}
-  setProfile(p=>({...p,photo_path:path}));await signed(path);await refreshProfile();
+  setProfile(p=>({...p,photo_path:path}));await refreshProfile();
   if(old&&old!==path)await db.storage.from("wellness-avatars").remove([old]);
   setNote("Fotografía actualizada.");setBusy(false);
  }
@@ -110,7 +104,7 @@ export default function Perfil(){
   const {error}=await db.from("wellness_profiles").update({photo_path:null}).eq("user_id",user.id);
   if(error){setNote("No fue posible eliminar la fotografía.");setBusy(false);return}
   await db.storage.from("wellness-avatars").remove([old]);
-  setProfile(p=>({...p,photo_path:null}));setAvatar(null);await refreshProfile();setBusy(false);setNote("Fotografía eliminada.");
+  setProfile(p=>({...p,photo_path:null}));await refreshProfile();setBusy(false);setNote("Fotografía eliminada.");
  }
  const sections=[
   {step:1,title:"Datos personales",desc:"Identidad, fotografía y referencias personales",symbol:"◉"},
@@ -138,7 +132,7 @@ export default function Perfil(){
       <div style={{flex:1,minWidth:175}}>
        <strong style={{fontSize:22}}>{[profile.first_name,profile.last_name].filter(Boolean).join(" ")||"Mi cuenta"}</strong>
        <p style={{margin:"6px 0",fontSize:12,color:"var(--well-muted)"}}>Información privada de tu cuenta</p>
-       <span style={{fontSize:12,color:"#6750AC",fontWeight:700}}>Configuración guardada · Paso {profile.completed_step} de 5</span>
+       <span style={{fontSize:12,color:"#6750AC",fontWeight:700}}>Última sección guardada: {profile.completed_step} de 5</span>
       </div>
       <button className="well-button-secondary" type="button" onClick={()=>{setStep(1);setOverview(false)}}>Cambiar fotografía</button>
      </div>
