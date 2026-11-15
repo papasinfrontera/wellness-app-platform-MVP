@@ -75,17 +75,29 @@ export function AuthProvider({children}:{children:ReactNode}){
    mounted.current=true;
    void refreshAuth();
    if(!client)return()=>{mounted.current=false};
-   const {data:subscription}=client.auth.onAuthStateChange(event=>{
+   const {data:subscription}=client.auth.onAuthStateChange((event,session)=>{
      if(event==="PASSWORD_RECOVERY"){setRecoveryMode(true);queueMicrotask(()=>{if(mounted.current)void refreshAuth()});}
      else if(event==="SIGNED_OUT"){
        ++authRequest.current;++currentRequest.current;userId.current=null;
-       setUser(null);setIdentity(empty);setStatus("signed_out");
+       setUser(null);setIdentity(empty);setStatus("signed_out");setRecoveryMode(false);
      }else if(event==="SIGNED_IN"||event==="TOKEN_REFRESHED"||event==="USER_UPDATED"){
+       // Account switches must never briefly show the previous user's private content.
+       if(session?.user?.id&&session.user.id!==userId.current){
+         ++authRequest.current;++currentRequest.current;
+         userId.current=null;setUser(null);setIdentity(empty);setStatus("loading");
+         setRecoveryMode(false);
+       }
        // Do not await Supabase requests inside the auth change callback.
        queueMicrotask(()=>{if(mounted.current)void refreshAuth()});
      }
    });
-   const onVisible=()=>{if(document.visibilityState==="visible")void refreshAuth()};
+   const onVisible=()=>{
+     if(document.visibilityState==="visible"){
+       // Hide private dashboard content until a fresh server-side user check finishes.
+       setStatus("loading");
+       void refreshAuth();
+     }
+   };
    document.addEventListener("visibilitychange",onVisible);
    const refreshAvatar=setInterval(()=>{if(userId.current)void loadProfile(userId.current)},10*60*1000);
    return()=>{mounted.current=false;++authRequest.current;++currentRequest.current;subscription.subscription.unsubscribe();document.removeEventListener("visibilitychange",onVisible);clearInterval(refreshAvatar)};
