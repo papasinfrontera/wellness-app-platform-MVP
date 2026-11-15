@@ -22,8 +22,15 @@ function AccountMenu(){
  useEffect(()=>{if(menu.current)menu.current.open=false;setMessage("");setPhotoFailed(false)},[path,identity.avatarUrl]);
  useEffect(()=>{
   const close=(event:PointerEvent)=>{if(menu.current&&!menu.current.contains(event.target as Node))menu.current.open=false};
+  const keyClose=(event:KeyboardEvent)=>{
+    if(event.key==="Escape"&&menu.current?.open){
+      menu.current.open=false;
+      menu.current.querySelector("summary")?.focus();
+    }
+  };
   document.addEventListener("pointerdown",close);
-  return()=>document.removeEventListener("pointerdown",close);
+  document.addEventListener("keydown",keyClose);
+  return()=>{document.removeEventListener("pointerdown",close);document.removeEventListener("keydown",keyClose)};
  },[]);
  if(status==="loading")return <span className="wb-session-wait" role="status">Comprobando sesión…</span>;
  if(status==="error")return <button type="button" className="wb-session-retry" onClick={()=>void refreshAuth()}>Reintentar sesión</button>;
@@ -53,8 +60,8 @@ function AccountMenu(){
         <small>Sesión activa</small>
       </div>
       <a href="/mi-perfil" className="wb-account-option">◉ <span>Mi perfil</span></a>
-      <a href="/mi-perfil" className="wb-account-option">⚙ <span>Configuración del perfil</span></a>
-      <a href="/mi-perfil" className="wb-account-option">♧ <span>Privacidad y permisos</span></a>
+      <a href="/mi-perfil?seccion=1" className="wb-account-option">⚙ <span>Configuración del perfil</span></a>
+      <a href="/mi-perfil?seccion=5" className="wb-account-option">♧ <span>Privacidad y permisos</span></a>
       <div className="wb-account-rule"/>
       <button type="button" disabled={busy} onClick={()=>void logout()} className="wb-account-option wb-account-logout">↪ <span>{busy?"Cerrando sesión…":"Cerrar sesión"}</span></button>
       {message&&<p role="alert" className="wb-account-message">{message}</p>}
