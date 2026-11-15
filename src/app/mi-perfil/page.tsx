@@ -30,6 +30,7 @@ export default function Perfil(){
  const {client:db,user,status,refreshProfile}=useWellnessAuth();
  const [profile,setProfile]=useState<Profile>(empty);
  const [step,setStep]=useState(1);
+ const [overview,setOverview]=useState(true);
  const [loading,setLoading]=useState(true);
  const [busy,setBusy]=useState(false);
  const [note,setNote]=useState("");
@@ -86,6 +87,7 @@ export default function Perfil(){
    return true;
  }
  async function navigate(target:number){if(await save(target))setStep(target)}
+ async function backToOverview(){if(await save(step))setOverview(true)}
  async function upload(file?:File){
   if(!file||!db||!user||busy)return;
   if(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>2*1024*1024){setNote("Elige un archivo JPG, PNG o WebP de hasta 2 MB.");return}
@@ -110,18 +112,51 @@ export default function Perfil(){
   await db.storage.from("wellness-avatars").remove([old]);
   setProfile(p=>({...p,photo_path:null}));setAvatar(null);await refreshProfile();setBusy(false);setNote("Fotografía eliminada.");
  }
+ const sections=[
+  {step:1,title:"Datos personales",desc:"Identidad, fotografía y referencias personales",symbol:"◉"},
+  {step:2,title:"Medidas y actividad",desc:"Altura, peso y nivel de actividad",symbol:"◇"},
+  {step:3,title:"Mi salud",desc:"Antecedentes y datos declarados por ti",symbol:"♡"},
+  {step:4,title:"Mis hábitos",desc:"Sueño, alimentación y actividad habitual",symbol:"◎"},
+  {step:5,title:"Objetivos y privacidad",desc:"Preferencias, objetivos y consentimiento",symbol:"✳"}
+ ];
  const select=(key:keyof Profile,options:string[])=> <select style={inputStyle} value={String(profile[key]??"")} onChange={e=>set(key,e.target.value)}><option value="">Prefiero no indicar</option>{options.map(s=><option value={s} key={s}>{s==="low"?"Bajo":s==="moderate"?"Moderado":s==="high"?"Alto":s==="female"?"Femenino":s==="male"?"Masculino":s==="unspecified"?"No especificado":s}</option>)}</select>;
  const field=(name:string,key:keyof Profile,placeholder="")=><Field label={name}><input style={inputStyle} value={String(profile[key]??"")} placeholder={placeholder} maxLength={key==="nutrition_pattern"||key==="hydration"?300:100} onChange={e=>set(key,e.target.value)}/></Field>;
  const area=(name:string,key:keyof Profile)=><Field label={name}><textarea style={{...inputStyle,minHeight:83,resize:"vertical"}} value={String(profile[key]??"")} maxLength={2000} onChange={e=>set(key,e.target.value)}/></Field>;
  return <main className="well-shell" style={{maxWidth:980,paddingTop:45,paddingBottom:70}}>
   <span className="well-eyebrow">Mi cuenta · Perfil de bienestar</span>
-  <h1 className="well-title" style={{fontSize:"clamp(30px,4vw,44px)",marginBottom:12}}>Conozcamos lo que te hace único.</h1>
-  <p className="well-subtitle" style={{marginTop:0}}>Personaliza tu espacio con la información que quieras compartir. Puedes editarla cuando lo necesites.</p>
+  <h1 className="well-title" style={{fontSize:"clamp(30px,4vw,44px)",marginBottom:12}}>{overview?"Mi perfil": "Editar mi perfil"}</h1>
+  <p className="well-subtitle" style={{marginTop:0}}>Administra tu información personal en un solo lugar. Puedes actualizar cada sección cuando lo necesites.</p>
   {!db?<div className="well-card" style={{padding:24}}>El servicio no está disponible en este momento.</div>:
    loading?<div className="well-card" style={{padding:24}}>Preparando tu perfil…</div>:
    !user?<div className="well-card" style={{padding:24}}>Para editar tu perfil necesitas <a className="well-link" href="/sprint-6-2/persistencia">iniciar sesión</a>.</div>:
+   overview?<div style={{display:"grid",gap:18}}>
+    <section className="well-card" style={{padding:"24px clamp(18px,4vw,32px)"}}>
+     <div style={{display:"flex",alignItems:"center",gap:18,flexWrap:"wrap"}}>
+      <div style={{width:78,height:78,borderRadius:"50%",background:"#EEE8FF",overflow:"hidden",display:"grid",placeItems:"center",color:"#5B40F5",fontWeight:800,fontSize:24}}>
+       {avatar?<img alt="Fotografía de perfil" src={avatar} style={{width:"100%",height:"100%",objectFit:"cover"}}/>:<span aria-hidden="true">{(profile.first_name[0]||"")+ (profile.last_name[0]||"")||"◉"}</span>}
+      </div>
+      <div style={{flex:1,minWidth:175}}>
+       <strong style={{fontSize:22}}>{[profile.first_name,profile.last_name].filter(Boolean).join(" ")||"Mi cuenta"}</strong>
+       <p style={{margin:"6px 0",fontSize:12,color:"var(--well-muted)"}}>Información privada de tu cuenta</p>
+       <span style={{fontSize:12,color:"#6750AC",fontWeight:700}}>Configuración guardada · Paso {profile.completed_step} de 5</span>
+      </div>
+      <button className="well-button-secondary" type="button" onClick={()=>{setStep(1);setOverview(false)}}>Cambiar fotografía</button>
+     </div>
+    </section>
+    <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(235px,1fr))",gap:13}}>
+     {sections.map(item=><button key={item.step} type="button" onClick={()=>{setStep(item.step);setOverview(false)}} style={{textAlign:"left",cursor:"pointer",background:"#fff",border:"1px solid #E7E4EE",borderRadius:17,padding:20,minHeight:135,display:"grid",gap:9,color:"#211A33"}}>
+      <span style={{width:35,height:35,borderRadius:11,background:"#EEE8FF",color:"#5B40F5",display:"grid",placeItems:"center",fontSize:20}} aria-hidden="true">{item.symbol}</span>
+      <strong style={{fontSize:15}}>{item.title}</strong>
+      <span style={{fontSize:12,lineHeight:1.5,color:"#777084"}}>{item.desc}</span>
+      <span style={{color:"#5B40F5",fontWeight:700,fontSize:12}}>Editar sección →</span>
+     </button>)}
+    </div>
+    <p style={{fontSize:12,color:"var(--well-muted)"}}>Tus antecedentes y autorizaciones son privados y no se muestran en el resumen.</p>
+    {note&&<p role="status" aria-live="polite" className="well-info">{note}</p>}
+   </div>:
    <div className="well-card" style={{padding:"28px clamp(18px,4vw,38px)"}}>
-    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,marginBottom:17}}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,marginBottom:17,flexWrap:"wrap"}}>
+     <button className="well-button-secondary" type="button" onClick={()=>void backToOverview()} disabled={busy}>← Volver a mi perfil</button>
       <strong style={{fontSize:18}}>{steps[step-1]}</strong><span style={{fontSize:12,color:"var(--well-muted)"}}>Paso {step} de 5</span>
     </div>
     <div style={{display:"flex",gap:5,marginBottom:28}}>{steps.map((_,i)=><button key={i} type="button" disabled={busy} onClick={()=>void navigate(i+1)} aria-label={"Ir al paso "+(i+1)} style={{border:0,padding:0,flex:1,height:7,background:i<step?"#5B40F5":"#ECEAF2",borderRadius:20}} />)}</div>
