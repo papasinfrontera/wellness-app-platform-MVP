@@ -13,7 +13,8 @@ test("values and units are rendered separately and preserve user-owned data",()=
  assert.match(page,/resultLabel\(x\.value\)/);
  assert.match(page,/x\.unit\|\|"—"/);
  assert.match(page,/\.eq\("user_id",user\.id\)/);
- assert.match(page,/Confirmado · sin evaluar/);
+ assert.ok(page.includes('display==="sufficient"?"Suficiente"'),"State shows a qualified laboratory classification");
+ assert.ok(page.includes('display==="pending"'),"Unverified results remain pending rather than missing");
  assert.doesNotMatch(page,/x\.status==="approved"\?"Óptimo"/);
 });
 test("category list has eleven entries and one category assignment per indicator",()=>{
