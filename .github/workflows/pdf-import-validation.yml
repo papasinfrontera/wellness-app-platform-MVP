@@ -2,7 +2,7 @@ name: Wellness platform validation
 on:
   push:
     branches:
-      - sprint-6-8-k6-auth-security-accessibility
+      - sprint-6-8-j-duplicate-correction-audit
   workflow_dispatch:
 
 permissions:
@@ -28,6 +28,7 @@ jobs:
           node --test tests/auth-identity-header.test.mjs
           node --test tests/login-profile-hub.test.mjs
           node --test tests/auth-k6-audit.test.mjs
+          node --experimental-strip-types --test tests/lab-duplicate-corrections.test.mjs
       - name: Install dependencies for TypeScript verification
         run: npm install --ignore-scripts --no-package-lock --no-audit --no-fund
       - name: Type-check Next.js source
