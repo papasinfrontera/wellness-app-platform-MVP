@@ -14,7 +14,7 @@ test("metadata is saved with the same review transaction",()=>{
 test("metadata-only provenance protects patient information",()=>{
  assert.ok(sql.includes("enable row level security"));
  assert.ok(sql.includes("auth.uid()"));
- assert.ok(sql.includes("security invoker"));
+ assert.ok(!/SECURITY DEFINER/i.test(sql));
  assert.ok(sql.includes("unique (user_id, sha256, sample_date)")||sql.includes("unique(user_id,sha256,sample_date)"));
  assert.ok(history.includes("PDF original no se almacena"));
  assert.ok(!sql.includes("104,5 mg/dL"));
