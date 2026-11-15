@@ -43,7 +43,12 @@ export default function Perfil(){
    setLoading(true);
    void Promise.resolve(db.from("wellness_profiles").select("*").eq("user_id",user.id).maybeSingle()).then(res=>{
      if(!active)return;
-     if(!res.error&&res.data){const p=normalize(res.data as Record<string,unknown>);setProfile(p);setStep(p.completed_step)}
+     if(!res.error&&res.data){const p=normalize(res.data as Record<string,unknown>);setProfile(p);
+       const target=new URLSearchParams(window.location.search).get("seccion");
+       const requested=target?Number(target):null;
+       if(requested!==null&&Number.isInteger(requested)&&requested>=1&&requested<=5){
+         setStep(requested);setOverview(false);
+       }else setStep(p.completed_step);}
      if(res.error)setNote("No pudimos cargar tu perfil. Actualiza la página para intentarlo nuevamente.");
      setLoading(false);
    }).catch(()=>{if(active){setNote("No pudimos cargar tu perfil.");setLoading(false)}});
@@ -81,7 +86,7 @@ export default function Perfil(){
    return true;
  }
  async function navigate(target:number){if(await save(target))setStep(target)}
- async function backToOverview(){if(await save(step))setOverview(true)}
+ async function backToOverview(){if(await save(step)){window.history.replaceState(null,"","/mi-perfil");setOverview(true)}}
  async function upload(file?:File){
   if(!file||!db||!user||busy)return;
   if(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>2*1024*1024){setNote("Elige un archivo JPG, PNG o WebP de hasta 2 MB.");return}
