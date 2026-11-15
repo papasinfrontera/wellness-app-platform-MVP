@@ -37,6 +37,9 @@ export default function PdfPilotPage(){
  const [rowAction,setRowAction]=useState<"confirmed"|"deferred"|"excluded">("confirmed");
  const [bulkPreview,setBulkPreview]=useState(false);
  const [bulkMessage,setBulkMessage]=useState("");
+ const [duplicateCheck,setDuplicateCheck]=useState<"idle"|"loading"|"ready"|"error">("idle");
+ const [duplicateMatches,setDuplicateMatches]=useState<string[]>([]);
+
 
  const input=useRef<HTMLInputElement>(null);
  useEffect(()=>{let mounted=true;const u=process.env.NEXT_PUBLIC_SUPABASE_URL,k=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -68,8 +71,39 @@ export default function PdfPilotPage(){
    const value=Number(normalized);
    return normalized!==""&&Number.isFinite(value)?value:null;
  };
+ useEffect(()=>{
+  if(!finished||!file||!collectionDate||identity!=="signed_in"){
+    setDuplicateMatches([]);setDuplicateCheck("idle");return;
+  }
+  let live=true;
+  setDuplicateCheck("loading");setDuplicateMatches([]);
+  void(async()=>{
+   const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+   if(!url||!key)throw new Error("NO_CONFIG");
+   const db=createClient(url,key);
+   const {data:{user},error:authError}=await db.auth.getUser();
+   if(authError||!user)throw new Error("AUTH_REQUIRED");
+   const start=collectionDate+"T00:00:00.000Z";
+   const next=new Date(Date.parse(start)+86400000).toISOString();
+   const {data,error:readError}=await db.from("observations")
+    .select("source_key,indicators(code)").eq("user_id",user.id)
+    .eq("origin","laboratory").eq("status","approved")
+    .gte("observed_at",start).lt("observed_at",next).limit(500);
+   if(readError)throw readError;
+   const digest=await crypto.subtle.digest("SHA-256",await file.arrayBuffer());
+   const sha=[...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,"0")).join("");
+   const existing=new Set((data||[]).filter(item=>!item.source_key?.startsWith(sha+":")).flatMap(item=>{
+    const related=item.indicators as {code?:string}|{code?:string}[]|null;
+    const indicator=Array.isArray(related)?related[0]:related;
+    return indicator?.code?[indicator.code]:[];
+   }));
+   const duplicates=[...new Set(rows.filter(row=>row.decision==="confirmed"&&existing.has(row.indicatorCode)).map(row=>row.original))];
+   if(live){setDuplicateMatches(duplicates);setDuplicateCheck("ready")}
+  })().catch(()=>{if(live){setDuplicateCheck("error");setDuplicateMatches([])}});
+  return()=>{live=false};
+ },[finished,collectionDate,file,identity,rows]);
  async function saveReviewed(){
-   if(!file||!done||saveBusy||saved||!collectionDate||identity!=="signed_in")return;
+   if(!file||!done||saveBusy||saved||!collectionDate||identity!=="signed_in"||duplicateCheck!=="ready"||duplicateMatches.length>0)return;
    const confirmedRows=rows.filter(r=>r.decision==="confirmed");
    const invalid=confirmedRows.filter(r=>asNumber(r.value)===null).map(r=>r.original);
    if(invalid.length){setSaveNotice("No se pudo interpretar el valor de: "+invalid.join(", ")+". Vuelve a editar esos resultados antes de guardar.");return}
@@ -84,7 +118,7 @@ export default function PdfPilotPage(){
      const sha=[...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,"0")).join("");
      const payload=rows.map(r=>({decision:r.decision,code:r.indicatorCode,original:r.original,value:r.value,unit:r.unit,numeric_value:r.decision==="confirmed"?asNumber(r.value):null,kind:classifyUnmatchedReading(r.original,r.value)}));
      const {data,error}=await db.rpc("save_lab_review_v3",{p_rows:payload,p_observed_on:collectionDate,p_sha256:sha,p_filename:file.name,p_lab_name:laboratoryName.trim()||null});
-     if(error)throw new Error("No se pudo completar el guardado seguro. No se registró una importación parcial.");
+     if(error)throw new Error(error.message?.includes("POTENTIAL_DUPLICATE_SAME_DAY")?"Se detectó otro informe con un indicador de la misma fecha. Regresa a la revisión y excluye ese resultado, o utiliza el historial de correcciones. No se guardó ningún resultado de este lote.":"No se pudo completar el guardado seguro. No se registró una importación parcial.");
      setSaved(true);
      const result=data as {confirmed_saved?:number;confirmed_existing?:number;pending_saved?:number;pending_existing?:number;excluded?:number}|null;
      setSaveNotice("Documento registrado. Guardado seguro: "+(result?.confirmed_saved??0)+" resultados nuevos, "+(result?.confirmed_existing??0)+" ya existentes; "+(result?.pending_saved??0)+" lecturas pendientes nuevas y "+(result?.pending_existing??0)+" pendientes existentes. "+(result?.excluded??0)+" excluidas por decisión explícita.");
@@ -256,11 +290,21 @@ export default function PdfPilotPage(){
     <label style={{display:"grid",gap:5,fontSize:12,fontWeight:700}}>Fecha de toma de muestra
       <input type="date" aria-label="Fecha de toma de muestra" max={new Date().toISOString().slice(0,10)} value={collectionDate} onChange={e=>setCollectionDate(e.target.value)} disabled={saved} style={{...fieldStyle,maxWidth:280}}/>
     </label>
+    {collectionDate&&identity==="signed_in"&&<>
+     {duplicateCheck==="loading"&&<p role="status" style={{fontSize:12,color:"#665777"}}>Comprobando posibles duplicados de esa fecha…</p>}
+     {duplicateCheck==="error"&&<p role="alert" style={{fontSize:12,color:"#923C41"}}>No se pudo comprobar el historial. Por seguridad, no se habilitará el guardado hasta verificar los duplicados.</p>}
+     {duplicateCheck==="ready"&&duplicateMatches.length>0&&<div role="alert" style={{padding:12,marginTop:12,background:"#FFF7E9",border:"1px solid #EAD5A3",borderRadius:10,fontSize:12,color:"#684825"}}>
+       <strong>Posibles duplicados ({duplicateMatches.length})</strong>
+       <p>Ya hay resultados del mismo indicador y fecha provenientes de otro registro: {duplicateMatches.join(", ")}.</p>
+       <p>Regresa a la revisión y excluye las filas repetidas. Si se trata de una rectificación, utiliza <a href="/mi-analisis/correcciones" style={{color:"#5B40F5",fontWeight:800}}>Historial de correcciones</a>. No se sobrescribirán resultados automáticamente.</p>
+      </div>}
+     {duplicateCheck==="ready"&&duplicateMatches.length===0&&<p role="status" style={{fontSize:11,color:"#407349"}}>Sin coincidencias de indicadores de otros informes en la fecha seleccionada. El mismo archivo se puede reimportar sin duplicar sus registros.</p>}
+    </>}
     {identity==="signed_out"&&<p style={{fontSize:12,color:"#97521d"}}>Para guardar necesitas <a href="/sprint-6-2/persistencia">iniciar sesión</a> con tu cuenta.</p>}
     {identity==="loading"&&<p style={{fontSize:12}}>Verificando sesión…</p>}
     {saveNotice&&<p role="status" style={{fontSize:12,color:saved?"#286c39":"#9b303b"}}>{saveNotice}</p>}
     <div style={{display:"flex",gap:9,flexWrap:"wrap",marginTop:12}}>
-      <button type="button" onClick={()=>void saveReviewed()} disabled={identity!=="signed_in"||!collectionDate||saveBusy||saved||(confirmed+deferred===0)} style={{...buttonStyle,background:primary,color:"white",opacity:identity==="signed_in"&&collectionDate&&!saveBusy&&!saved&&(confirmed+deferred)?1:.45}}>{saveBusy?"Guardando…":saved?"Guardado correctamente":"Guardar "+confirmed+" resultados y "+deferred+" pendientes"}</button>
+      <button type="button" onClick={()=>void saveReviewed()} disabled={identity!=="signed_in"||!collectionDate||duplicateCheck!=="ready"||duplicateMatches.length>0||saveBusy||saved||(confirmed+deferred===0)} style={{...buttonStyle,background:primary,color:"white",opacity:identity==="signed_in"&&collectionDate&&duplicateCheck==="ready"&&duplicateMatches.length===0&&!saveBusy&&!saved&&(confirmed+deferred)?1:.45}}>{saveBusy?"Guardando…":saved?"Guardado correctamente":"Guardar "+confirmed+" resultados y "+deferred+" pendientes"}</button>
       {saved&&deferred>0&&<a href="/mi-analisis/pendientes" style={{...buttonStyle,background:"#fff0df",color:"#8d5819",textDecoration:"none"}}>Ver lecturas pendientes →</a>}
       {saved&&<a href="/mi-analisis" style={{...buttonStyle,background:"#ede9fe",color:primary,textDecoration:"none"}}>Abrir Mis análisis →</a>}
     </div>
