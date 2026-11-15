@@ -19,17 +19,18 @@ export function identifyPdfIndicator(original:string,unit:string,catalog:Referen
   const k=normalizePdfLabel(original);
   const hint:Record<string,string>={
    "globulos rojos":"REF-023","globulos blancos":"REF-025",
-   "neutrofilos":"REF-049","linfocitos":"REF-043","monocitos":"REF-047"
+   "neutrofilos":"REF-049","linfocitos":"REF-043","monocitos":"REF-047",
+   "volumen plaquetario medio":"REF-046","glicemia basal":"REF-017"
   };
   const code=hint[k]||"";
   const suggested=catalog.find(x=>x.code===code);
-  if(code&&suggested)return {status:"review" as const,code,name:suggested.name,reason:"Correspondencia orientativa: revisar si la unidad y el tipo de recuento son compatibles."};
+  if(code&&suggested)return {status:"review" as const,code,name:suggested.name,reason:code==="REF-017"?"Glucemia basal: posible glucosa medida; confirmar ayuno, muestra y método.":"Correspondencia orientativa: revisar magnitud, muestra, método y unidad."};
   return {status:"review" as const,code:"",name:"",reason:"Etiqueta sin coincidencia exacta; requiere identificación manual."};
  }
  const x=matched[0],code=x.code||"";
  if(["REF-111","REF-112"].includes(code))return {status:"review" as const,code,name:x.name,reason:"PSA libre: diferenciar porcentaje de concentración, método y unidad."};
  if(rejectContext.test(original))return {status:"review" as const,code,name:x.name,reason:"La etiqueta contiene información adicional de muestra o método; revisar equivalencia."};
- if(!unit)return {status:"review" as const,code,name:x.name,reason:"No se identificó unidad; comprobar tipo de prueba."};
+ if(!unit){if(code==="REF-028")return {status:"candidate" as const,code,name:x.name,reason:"Cociente sin unidad; comprobar que sea la relación albúmina/globulina indicada."};return {status:"review" as const,code,name:x.name,reason:"No se identificó unidad; comprobar tipo de prueba."};}
  if(["REF-069","REF-081","REF-085","REF-086","REF-121","REF-122","REF-127"].includes(code))return {status:"review" as const,code,name:x.name,reason:"Prueba dependiente de determinación, fracción, muestra u hora; confirmar con el PDF."};
  return {status:"candidate" as const,code,name:x.name,reason:"Coincidencia textual única. Confirmar muestra, método, unidad y fecha antes de utilizar."};
 }
