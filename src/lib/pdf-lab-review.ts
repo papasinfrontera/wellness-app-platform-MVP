@@ -20,11 +20,17 @@ export function identifyPdfIndicator(original:string,unit:string,catalog:Referen
   const hint:Record<string,string>={
    "globulos rojos":"REF-023","globulos blancos":"REF-025",
    "neutrofilos":"REF-049","linfocitos":"REF-043","monocitos":"REF-047",
-   "volumen plaquetario medio":"REF-046","glicemia basal":"REF-017"
+   "volumen plaquetario medio":"REF-046","glicemia basal":"REF-017",
+   "transaminasa oxalacetica tgo ast":"REF-030",
+   "transaminasa oxalacetica tgo":"REF-030",
+   "transaminasa oxalacetica":"REF-030",
+   "transaminasa piruvica tgp alt":"REF-026",
+   "transaminasa piruvica tgp":"REF-026",
+   "transaminasa piruvica":"REF-026"
   };
   const code=hint[k]||"";
   const suggested=catalog.find(x=>x.code===code);
-  if(code&&suggested)return {status:"review" as const,code,name:suggested.name,reason:code==="REF-017"?"Glucemia basal: posible glucosa medida; confirmar ayuno, muestra y método.":"Correspondencia orientativa: revisar magnitud, muestra, método y unidad."};
+  if(code&&suggested)return {status:"review" as const,code,name:suggested.name,reason:code==="REF-017"?"Glucemia basal: posible glucosa medida; confirmar ayuno, muestra y método.":(["REF-030","REF-026"].includes(code)?"Sinónimo de transaminasa detectado; confirmar AST/ALT, tipo de muestra y unidad antes de aprobar.":"Correspondencia orientativa: revisar magnitud, muestra, método y unidad.")};
   return {status:"review" as const,code:"",name:"",reason:"Etiqueta sin coincidencia exacta; requiere identificación manual."};
  }
  const x=matched[0],code=x.code||"";
@@ -78,7 +84,10 @@ export function analyzeExtractedText(text:string,catalog:ReferenceIndicator[],ma
  for(let i=0;i<lines.length;i++){
   if(rows.length>=maxRows)break;
   const line=lines[i];
-  if(line.length>400||line.length<4||/^(?:N\.?º|N\.?°|Indicador|Resultado|Valor de referencia|Área|Nombre:|Edad:)/i.test(line))continue;
+  if(line.length>400||line.length<4||/^(?:N\\.?º|N\\.?°|Indicador|Resultado|Valor de referencia|Área|Nombre:|Edad:)/i.test(line))continue;
+  // Non-clinical report totals ("Total: 24", "25 Total: 24") are metadata, not readings.
+  // Do NOT suppress "Total de celularidad", which is a real complementary line.
+  if(/^\\s*(?:\\d{1,3}\\s+)?total\\s*:\\s*\\d+(?:\\s*(?:indicadores|pruebas|analisis|resultados))?\\s*$/i.test(line))continue;
   const parsed=parseRow(line);
   if(!parsed||parsed.original.length>120)continue;
   const {original,value,unit}=parsed,match=identifyPdfIndicator(original,unit,catalog);
