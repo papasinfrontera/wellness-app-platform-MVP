@@ -84,10 +84,9 @@ export function analyzeExtractedText(text:string,catalog:ReferenceIndicator[],ma
  for(let i=0;i<lines.length;i++){
   if(rows.length>=maxRows)break;
   const line=lines[i];
-  if(line.length>400||line.length<4||/^(?:N\\.?º|N\\.?°|Indicador|Resultado|Valor de referencia|Área|Nombre:|Edad:)/i.test(line))continue;
-  // Non-clinical report totals ("Total: 24", "25 Total: 24") are metadata, not readings.
-  // Do NOT suppress "Total de celularidad", which is a real complementary line.
-  if(/^\\s*(?:\\d{1,3}\\s+)?total\\s*:\\s*\\d+(?:\\s*(?:indicadores|pruebas|analisis|resultados))?\\s*$/i.test(line))continue;
+  if(line.length>400||line.length<4||/^(?:N\.?º|N\.?°|Indicador|Resultado|Valor de referencia|Área|Nombre:|Edad:)/i.test(line))continue;
+  // A report count is metadata, not a lab observation. "Total de celularidad" stays.
+  if(/^\s*(?:\d{1,3}\s+)?total\s*:\s*\d+(?:\s*(?:indicadores|pruebas|analisis|resultados))?\s*$/i.test(line))continue;
   const parsed=parseRow(line);
   if(!parsed||parsed.original.length>120)continue;
   const {original,value,unit}=parsed,match=identifyPdfIndicator(original,unit,catalog);
