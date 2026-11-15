@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
-import {analyzeExtractedText,identifyPdfIndicator,normalizePdfLabel} from "../src/lib/pdf-lab-review.ts";
+import {analyzeExtractedText,identifyPdfIndicator,normalizePdfLabel,classifyUnmatchedReading} from "../src/lib/pdf-lab-review.ts";
 const catalog=JSON.parse(readFileSync("src/app/(dashboard)/mi-analisis/catalog-reference.json","utf8"));
 test("digital lab rows recognized with no persistence",()=>{
  const r=analyzeExtractedText("Glucose 92 mg/dL\nFerritin 85 ng/mL\nApoB 88 mg/dL",catalog);
@@ -162,4 +162,41 @@ test("6.8-D non-equivalent readings stay unmapped rather than silently discarded
  assert.equal(parsed.rows.length,2);
  assert.ok(parsed.rows.every(r=>r.status==="review"));
  assert.ok(parsed.rows.every(r=>r.indicatorCode===""));
+});
+
+test("6.8-H preserves non-equivalent Urea, VLDL and conventional PCR for review",()=>{
+ for(const [label,unit,reason] of [
+  ["Urea","mg/dL",/no equivale a nitrógeno ureico/],
+  ["Colesterol VLDL","mg/dL",/no es LDL/],
+  ["Proteína C reactiva (PCR)","mg/L",/no asociar a PCR ultrasensible/]
+ ]){
+  const match=identifyPdfIndicator(label,unit,catalog);
+  assert.equal(match.status,"review");
+  assert.equal(match.code,"");
+  assert.match(match.reason,reason);
+ }
+});
+test("6.8-H preserves the qualitative and complementary kinds independently of clinical states",()=>{
+ assert.equal(classifyUnmatchedReading("Proteína C reactiva (PCR)","Negativo, < 6"),"qualitative");
+ assert.equal(classifyUnmatchedReading("Cultivo","No reactivo"),"qualitative");
+ assert.equal(classifyUnmatchedReading("Total de celularidad","100"),"complementary");
+ assert.equal(classifyUnmatchedReading("Urea","31.2"),"unmapped");
+ assert.equal(classifyUnmatchedReading("Colesterol VLDL","42.2"),"unmapped");
+});
+test("6.8-H 24 genuine readings retained; administrative total excluded",()=>{
+ const base=Array.from({length:19},(_,i)=>[String(i+1),"Glucose","90 mg/dL","65–110 mg/dL"].join("\t"));
+ const extra=[
+  "20\tUrea\t31,20 mg/dL",
+  "21\tColesterol VLDL\t42,20 mg/dL",
+  "22\tTransaminasa oxalacética (TGO/AST)\t19,20 U/L",
+  "23\tTransaminasa pirúvica (TGP/ALT)\t24,20 U/L",
+  "24\tTotal de celularidad\t100 %",
+  "25\tTotal:\t24"
+ ];
+ const parsed=analyzeExtractedText([...base,...extra].join("\n"),catalog);
+ assert.equal(parsed.rows.length,24);
+ assert.equal(parsed.rows.at(-3).indicatorCode,"REF-030");
+ assert.equal(parsed.rows.at(-2).indicatorCode,"REF-026");
+ assert.equal(parsed.rows.at(-1).original,"Total de celularidad");
+ assert.ok(parsed.rows.every(x=>!/^Total:/.test(x.original)));
 });
