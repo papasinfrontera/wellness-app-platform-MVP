@@ -1,6 +1,7 @@
 "use client";
 import {useEffect,useState,useCallback} from "react";
-import {createClient,type SupabaseClient,type User} from "@supabase/supabase-js";
+import {type SupabaseClient} from "@supabase/supabase-js";
+import {useWellnessAuth} from "../components/WellnessAuthProvider";
 
 type Profile={
  first_name:string;last_name:string;birth_date:string;sex_for_references:string;country:string;timezone:string;
@@ -13,7 +14,6 @@ const steps=["Identidad","Medidas","Mi salud","Mis hábitos","Objetivos"];
 const goals=["Dormir mejor","Mejorar mi energía","Salud metabólica","Salud cardiovascular","Rendimiento físico","Prevención","Longevidad","Reducir el estrés"];
 const inputStyle={width:"100%",padding:"13px 14px",border:"1px solid #dddde8",borderRadius:11,fontSize:14,color:"#161620",background:"white"} as const;
 function Field({label,children}:{label:string;children:React.ReactNode}){return <label style={{display:"grid",gap:7,fontSize:13,fontWeight:600,color:"#161620"}}>{label}{children}</label>}
-function makeClient():SupabaseClient|null{const u=process.env.NEXT_PUBLIC_SUPABASE_URL,k=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;return u&&k?createClient(u,k):null}
 function normalize(row:Record<string,unknown>):Profile{
  const v={...empty};
  for(const k of Object.keys(empty) as (keyof Profile)[]){
@@ -27,8 +27,7 @@ function normalize(row:Record<string,unknown>):Profile{
  return v;
 }
 export default function Perfil(){
- const [db]=useState(makeClient);
- const [user,setUser]=useState<User|null>(null);
+ const {client:db,user,status,refreshProfile}=useWellnessAuth();
  const [profile,setProfile]=useState<Profile>(empty);
  const [step,setStep]=useState(1);
  const [loading,setLoading]=useState(true);
@@ -42,20 +41,19 @@ export default function Perfil(){
    setAvatar(!error&&data?.signedUrl?data.signedUrl:null);
  },[db]);
  useEffect(()=>{
-   if(!db){setLoading(false);return}
+   if(!db||status==="error"){setLoading(false);return}
+   if(status==="loading"){setLoading(true);return}
+   if(!user){setProfile(empty);setAvatar(null);setLoading(false);return}
    let active=true;
-   void db.auth.getUser().then(async({data,error})=>{
-    if(!active)return;
-    if(error||!data.user){setLoading(false);return}
-    setUser(data.user);
-    const res=await db.from("wellness_profiles").select("*").eq("user_id",data.user.id).maybeSingle();
-    if(!active)return;
-    if(!res.error&&res.data){const p=normalize(res.data as Record<string,unknown>);setProfile(p);setStep(p.completed_step);void signed(p.photo_path)}
-    if(res.error)setNote("No pudimos cargar tu perfil. Actualiza la página para intentarlo nuevamente.");
-    setLoading(false);
-   }).catch(()=>{if(active)setLoading(false)});
-   return ()=>{active=false};
- },[db,signed]);
+   setLoading(true);
+   void db.from("wellness_profiles").select("*").eq("user_id",user.id).maybeSingle().then(res=>{
+     if(!active)return;
+     if(!res.error&&res.data){const p=normalize(res.data as Record<string,unknown>);setProfile(p);setStep(p.completed_step);void signed(p.photo_path)}
+     if(res.error)setNote("No pudimos cargar tu perfil. Actualiza la página para intentarlo nuevamente.");
+     setLoading(false);
+   }).catch(()=>{if(active){setNote("No pudimos cargar tu perfil.");setLoading(false)}});
+   return()=>{active=false};
+ },[db,user,status,signed]);
  async function save(target=step){
    if(!db||!user||busy)return false;
    const height=profile.height_cm.trim()?Number(profile.height_cm):null;
@@ -83,6 +81,7 @@ export default function Perfil(){
    setBusy(false);
    if(error){setNote("No fue posible guardar el perfil. Revisa la información e inténtalo de nuevo.");return false}
    setProfile(p=>({...p,ai_consent_at:consentTime,completed_step:target}));
+   await refreshProfile();
    setNote(target===5?"Tu perfil se ha guardado. Puedes actualizarlo cuando quieras.":"Tus cambios se guardaron.");
    return true;
  }
@@ -98,7 +97,7 @@ export default function Perfil(){
   const old=profile.photo_path;
   const {error:dbError}=await db.from("wellness_profiles").upsert({user_id:user.id,photo_path:path,completed_step:step},{onConflict:"user_id"});
   if(dbError){await db.storage.from("wellness-avatars").remove([path]);setNote("No se pudo guardar la fotografía.");setBusy(false);return}
-  setProfile(p=>({...p,photo_path:path}));await signed(path);
+  setProfile(p=>({...p,photo_path:path}));await signed(path);await refreshProfile();
   if(old&&old!==path)await db.storage.from("wellness-avatars").remove([old]);
   setNote("Fotografía actualizada.");setBusy(false);
  }
@@ -109,7 +108,7 @@ export default function Perfil(){
   const {error}=await db.from("wellness_profiles").update({photo_path:null}).eq("user_id",user.id);
   if(error){setNote("No fue posible eliminar la fotografía.");setBusy(false);return}
   await db.storage.from("wellness-avatars").remove([old]);
-  setProfile(p=>({...p,photo_path:null}));setAvatar(null);setBusy(false);setNote("Fotografía eliminada.");
+  setProfile(p=>({...p,photo_path:null}));setAvatar(null);await refreshProfile();setBusy(false);setNote("Fotografía eliminada.");
  }
  const select=(key:keyof Profile,options:string[])=> <select style={inputStyle} value={String(profile[key]??"")} onChange={e=>set(key,e.target.value)}><option value="">Prefiero no indicar</option>{options.map(s=><option value={s} key={s}>{s==="low"?"Bajo":s==="moderate"?"Moderado":s==="high"?"Alto":s==="female"?"Femenino":s==="male"?"Masculino":s==="unspecified"?"No especificado":s}</option>)}</select>;
  const field=(name:string,key:keyof Profile,placeholder="")=><Field label={name}><input style={inputStyle} value={String(profile[key]??"")} placeholder={placeholder} maxLength={key==="nutrition_pattern"||key==="hydration"?300:100} onChange={e=>set(key,e.target.value)}/></Field>;
