@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run test:pilot && npm run test:catalog128 && npm run test:audit && npm run test:pdf && npm run test:analysis && next build",
+    "build": "npm run test:pilot && npm run test:catalog128 && npm run test:audit && npm run test:pdf && npm run test:analysis && npm run test:categories && next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "catalog:refresh": "node scripts/extract-public-reference-catalog.mjs",
@@ -20,7 +20,8 @@
     "test:audit": "node --test tests/indicator-terminology-audit.test.mjs",
     "audit:catalog": "node scripts/audit-indicator-catalog.mjs",
     "test:pdf": "node --experimental-strip-types --test tests/pdf-lab-review.test.mjs",
-    "test:analysis": "node --test tests/analysis-six-columns.test.mjs"
+    "test:analysis": "node --test tests/analysis-six-columns.test.mjs",
+    "test:categories": "node --experimental-strip-types --test tests/analysis-categories.test.mjs"
   },
   "dependencies": {
     "next": "^15.5.0",
