@@ -11,8 +11,8 @@ test("intervals join the user's authenticated observations only",()=>{
 test("source intervals remain separate from unapproved clinical labels",()=>{
  assert.ok(page.includes('source_kind!=="user_supplied_pdf"'));
  assert.ok(page.includes('pdfReference.lower_bound'));
- assert.ok(page.includes('Confirmado · sin evaluar'));
- assert.ok(page.includes('Esta comparación no equivale a los estados Óptimo o Suficiente'));
+ assert.ok(page.includes('Pendiente de evaluación'));
+ assert.ok(page.includes('La etiqueta «Suficiente» en este piloto'));
 });
 test("database references have owner RLS and no client write permission",()=>{
  assert.match(migration,/enable row level security/);
