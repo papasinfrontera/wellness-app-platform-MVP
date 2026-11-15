@@ -1,0 +1,26 @@
+name: PDF importer validation
+on:
+  push:
+    branches:
+      - sprint-6-8-h-unmatched-recovery-audit
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pdf-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify PDF parser and safety
+        run: |
+          npm run test:pdf
+          npm run test:pdf-unmatched
+          npm run test:pdf-reconcile
+          npm run test:pdf-bulk
