@@ -57,7 +57,7 @@ export default function Analysis(){
  <span className="wa-result-name">{m.name}</span>
  <span className="wa-result-value">{x?resultLabel(x.value):"—"}</span>
  <span className="wa-result-unit">{x?(x.unit||"—"):"—"}</span>
- <span><span className={"wa-result-status"+(x?.status==="approved"?" wa-result-status-confirmed":"")}>{x?(x.status==="approved"?"Confirmado · sin evaluar":"En revisión"):"Sin resultados"}</span></span>
+ <span><span className={"wa-result-status"+(x?.status==="approved"?" wa-result-status-confirmed":"")}>{x?(x.status==="approved"?"Confirmado · sin evaluar":"En revisión"):"Sin resultado"}</span></span>
  <span className="wa-result-category">{category>=0?groups[category]:"Pendiente de categoría"}</span>
  <span className="wa-result-chevron" aria-hidden="true">›</span>
  </a>})}
