@@ -224,7 +224,7 @@ export default function PdfPilotPage(){
   if(!done)return;setFinished(true);window.scrollTo({top:0,behavior:"smooth"});
  };
  return <main className="wa-page">
- <a className="wa-back" href="/mi-analisis">‹ Volver a Mis análisis</a><div style={{marginTop:9}}><a href="/mi-analisis/pendientes" style={{fontSize:12,color:primary,fontWeight:750}}>Ver lecturas pendientes guardadas →</a></div>
+ <a className="wa-back" href="/mi-analisis">‹ Volver a Mis análisis</a><div style={{marginTop:9}}><a href="/mi-analisis/pendientes" style={{fontSize:12,color:primary,fontWeight:750}}>Ver lecturas pendientes guardadas →</a> <span style={{margin:"0 8px",color:"#b6accd"}}>·</span><a href="/mi-analisis/archivos" style={{fontSize:12,color:primary,fontWeight:750}}>Historial de archivos →</a></div>
  <span className="wa-eyebrow">SPRINT 6.6-A.2 · REVISIÓN DE PDF</span>
  <h1 className="wa-title">Importa tus análisis</h1>
  <p className="wa-subtitle">Identifica, corrige y clasifica los resultados del PDF. La revisión es temporal; al guardar, las mediciones confirmadas entran en tu historial y las lecturas sin equivalencia quedan en una bandeja privada de pendientes.</p>
