@@ -27,6 +27,10 @@ export default function PdfPilotPage(){
  const [collectionDate,setCollectionDate]=useState("");
  const [saveBusy,setSaveBusy]=useState(false),[saveNotice,setSaveNotice]=useState(""),[saved,setSaved]=useState(false);
  const [identity,setIdentity]=useState<"loading"|"signed_in"|"signed_out">("loading");
+ const [recognized,setRecognized]=useState<string[]>([]);
+ const [reconcileMessage,setReconcileMessage]=useState("");
+ const [recognizedDate,setRecognizedDate]=useState("");
+
  const input=useRef<HTMLInputElement>(null);
  useEffect(()=>{let mounted=true;const u=process.env.NEXT_PUBLIC_SUPABASE_URL,k=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
    if(!u||!k){setIdentity("signed_out");return}
@@ -80,15 +84,65 @@ export default function PdfPilotPage(){
    }catch(e){setSaveNotice(e instanceof Error?e.message:"No fue posible guardar los análisis.");}
    finally{setSaveBusy(false)}
  }
- const reset=()=>{setFile(null);setReport(null);setRows([]);setSaved(false);setSaveNotice("");setCollectionDate("");setError("");setSearch({});setFinished(false);setBulkReviewed(false);setFilter("all");if(input.current)input.current.value=""};
+ const reset=()=>{setFile(null);setReport(null);setRows([]);setRecognized([]);setRecognizedDate("");setReconcileMessage("");setSaved(false);setSaveNotice("");setCollectionDate("");setError("");setSearch({});setFinished(false);setBulkReviewed(false);setFilter("all");if(input.current)input.current.value=""};
  async function analyze(){
   if(!file)return;
   if(file.size>5*1024*1024){setError("El tamaño máximo es 5 MB.");return}
-  setBusy(true);setError("");setReport(null);setRows([]);setFinished(false);setBulkReviewed(false);
-  try{const body=new FormData();body.append("file",file);const response=await fetch("/api/lab-pdf-preview",{method:"POST",body,cache:"no-store"});const json=await response.json();
+  setBusy(true);setError("");setReport(null);setRows([]);setRecognized([]);setRecognizedDate("");setReconcileMessage("");setFinished(false);setBulkReviewed(false);
+  try{
+   const body=new FormData();body.append("file",file);
+   const response=await fetch("/api/lab-pdf-preview",{method:"POST",body,cache:"no-store"});
+   const json=await response.json();
    if(!response.ok)throw new Error(json.error||"No se pudo analizar el PDF");
-   setReport(json);setRows((json.rows||[]).map((x:PdfRow)=>({...x,decision:"pending"})));
-  }catch(e){setError(e instanceof Error?e.message:"Error al leer PDF");}finally{setBusy(false)}
+   const parsed:Row[]=(json.rows||[]).map((x:PdfRow)=>({...x,decision:"pending"}));
+   setReport(json);setRows(parsed);
+   if(identity!=="signed_in")return;
+   const u=process.env.NEXT_PUBLIC_SUPABASE_URL,k=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+   if(!u||!k)return;
+   // Only the exact previously uploaded PDF fingerprint can reuse a prior review.
+   const digest=await crypto.subtle.digest("SHA-256",await file.arrayBuffer());
+   const sha=[...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,"0")).join("");
+   const db=createClient(u,k),{data:{user},error:authError}=await db.auth.getUser();
+   if(authError||!user)return;
+   const {data:stored,error:readError}=await db.from("observations")
+    .select("value,unit,raw_label,source_key,observed_at,indicators(code)")
+    .eq("user_id",user.id).eq("origin","laboratory").eq("status","approved")
+    .like("source_key",sha+":%").limit(200);
+   if(readError){setReconcileMessage("No se pudo comprobar el historial. Puedes revisar las 22 filas manualmente.");return;}
+   type Existing={value:number;unit:string;raw_label:string|null;observed_at:string;indicators:{code:string}|{code:string}[]|null};
+   const existing=(stored||[]) as Existing[];
+   const normalizeUnit=(v:string)=>v.normalize("NFKC").replace(/\\s+/g,"").replace(/[μµ]/g,"u").toLowerCase();
+   const matches=parsed.filter(row=>{
+    const numeric=asNumber(row.value);
+    if(!row.indicatorCode||numeric===null)return false;
+    return existing.some(saved=>{
+      const indicators=Array.isArray(saved.indicators)?saved.indicators[0]:saved.indicators;
+      return indicators?.code===row.indicatorCode
+        &&Number(saved.value)===numeric
+        &&normalizeUnit(saved.unit)===normalizeUnit(row.unit)
+        &&normalize(saved.raw_label||"")===normalize(row.original);
+    });
+   });
+   if(matches.length===0){setReconcileMessage("No se encontró una revisión previa de este mismo archivo. Revisa las filas antes de importar.");return;}
+   const dates=[...new Set(existing.map(x=>x.observed_at.slice(0,10)))];
+   if(dates.length!==1){setReconcileMessage("Hay fechas distintas para este archivo. Se requiere revisión manual.");return;}
+   setRecognized(matches.map(x=>x.id));
+   setRecognizedDate(dates[0]);
+   setReconcileMessage("Se reconocieron "+matches.length+" resultados idénticos ya guardados para este PDF. Puedes recuperar sus decisiones y revisar las lecturas restantes.");
+  }catch(e){
+   if(!report){setError(e instanceof Error?e.message:"Error al leer PDF");}
+   else setReconcileMessage("La comprobación de resultados anteriores no se completó; los resultados extraídos siguen disponibles.");
+  }finally{setBusy(false)}
+ }
+ function applyPriorReview(){
+  if(!recognized.length||!recognizedDate||!report)return;
+  const ids=new Set(recognized);
+  setRows(previous=>previous.map(r=>({
+   ...r,decision:ids.has(r.id)?"confirmed":r.decision==="pending"?"deferred":r.decision
+  })));
+  setCollectionDate(recognizedDate);
+  setReconcileMessage("Decisiones recuperadas: "+recognized.length+" resultados existentes y "+(rows.length-recognized.length)+" lecturas pendientes de comprobar. Revisa el resumen antes de guardar.");
+  setRecognized([]);
  }
  function edit(i:number,patch:Partial<Row>){setBulkReviewed(false);setRows(prev=>prev.map((r,j)=>j===i?{...r,...patch,decision:"pending"}:r))}
  function decide(i:number,decision:Decision){setRows(prev=>prev.map((r,j)=>j===i?{...r,decision}:r))}
@@ -106,7 +160,7 @@ export default function PdfPilotPage(){
  <p className="wa-subtitle">Identifica, corrige y clasifica los resultados del PDF. La revisión es temporal; al guardar, las mediciones confirmadas entran en tu historial y las lecturas sin equivalencia quedan en una bandeja privada de pendientes.</p>
  <section className="wa-explorer" style={{marginTop:17,padding:18}}>
   <h2>1. Selecciona el PDF</h2><p className="wa-subtitle">Máximo 5 MB y 12 páginas · PDF digital con texto seleccionable · Sin OCR</p>
-  <input ref={input} type="file" accept=".pdf,application/pdf" aria-label="Archivo PDF de laboratorio" style={{...fieldStyle,marginTop:12}} onChange={e=>{setFile(e.target.files?.[0]||null);setRows([]);setReport(null);setFinished(false);setError("")}}/>
+  <input ref={input} type="file" accept=".pdf,application/pdf" aria-label="Archivo PDF de laboratorio" style={{...fieldStyle,marginTop:12}} onChange={e=>{setFile(e.target.files?.[0]||null);setRows([]);setRecognized([]);setRecognizedDate("");setReconcileMessage("");setReport(null);setFinished(false);setError("")}}/>
   <div style={{display:"flex",gap:9,flexWrap:"wrap",marginTop:12,alignItems:"center"}}>
    <button type="button" disabled={!file||busy} onClick={analyze} style={{...buttonStyle,background:primary,color:"#fff",opacity:!file||busy?.5:1}}>{busy?"Extrayendo…":"Extraer resultados del PDF"}</button>
    <button type="button" onClick={reset} style={{...buttonStyle,background:"#f0edfb",color:primary}}>Limpiar sesión</button>
@@ -143,6 +197,10 @@ export default function PdfPilotPage(){
    <h2>2. Revisa los resultados</h2>
    <p className="wa-subtitle">{report.pages} página(s) · {report.linesExamined} líneas examinadas · {rows.length} resultados extraídos. Las propuestas son textuales, no validaciones clínicas.</p>
    {report.warning&&<p style={{fontSize:12,color:"#594880",background:"#f5f0ff",padding:10,borderRadius:10,marginTop:11}}>{report.warning}</p>}
+   {reconcileMessage&&<div role="status" style={{marginTop:10,padding:12,border:"1px solid #e0d9f3",background:"#f8f5ff",borderRadius:10,fontSize:12,color:"#463578"}}>
+    {reconcileMessage}
+    {recognized.length>0&&<div style={{marginTop:9}}><button type="button" onClick={applyPriorReview} style={{...buttonStyle,background:primary,color:"#fff"}}>Recuperar {recognized.length} confirmaciones del historial</button></div>}
+   </div>}
    {report.truncated&&<p role="alert" style={{color:"#8e3e22",fontSize:12}}>Extracción incompleta: máximo 80 filas. No se puede finalizar.</p>}
    <div style={{position:"sticky",top:8,zIndex:5,background:"#fff",border:"1px solid #e6e1f4",borderRadius:12,padding:12,marginTop:12,boxShadow:"0 3px 12px #21134a0d"}}>
     <div style={{display:"flex",gap:9,flexWrap:"wrap",justifyContent:"space-between",alignItems:"center"}}>
