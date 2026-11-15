@@ -271,8 +271,6 @@ export default function PdfPilotPage(){
     </div>
     <div style={{background:"#eeeaf7",height:7,borderRadius:8,marginTop:9,overflow:"hidden"}}><div style={{height:"100%",width:(rows.length?100*(confirmed+deferred+excluded)/rows.length:0)+"%",background:primary}}/></div>
     <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:12,alignItems:"center"}}>
-     <label style={{fontSize:11,display:"flex",alignItems:"center",gap:5}}><input type="checkbox" checked={bulkReviewed} onChange={e=>setBulkReviewed(e.target.checked)}/> Revisé las coincidencias candidatas</label><button type="button" disabled={!bulkReviewed} onClick={confirmCandidates} style={{...buttonStyle,background:"#eeeaff",color:primary,opacity:bulkReviewed?1:.45}}>Confirmar candidatos revisados</button>
-     <button type="button" disabled={!unmappedToReview} onClick={deferUnmapped} style={{...buttonStyle,background:"#fff0df",color:"#885216",opacity:unmappedToReview?1:.5}}>Marcar sin equivalencia como pendientes ({unmappedToReview})</button>
      <button type="button" onClick={summary} disabled={!done} style={{...buttonStyle,background:primary,color:"white",opacity:done?1:.4}}>Finalizar revisión</button>
      <label style={{fontSize:11,fontWeight:700,marginLeft:"auto"}}>Mostrar <select aria-label="Filtrar resultados" value={filter} onChange={e=>setFilter(e.target.value)} style={{...fieldStyle,width:"auto",marginLeft:5}}><option value="all">Todos</option><option value="pending">Por revisar</option><option value="candidates">Candidatos</option><option value="confirmed">Confirmados</option><option value="deferred">Pendientes declarados</option><option value="excluded">Excluidos</option></select></label>
     </div>
