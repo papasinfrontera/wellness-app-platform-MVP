@@ -639,67 +639,158 @@
   },
   {
     "id": 65,
-    "name": "C-Peptide"
+    "name": "Péptido C",
+    "name_en": "C-Peptide",
+    "aliases": [
+      "Péptido-C",
+      "C-péptido"
+    ],
+    "code": "REF-065"
   },
   {
     "id": 66,
-    "name": "Carbon Dioxide"
+    "name": "Dióxido de carbono total (CO₂)",
+    "name_en": "Carbon Dioxide",
+    "aliases": [
+      "CO2 total",
+      "Bicarbonato total (CO₂ total)"
+    ],
+    "code": "REF-066"
   },
   {
     "id": 67,
-    "name": "Cholesterol / HDL Ratio"
+    "name": "Relación colesterol total/HDL",
+    "name_en": "Cholesterol / HDL Ratio",
+    "aliases": [
+      "Cociente colesterol/HDL",
+      "Colesterol total/HDL"
+    ],
+    "code": "REF-067"
   },
   {
     "id": 68,
-    "name": "Copper (serum)"
+    "name": "Cobre sérico",
+    "name_en": "Copper (serum)",
+    "aliases": [
+      "Cobre en suero",
+      "Cobre (suero)"
+    ],
+    "code": "REF-068"
   },
   {
     "id": 69,
-    "name": "Cortisol"
+    "name": "Cortisol",
+    "name_en": "Cortisol",
+    "aliases": [
+      "Cortisol sérico"
+    ],
+    "code": "REF-069"
   },
   {
     "id": 70,
-    "name": "Creatine Kinase (CK)"
+    "name": "Creatina quinasa (CK)",
+    "name_en": "Creatine Kinase (CK)",
+    "aliases": [
+      "CK",
+      "Creatinfosfoquinasa (CPK)",
+      "CPK"
+    ],
+    "code": "REF-070"
   },
   {
     "id": 71,
-    "name": "Cystatin C"
+    "name": "Cistatina C",
+    "name_en": "Cystatin C",
+    "aliases": [
+      "Cistatina C sérica"
+    ],
+    "code": "REF-071"
   },
   {
     "id": 72,
-    "name": "Cystatin C eGFR"
+    "name": "Filtrado glomerular estimado por cistatina C (eGFR)",
+    "name_en": "Cystatin C eGFR",
+    "aliases": [
+      "TFGe por cistatina C",
+      "eGFR por cistatina C"
+    ],
+    "code": "REF-072"
   },
   {
     "id": 73,
-    "name": "DHEA Sulfate"
+    "name": "Sulfato de dehidroepiandrosterona (DHEA-S)",
+    "name_en": "DHEA Sulfate",
+    "aliases": [
+      "DHEA-S",
+      "Sulfato de DHEA"
+    ],
+    "code": "REF-073"
   },
   {
     "id": 74,
-    "name": "Dihydrotestosterone (DHT)"
+    "name": "Dihidrotestosterona (DHT)",
+    "name_en": "Dihydrotestosterone (DHT)",
+    "aliases": [
+      "DHT"
+    ],
+    "code": "REF-074"
   },
   {
     "id": 75,
-    "name": "Docosahexaenoic Acid (DHA)"
+    "name": "Ácido docosahexaenoico (DHA)",
+    "name_en": "Docosahexaenoic Acid (DHA)",
+    "aliases": [
+      "DHA"
+    ],
+    "code": "REF-075"
   },
   {
     "id": 76,
-    "name": "Docosapentaenoic Acid (DPA)"
+    "name": "Ácido docosapentaenoico (DPA)",
+    "name_en": "Docosapentaenoic Acid (DPA)",
+    "aliases": [
+      "DPA"
+    ],
+    "code": "REF-076"
   },
   {
     "id": 77,
-    "name": "Eicosapentaenoic Acid (EPA)"
+    "name": "Ácido eicosapentaenoico (EPA)",
+    "name_en": "Eicosapentaenoic Acid (EPA)",
+    "aliases": [
+      "EPA"
+    ],
+    "code": "REF-077"
   },
   {
     "id": 78,
-    "name": "Estimated Glomerular Filtration Rate (eGFR)"
+    "name": "Tasa de filtración glomerular estimada (eGFR)",
+    "name_en": "Estimated Glomerular Filtration Rate (eGFR)",
+    "aliases": [
+      "TFGe",
+      "Filtrado glomerular estimado",
+      "eGFR"
+    ],
+    "code": "REF-078"
   },
   {
     "id": 79,
-    "name": "Estradiol"
+    "name": "Estradiol",
+    "name_en": "Estradiol",
+    "aliases": [
+      "Estradiol (E2)",
+      "E2"
+    ],
+    "code": "REF-079"
   },
   {
     "id": 80,
-    "name": "Ferritin"
+    "name": "Ferritina",
+    "name_en": "Ferritin",
+    "aliases": [
+      "Ferritina sérica"
+    ],
+    "code": "REF-080"
   },
   {
     "id": 81,
