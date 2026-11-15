@@ -953,67 +953,153 @@
   },
   {
     "id": 97,
-    "name": "LDL Medium"
+    "name": "Partículas LDL medianas",
+    "name_en": "LDL Medium",
+    "aliases": [
+      "LDL medianas"
+    ],
+    "code": "REF-097"
   },
   {
     "id": 98,
-    "name": "LDL Particle Number"
+    "name": "Número de partículas LDL (LDL-P)",
+    "name_en": "LDL Particle Number",
+    "aliases": [
+      "LDL-P",
+      "Concentración de partículas LDL"
+    ],
+    "code": "REF-098"
   },
   {
     "id": 99,
-    "name": "LDL Pattern"
+    "name": "Patrón de partículas LDL",
+    "name_en": "LDL Pattern",
+    "aliases": [
+      "Patrón LDL"
+    ],
+    "code": "REF-099"
   },
   {
     "id": 100,
-    "name": "LDL Peak Size"
+    "name": "Tamaño de pico de partículas LDL",
+    "name_en": "LDL Peak Size",
+    "aliases": [
+      "Tamaño de pico LDL"
+    ],
+    "code": "REF-100"
   },
   {
     "id": 101,
-    "name": "LDL Small"
+    "name": "Partículas LDL pequeñas",
+    "name_en": "LDL Small",
+    "aliases": [
+      "LDL pequeñas"
+    ],
+    "code": "REF-101"
   },
   {
     "id": 102,
-    "name": "Leptin"
+    "name": "Leptina",
+    "name_en": "Leptin",
+    "aliases": [
+      "Leptina sérica"
+    ],
+    "code": "REF-102"
   },
   {
     "id": 103,
-    "name": "Linoleic Acid (LA)"
+    "name": "Ácido linoleico (LA)",
+    "name_en": "Linoleic Acid (LA)",
+    "aliases": [
+      "Ácido linoleico",
+      "LA"
+    ],
+    "code": "REF-103"
   },
   {
     "id": 104,
-    "name": "Lipoprotein-Associated Phospholipase A₂ (LP-PLA₂)"
+    "name": "Fosfolipasa A₂ asociada a lipoproteínas (Lp-PLA₂)",
+    "name_en": "Lipoprotein-Associated Phospholipase A₂ (LP-PLA₂)",
+    "aliases": [
+      "Lp-PLA₂",
+      "Fosfolipasa A2 asociada a lipoproteínas"
+    ],
+    "code": "REF-104"
   },
   {
     "id": 105,
-    "name": "Luteinizing Hormone (LH)"
+    "name": "Hormona luteinizante (LH)",
+    "name_en": "Luteinizing Hormone (LH)",
+    "aliases": [
+      "LH",
+      "Lutropina"
+    ],
+    "code": "REF-105"
   },
   {
     "id": 106,
-    "name": "Magnesium"
+    "name": "Magnesio",
+    "name_en": "Magnesium",
+    "aliases": [
+      "Magnesio sérico"
+    ],
+    "code": "REF-106"
   },
   {
     "id": 107,
-    "name": "Myeloperoxidase (MPO)"
+    "name": "Mieloperoxidasa (MPO)",
+    "name_en": "Myeloperoxidase (MPO)",
+    "aliases": [
+      "MPO"
+    ],
+    "code": "REF-107"
   },
   {
     "id": 108,
-    "name": "Omega-3 Total"
+    "name": "Omega-3 total",
+    "name_en": "Omega-3 Total",
+    "aliases": [
+      "Ácidos grasos omega-3 totales"
+    ],
+    "code": "REF-108"
   },
   {
     "id": 109,
-    "name": "Omega-6 Total"
+    "name": "Omega-6 total",
+    "name_en": "Omega-6 Total",
+    "aliases": [
+      "Ácidos grasos omega-6 totales"
+    ],
+    "code": "REF-109"
   },
   {
     "id": 110,
-    "name": "Omega-6/Omega-3 Ratio"
+    "name": "Relación omega-6/omega-3",
+    "name_en": "Omega-6/Omega-3 Ratio",
+    "aliases": [
+      "Cociente omega-6/omega-3"
+    ],
+    "code": "REF-110"
   },
   {
     "id": 111,
-    "name": "PSA %, Free"
+    "name": "Porcentaje de PSA libre",
+    "name_en": "PSA %, Free",
+    "aliases": [
+      "PSA libre (%)",
+      "Relación PSA libre/total (%)"
+    ],
+    "code": "REF-111"
   },
   {
     "id": 112,
-    "name": "PSA, Free"
+    "name": "Antígeno prostático específico libre (PSA libre)",
+    "name_en": "PSA, Free",
+    "aliases": [
+      "PSA libre",
+      "PSA no unido"
+    ],
+    "code": "REF-112"
   },
   {
     "id": 113,
