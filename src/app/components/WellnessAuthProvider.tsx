@@ -10,6 +10,7 @@ const Context=createContext<AuthContextValue|null>(null);
 
 let browserClient:SupabaseClient|null|undefined;
 export function getWellnessClient():SupabaseClient|null{
+ if(typeof window==="undefined")return null;
  if(browserClient!==undefined)return browserClient;
  const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
  const key=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
