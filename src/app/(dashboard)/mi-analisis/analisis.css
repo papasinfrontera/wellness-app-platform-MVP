@@ -47,3 +47,38 @@
 .wa-result-status-confirmed{background:#eeeafd;color:#51408e}
 @media(min-width:1180px){.wa-catalog-shell{grid-template-columns:210px minmax(0,1fr)}}
 @media(max-width:900px){.wa-results{min-width:800px}}
+
+/* Sprint 6.6-C layout hardening — prevent header/row misalignment and cropped names.
+   Desktop cells share a single template. Horizontal scrolling is a small-screen fallback only. */
+.wa-catalog-shell>.wa-explorer{min-width:0;overflow:hidden}
+.wa-explorer .wa-table-scroll{width:100%;max-width:100%;overflow-x:auto;overflow-y:auto;scrollbar-gutter:stable}
+.wa-explorer .wa-results{width:100%;min-width:0}
+.wa-explorer .wa-result-head,.wa-explorer .wa-result-row{
+ box-sizing:border-box;
+ display:grid;
+ width:100%;
+ grid-template-columns:minmax(0,2.4fr) minmax(72px,.68fr) minmax(74px,.7fr) minmax(130px,1.2fr) minmax(135px,1.25fr) 19px;
+ gap:10px;
+ align-items:center;
+ margin:0;
+ padding:12px 14px;
+}
+.wa-explorer .wa-result-head>*,.wa-explorer .wa-result-row>*{
+ min-width:0;
+ max-width:100%;
+ justify-self:stretch;
+ overflow-wrap:normal;
+}
+.wa-explorer .wa-result-row{min-height:52px;line-height:1.35}
+.wa-explorer .wa-result-name{white-space:normal;overflow-wrap:break-word}
+.wa-explorer .wa-result-category{white-space:normal;overflow-wrap:break-word}
+.wa-explorer .wa-result-chevron{justify-self:end;align-self:center;text-align:right;line-height:1}
+.wa-explorer .wa-result-unit,.wa-explorer .wa-result-value{white-space:nowrap}
+.wa-explorer .wa-result-head{position:sticky;top:0;z-index:1}
+@media(min-width:1200px){
+ .wa-catalog-shell{grid-template-columns:215px minmax(0,1fr)}
+ .wa-explorer .wa-results{min-width:0}
+}
+@media(max-width:1199px){
+ .wa-explorer .wa-results{min-width:800px}
+}
