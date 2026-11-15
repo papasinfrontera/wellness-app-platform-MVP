@@ -4,7 +4,7 @@ import {createClient} from "@supabase/supabase-js";
 import catalogData from "./catalog-reference.json";
 import "./analisis.css";
 type Item={id:number;name:string;name_en?:string;aliases?:string[];code?:string};
-type Result={code:string;value:number;unit:string};
+type Result={code:string;value:number;unit:string;status:string};
 const catalog=catalogData as Item[];
 const groups=["Sangre","Salud cerebral","Salud digestiva","Corazón y circulación","Hormonas","Inflamación","Riñones","Salud metabólica","Vitaminas y nutrientes","Estrés y energía","Exposición y toxinas"];
 const patterns=[/hemoglobin|hematocrit|blood cell|platelet|corpuscular|basophil|eosinophil|lymphocyte|monocyte|neutrophil|red cell|reticulocyte|rdw|mcv|mch|rbc|wbc/i,/vitamin b12|folate|homocysteine|thyroid/i,/albumin|globulin|bilirubin|alkaline phosphatase|aminotransferase|total protein|fib-4|ggt/i,/cholesterol|apolipoprotein|atherogenic|lipoprotein|triglyceride|ldl|hdl|homocysteine/i,/testosterone|estradiol|cortisol|dhea|thyroid|tsh|free t3|free t4|prolactin|progesterone|shbg/i,/crp|inflammation|immune|myeloperoxidase|mpo/i,/creatinine|blood urea|bun\/|uric acid|potassium|sodium|chloride|osmolality|cystatin|egfr/i,/glucose|a1c|insulin|homa|fructosamine|triglyceride|atherogenic/i,/vitamin|calcium|magnesium|iron|ferritin|folate|potassium|phosphorus|zinc|selenium|iodine/i,/cortisol|dhea|thyroid|glucose|testosterone|creatine kinase/i,/lead|mercury|cadmium|arsenic|toxin/i];
@@ -19,14 +19,14 @@ export default function Analysis(){
   const db=createClient(url,key),{data:{user},error}=await db.auth.getUser();
   if(!active)return;
   if(error||!user){setAuth("denied");return}
-  const [p,o]=await Promise.all([db.from("wellness_profiles").select("first_name").eq("user_id",user.id).maybeSingle(),db.from("observations").select("value,unit,observed_at,indicators(code,name_es)").eq("user_id",user.id).order("observed_at",{ascending:false}).limit(3000)]);
+  const [p,o]=await Promise.all([db.from("wellness_profiles").select("first_name").eq("user_id",user.id).maybeSingle(),db.from("observations").select("value,unit,status,observed_at,indicators(code,name_es)").eq("user_id",user.id).order("observed_at",{ascending:false}).limit(3000)]);
   if(!active)return;
   if(p.error||o.error){setAuth("error");return}
   setFirst(p.data?.first_name||"");
   const found:Result[]=(o.data||[]).flatMap((v):Result[]=>{
-   const raw=v as unknown as {value:number;unit:string;indicators:{code?:string;name_es?:string}|{code?:string;name_es?:string}[]|null};
+   const raw=v as unknown as {value:number;unit:string;status:string;indicators:{code?:string;name_es?:string}|{code?:string;name_es?:string}[]|null};
    const marker=Array.isArray(raw.indicators)?raw.indicators[0]:raw.indicators;
-   return marker?.code&&typeof raw.value==="number"?[{code:marker.code,value:raw.value,unit:raw.unit||""}]:[];
+   return marker?.code&&typeof raw.value==="number"?[{code:marker.code,value:raw.value,unit:raw.unit||"",status:raw.status||"pending_review"}]:[];
   });
   setResults(found);setAuth("ready");
  })().catch(()=>{if(active)setAuth("error")});return()=>{active=false}},[]);
@@ -44,7 +44,7 @@ export default function Analysis(){
  <input aria-label="Buscar indicadores" className="wa-search" placeholder="⌕  Buscar: glucosa, glicemia, HbA1c, ApoB…" value={search} onChange={e=>{setSearch(e.target.value);setPage(1)}}/>
  <div className="wa-pills">{filters.map((f,i)=><button key={f} className={"wa-pill"+(filter===i?" on":"")} disabled={i>=2&&i<=4} title={i>=2&&i<=4?"Clasificación pendiente de validación científica":undefined} onClick={()=>{setFilter(i);setPage(1)}}>{f} ({counts[i]===null?"—":counts[i]})</button>)}</div>
  <div className="wa-tabletop"><span className="wa-caption">{rows.length?((current-1)*15+1)+"–"+Math.min(rows.length,current*15)+" de "+rows.length:"0"} indicadores</span><select className="wa-sort" aria-label="Ordenar" value={reverse?"za":"az"} onChange={e=>{setReverse(e.target.value==="za");setPage(1)}}><option value="az">Orden: A–Z</option><option value="za">Orden: Z–A</option></select></div>
- <div className="wa-table-scroll"><div role="table" className="wa-results"><div role="row" className="wa-result-head"><span>Indicador</span><span>Resultado</span><span>Estado</span><span>Posición actual</span><span/></div>{rows.slice((current-1)*15,current*15).map(m=>{const x=resultMap.get("REF-"+String(m.id).padStart(3,"0"));return <a key={m.id} className="wa-result-row" style={{textDecoration:"none"}} href={"/mi-analisis/"+m.id}><span className="wa-result-name">{m.name}</span><span>{x?<><strong>{x.value}</strong><span className="wa-result-unit">{x.unit}</span></>:"—"}</span><span className="wa-result-status">{x?"En revisión":"Sin resultados"}</span><span className="wa-range-empty">Sin escala verificada</span><span className="wa-result-chevron">›</span></a>})}{rows.length===0&&<div className="wa-result-empty">No hay indicadores que coincidan con el filtro.</div>}</div></div>
+ <div className="wa-table-scroll"><div role="table" className="wa-results"><div role="row" className="wa-result-head"><span>Indicador</span><span>Resultado</span><span>Estado</span><span>Posición actual</span><span/></div>{rows.slice((current-1)*15,current*15).map(m=>{const x=resultMap.get("REF-"+String(m.id).padStart(3,"0"));return <a key={m.id} className="wa-result-row" style={{textDecoration:"none"}} href={"/mi-analisis/"+m.id}><span className="wa-result-name">{m.name}</span><span>{x?<><strong>{x.value}</strong><span className="wa-result-unit">{x.unit}</span></>:"—"}</span><span className="wa-result-status">{x?(x.status==="approved"?"Confirmado":"En revisión"):"Sin resultados"}</span><span className="wa-range-empty">Sin escala verificada</span><span className="wa-result-chevron">›</span></a>})}{rows.length===0&&<div className="wa-result-empty">No hay indicadores que coincidan con el filtro.</div>}</div></div>
  <div className="wa-paginator"><button disabled={current<=1} onClick={()=>setPage(p=>Math.max(1,p-1))}>‹ Anterior</button><span>Página {current} de {pages}</span><button disabled={current>=pages} onClick={()=>setPage(p=>Math.min(pages,p+1))}>Siguiente ›</button></div>
  </section></div><p className="wa-disclaimer">{role==="Médico"?"La modalidad médica de Doctor Connect todavía no permite acceso a otros pacientes. ":""}Los nombres provienen del catálogo aprobado de la demo; los resultados se obtienen exclusivamente de la cuenta autenticada. Sin una importación validada, se mostrarán como “Sin resultados”. No se inventan rangos ni calificaciones clínicas.</p></>
  </main>
