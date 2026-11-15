@@ -28,8 +28,8 @@ export async function POST(request:Request){
     for(const item of content.items){
       if(typeof item.str!=="string"||!item.str.trim())continue;
       const x=item.transform[4],y=item.transform[5];
-      if(lastY===null||Math.abs(lastY-y)>2){if(output)output+="\\n";lastRight=null;}
-      else if(lastRight!==null)output+=x-lastRight>12?"\\t":" ";
+      if(lastY===null||Math.abs(lastY-y)>2){if(output)output+="\n";lastRight=null;}
+      else if(lastRight!==null)output+=x-lastRight>12?"\t":" ";
       output+=item.str;
       lastY=y;lastRight=x+item.width;
     }
