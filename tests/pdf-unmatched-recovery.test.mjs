@@ -10,7 +10,7 @@ test("unmapped, qualitative and complementary readings are distinct",()=>{
  assert.match(parser,/export function classifyUnmatchedReading/);
  assert.match(parser,/total de celularidad/);
  assert.match(parser,/proteina c reactiva/);
- assert.match(importer,/save_lab_review_v2/);
+ assert.match(importer,/save_lab_review_v3/);
 });
 test("numeric and pending rows saved together without fabricating catalog observations",()=>{
  assert.match(importer,/rows\.map\(r=>\(\{decision:r\.decision/);
