@@ -114,3 +114,28 @@ test("PDF layout renderer emits real newlines and tab separators, not literal sl
  assert.ok(!route.includes('output+="\\\\n"'));
  assert.ok(!route.includes('?"\\\\t":" "'));
 });
+
+
+test("A.2 candidate mapping helps without auto-approval",()=>{
+ for(const [label,unit,code] of [["Volumen plaquetario medio","fL","REF-046"],["Glicemia basal","mg/dL","REF-017"]]){
+  const p=identifyPdfIndicator(label,unit,catalog);
+  assert.equal(p.code,code);
+  assert.equal(p.status,"review");
+ }
+});
+test("A.2 dimensionless albumin globulin ratio recognized as a review candidate",()=>{
+ const p=identifyPdfIndicator("Relación albúmina/globulina","",catalog);
+ assert.equal(p.code,"REF-028");
+ assert.equal(p.status,"candidate");
+});
+test("A.2 never assigns Urea to BUN or generic CRP to hs-CRP",()=>{
+ for(const [label,unit,wrong] of [["Urea","mg/dL","REF-004"],["Proteína C reactiva (PCR)","mg/L","REF-020"]]){
+ const p=identifyPdfIndicator(label,unit,catalog);
+ assert.notEqual(p.code,wrong);assert.equal(p.status,"review");
+ }
+});
+test("A.2 interface has finalization and explicit pending classification with no DB writes",()=>{
+ const page=readFileSync("src/app/(dashboard)/mi-analisis/importar-pdf/page.tsx","utf8");
+ assert.match(page,/Finalizar revisión/);assert.match(page,/Pendiente/);assert.match(page,/Volver a editar/);
+ assert.doesNotMatch(page,/\.from\(["']observations["']\)|\.insert\(|\.upsert\(/);
+});
