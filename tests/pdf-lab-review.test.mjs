@@ -105,3 +105,12 @@ test("regression: standard CRP must not be mapped to high sensitivity CRP",()=>{
  assert.equal(r.rows[0].status,"review");
  assert.notEqual(r.rows[0].indicatorCode,"REF-020");
 });
+
+
+test("PDF layout renderer emits real newlines and tab separators, not literal slash escapes",()=>{
+ const route=readFileSync("src/app/api/lab-pdf-preview/route.ts","utf8");
+ assert.ok(route.includes('output+="\\n"'.replace("\\\\n","\\n")));
+ assert.ok(route.includes('?"\\t":" "'.replace("\\\\t","\\t")));
+ assert.ok(!route.includes('output+="\\\\n"'));
+ assert.ok(!route.includes('?"\\\\t":" "'));
+});
