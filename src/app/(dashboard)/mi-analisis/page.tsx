@@ -4,6 +4,7 @@ import {createClient} from "@supabase/supabase-js";
 import catalogData from "./catalog-reference.json";
 import {ANALYSIS_CATEGORIES,categoryForId} from "@/lib/indicator-categories";
 import "./analisis.css";
+import {applyLabCorrections,type LabCorrection} from "@/lib/lab-corrections";
 type Item={id:number;name:string;name_en?:string;aliases?:string[];code?:string};
 type Result={id:string;code:string;value:number;unit:string;status:string};
 type Reference={observation_id:string;lower_bound:number;upper_bound:number;unit:string;checked_against_pdf:boolean;source_kind:string};
@@ -24,16 +25,16 @@ export default function Analysis(){
   const db=createClient(url,key),{data:{user},error}=await db.auth.getUser();
   if(!active)return;
   if(error||!user){setAuth("denied");return}
-  const [p,o,refs]=await Promise.all([db.from("wellness_profiles").select("first_name").eq("user_id",user.id).maybeSingle(),db.from("observations").select("id,value,unit,status,observed_at,indicators(code,name_es)").eq("user_id",user.id).order("observed_at",{ascending:false}).limit(3000),db.from("observation_reference_intervals").select("observation_id,lower_bound,upper_bound,unit,checked_against_pdf,source_kind").eq("user_id",user.id).limit(3000)]);
+  const [p,o,refs,corrections]=await Promise.all([db.from("wellness_profiles").select("first_name").eq("user_id",user.id).maybeSingle(),db.from("observations").select("id,value,unit,status,observed_at,indicators(code,name_es)").eq("user_id",user.id).order("observed_at",{ascending:false}).limit(3000),db.from("observation_reference_intervals").select("observation_id,lower_bound,upper_bound,unit,checked_against_pdf,source_kind").eq("user_id",user.id).limit(3000),db.from("lab_observation_corrections").select("id,observation_id,corrected_value,corrected_unit,reason,created_at").eq("user_id",user.id).limit(3000)]);
   if(!active)return;
-  if(p.error||o.error){setAuth("error");return}
+  if(p.error||o.error||corrections.error){setAuth("error");return}
   setFirst(p.data?.first_name||"");
   const found:Result[]=(o.data||[]).flatMap((v):Result[]=>{
    const raw=v as unknown as {id:string;value:number;unit:string;status:string;indicators:{code?:string;name_es?:string}|{code?:string;name_es?:string}[]|null};
    const marker=Array.isArray(raw.indicators)?raw.indicators[0]:raw.indicators;
    return marker?.code&&typeof raw.value==="number"?[{id:raw.id,code:marker.code,value:raw.value,unit:raw.unit||"",status:raw.status||"pending_review"}]:[];
   });
-  setResults(found);setReferenceRows(!refs.error?(refs.data||[]) as Reference[]:[]);setAuth("ready");
+  setResults(applyLabCorrections(found,(corrections.data||[]) as LabCorrection[]));setReferenceRows(!refs.error?(refs.data||[]) as Reference[]:[]);setAuth("ready");
  })().catch(()=>{if(active)setAuth("error")});return()=>{active=false}},[]);
  const resultMap=useMemo(()=>{const m=new Map<string,Result>();for(const r of results)if(!m.has(r.code))m.set(r.code,r);return m},[results]);
  const measured=useMemo(()=>catalog.filter(x=>resultMap.has("REF-"+String(x.id).padStart(3,"0"))).length,[resultMap]);
@@ -66,7 +67,7 @@ export default function Analysis(){
  const pages=Math.max(1,Math.ceil(rows.length/15)),current=Math.min(page,pages);
  const counts=[catalog.length,auth==="ready"?measured:null,auth==="ready"?0:null,auth==="ready"?referenceSummary.inside:null,auth==="ready"?referenceSummary.outside:null,auth==="ready"?catalog.length-measured:null];
  const tiles=[["◈",catalog.length,"Indicadores","Catálogo de referencia"],["◉",auth==="ready"?measured:"—","Con resultado","Datos de tu cuenta"],["✓","—","Óptimos","Reglas óptimas pendientes"],["●",auth==="ready"?referenceSummary.inside:"—","Suficientes","Según referencia del informe"],["⚠",auth==="ready"?referenceSummary.outside:"—","Fuera de rango","Según referencia del informe"],["—",auth==="ready"?catalog.length-measured:"—","Sin resultado","Sin mediciones"]];
- return <main className="wa-page"><div className="wa-hero"><span className="wa-eyebrow">MIS ANÁLISIS DE SANGRE</span><h1 className="wa-title">{first?first+", tus resultados cuentan una historia.":"Tus resultados cuentan una historia."}</h1><p className="wa-subtitle">Descubre cómo evolucionan tus indicadores.</p><a href="/mi-analisis/importar-pdf" style={{display:"inline-flex",alignItems:"center",gap:8,marginTop:12,padding:"10px 15px",background:"#5B40F5",color:"white",borderRadius:10,fontSize:12,fontWeight:800,textDecoration:"none"}}>↑ Importar análisis desde PDF · piloto</a></div>
+ return <main className="wa-page"><div className="wa-hero"><span className="wa-eyebrow">MIS ANÁLISIS DE SANGRE</span><h1 className="wa-title">{first?first+", tus resultados cuentan una historia.":"Tus resultados cuentan una historia."}</h1><p className="wa-subtitle">Descubre cómo evolucionan tus indicadores.</p><a href="/mi-analisis/importar-pdf" style={{display:"inline-flex",alignItems:"center",gap:8,marginTop:12,padding:"10px 15px",background:"#5B40F5",color:"white",borderRadius:10,fontSize:12,fontWeight:800,textDecoration:"none"}}>↑ Importar análisis desde PDF · piloto</a> <a href="/mi-analisis/correcciones" style={{display:"inline-flex",alignItems:"center",marginTop:12,marginLeft:8,padding:"10px 15px",background:"#F2EEFF",color:"#5B40F5",borderRadius:10,fontSize:12,fontWeight:800,textDecoration:"none"}}>Historial de correcciones</a></div>
  {auth==="denied"&&<div className="wa-auth-notice" role="status"><div><h2>Catálogo disponible · resultados privados</h2><p>Los resultados no desaparecieron: esta dirección de revisión necesita su propia sesión. Inicia sesión aquí para consultar las mediciones asociadas a tu cuenta.</p></div><a href="/sprint-6-2/persistencia" className="wb-action">Iniciar sesión</a></div>}{auth==="error"&&<div className="wb-state" role="status">Los 128 indicadores están disponibles. La consulta de resultados personales no está disponible en este momento.</div>}<>
  <div className="wa-metrics"><div className="wa-metric wa-lime"><div><span className="wa-metric-label">♧ Edad PhenoAge</span><div className="wa-metric-number" style={{marginTop:12}}>—</div><span className="wa-metric-desc">Pendiente de cálculo validado</span></div><div className="wa-metric-secondary"><span className="wa-metric-desc">Edad cronológica</span><br/><b>Por calcular</b><br/><span className="wa-metric-desc">Diferencia</span><br/><b>—</b></div></div>{tiles.map(t=><article className="wa-metric" key={String(t[2])}><span className="wa-metric-symbol">{t[0]}</span><strong className="wa-metric-number">{auth==="loading"?"…":t[1]}</strong><span className="wa-metric-label">{t[2]}</span><span className="wa-metric-desc">{t[3]}</span></article>)}</div>
  <div className="wa-catalog-shell"><aside className="wa-categories"><h2>◈ &nbsp; Categorías</h2><div className="wa-category-list"><button className={"wa-cat"+(group===-1?" on":"")} onClick={()=>{setGroup(-1);setPage(1)}}><span className="wa-cat-label">◈ Todas las categorías</span><span className="wa-cat-num">{catalog.length}</span></button>{groups.map((g,i)=><button key={g} className={"wa-cat"+(group===i?" on":"")} onClick={()=>{setGroup(i);setPage(1)}}><span className="wa-cat-label"><span className="wa-cat-icon">◇</span>{g}</span><span className="wa-cat-num">{categoryCounts[i]}</span></button>)}</div></aside>
