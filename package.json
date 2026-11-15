@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run test:pilot && npm run test:catalog112 && next build",
+    "build": "npm run test:pilot && npm run test:catalog128 && next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "catalog:refresh": "node scripts/extract-public-reference-catalog.mjs",
@@ -15,7 +15,8 @@
     "test:catalog64": "node --test tests/indicator-batch-64.test.mjs",
     "test:catalog80": "node --test tests/indicator-batch-80.test.mjs",
     "test:catalog96": "node --test tests/indicator-batch-96.test.mjs",
-    "test:catalog112": "node --test tests/indicator-batch-112.test.mjs"
+    "test:catalog112": "node --test tests/indicator-batch-112.test.mjs",
+    "test:catalog128": "node --test tests/indicator-batch-128.test.mjs"
   },
   "dependencies": {
     "next": "^15.5.0",
