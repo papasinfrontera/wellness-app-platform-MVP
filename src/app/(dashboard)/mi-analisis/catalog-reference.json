@@ -1103,66 +1103,159 @@
   },
   {
     "id": 113,
-    "name": "PSA, Total"
+    "name": "Antígeno prostático específico total (PSA total)",
+    "name_en": "PSA, Total",
+    "aliases": [
+      "PSA total",
+      "Antígeno prostático específico total"
+    ],
+    "code": "REF-113"
   },
   {
     "id": 114,
-    "name": "Progesterone"
+    "name": "Progesterona",
+    "name_en": "Progesterone",
+    "aliases": [
+      "Progesterona sérica"
+    ],
+    "code": "REF-114"
   },
   {
     "id": 115,
-    "name": "Prolactin"
+    "name": "Prolactina",
+    "name_en": "Prolactin",
+    "aliases": [
+      "PRL",
+      "Prolactina sérica"
+    ],
+    "code": "REF-115"
   },
   {
     "id": 116,
-    "name": "Reticulocyte Count (RET)"
+    "name": "Recuento de reticulocitos (RET)",
+    "name_en": "Reticulocyte Count (RET)",
+    "aliases": [
+      "Reticulocitos",
+      "RET"
+    ],
+    "code": "REF-116"
   },
   {
     "id": 117,
-    "name": "Reticulocyte Index (RI)"
+    "name": "Índice de reticulocitos (RI)",
+    "name_en": "Reticulocyte Index (RI)",
+    "aliases": [
+      "Índice reticulocitario",
+      "RI"
+    ],
+    "code": "REF-117"
   },
   {
     "id": 118,
-    "name": "Selenium"
+    "name": "Selenio",
+    "name_en": "Selenium",
+    "aliases": [
+      "Selenio sérico"
+    ],
+    "code": "REF-118"
   },
   {
     "id": 119,
-    "name": "Sex Hormone Binding Globulin (SHBG)"
+    "name": "Globulina fijadora de hormonas sexuales (SHBG)",
+    "name_en": "Sex Hormone Binding Globulin (SHBG)",
+    "aliases": [
+      "SHBG",
+      "Globulina transportadora de hormonas sexuales"
+    ],
+    "code": "REF-119"
   },
   {
     "id": 120,
-    "name": "Symmetric Dimethylarginine (SDMA)"
+    "name": "Dimetilarginina simétrica (SDMA)",
+    "name_en": "Symmetric Dimethylarginine (SDMA)",
+    "aliases": [
+      "SDMA"
+    ],
+    "code": "REF-120"
   },
   {
     "id": 121,
-    "name": "Testosterone"
+    "name": "Testosterona",
+    "name_en": "Testosterone",
+    "aliases": [
+      "Testosterona total"
+    ],
+    "code": "REF-121"
   },
   {
     "id": 122,
-    "name": "Testosterone Immunoassay"
+    "name": "Testosterona por inmunoensayo",
+    "name_en": "Testosterone Immunoassay",
+    "aliases": [
+      "Testosterona medida por inmunoensayo",
+      "Inmunoensayo de testosterona"
+    ],
+    "code": "REF-122"
   },
   {
     "id": 123,
-    "name": "Thyroid Peroxidase Antibodies (TPOAb)"
+    "name": "Anticuerpos contra la peroxidasa tiroidea (anti-TPO)",
+    "name_en": "Thyroid Peroxidase Antibodies (TPOAb)",
+    "aliases": [
+      "Anti-TPO",
+      "Anticuerpos antiperoxidasa tiroidea",
+      "TPOAb"
+    ],
+    "code": "REF-123"
   },
   {
     "id": 124,
-    "name": "Thyroid-Stimulating Hormone (TSH)"
+    "name": "Hormona estimulante de la tiroides (TSH)",
+    "name_en": "Thyroid-Stimulating Hormone (TSH)",
+    "aliases": [
+      "TSH",
+      "Tirotropina"
+    ],
+    "code": "REF-124"
   },
   {
     "id": 125,
-    "name": "Total Iron-Binding Capacity (TIBC)"
+    "name": "Capacidad total de fijación del hierro (TIBC)",
+    "name_en": "Total Iron-Binding Capacity (TIBC)",
+    "aliases": [
+      "TIBC",
+      "Capacidad total de unión al hierro",
+      "CTFH"
+    ],
+    "code": "REF-125"
   },
   {
     "id": 126,
-    "name": "Vitamin B12 (cobalamin)"
+    "name": "Vitamina B12 (cobalamina)",
+    "name_en": "Vitamin B12 (cobalamin)",
+    "aliases": [
+      "Cobalamina",
+      "Vitamina B12"
+    ],
+    "code": "REF-126"
   },
   {
     "id": 127,
-    "name": "Vitamin D"
+    "name": "Vitamina D",
+    "name_en": "Vitamin D",
+    "aliases": [
+      "Vitamina D sérica"
+    ],
+    "code": "REF-127"
   },
   {
     "id": 128,
-    "name": "Zinc (serum)"
+    "name": "Zinc sérico",
+    "name_en": "Zinc (serum)",
+    "aliases": [
+      "Zinc en suero",
+      "Zinc (suero)"
+    ],
+    "code": "REF-128"
   }
 ]
