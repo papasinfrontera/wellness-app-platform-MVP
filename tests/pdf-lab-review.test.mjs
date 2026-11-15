@@ -143,8 +143,8 @@ test("A.2 interface has finalization and explicit pending classification with no
 
 test("6.8-D report counts are metadata while total cellularity is a complementary reading",()=>{
  const report=[
- "23\tTransaminasa oxalacética (TGO/AST)\t19,60 U/L\t10–40 U/L",
- "24\tTransaminasa pirúvica (TGP/ALT)\t29,40 U/L\t7–56 U/L",
+ "23\tTransaminasa oxalacética (TGO/AST)\t18,20 U/L\t10–40 U/L",
+ "24\tTransaminasa pirúvica (TGP/ALT)\t24,20 U/L\t7–56 U/L",
  "25\tTotal:\t24",
  "Total: 24",
  "11\tTotal de celularidad\t100 %\tNo indicado"
@@ -158,7 +158,7 @@ test("6.8-D report counts are metadata while total cellularity is a complementar
  assert.equal(parsed.rows[2].original,"Total de celularidad");
 });
 test("6.8-D non-equivalent readings stay unmapped rather than silently discarded",()=>{
- const parsed=analyzeExtractedText(["15\tUrea\t37,40 mg/dL","22\tColesterol VLDL\t46,70 mg/dL"].join("\n"),catalog);
+ const parsed=analyzeExtractedText(["15\tUrea\t31,20 mg/dL","22\tColesterol VLDL\t42,20 mg/dL"].join("\n"),catalog);
  assert.equal(parsed.rows.length,2);
  assert.ok(parsed.rows.every(r=>r.status==="review"));
  assert.ok(parsed.rows.every(r=>r.indicatorCode===""));
