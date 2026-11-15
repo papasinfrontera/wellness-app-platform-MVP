@@ -4,7 +4,7 @@ import {createClient,type SupabaseClient,type User} from "@supabase/supabase-js"
 
 type Status="loading"|"signed_in"|"signed_out"|"error";
 type Identity={firstName:string;lastName:string;photoPath:string|null;avatarUrl:string|null};
-type AuthContextValue={client:SupabaseClient|null;user:User|null;status:Status;identity:Identity;refreshProfile:()=>Promise<void>;refreshAuth:()=>Promise<void>;signOut:()=>Promise<boolean>};
+type AuthContextValue={client:SupabaseClient|null;user:User|null;status:Status;identity:Identity;refreshProfile:()=>Promise<void>;refreshAuth:()=>Promise<void>;signOut:()=>Promise<boolean>;recoveryMode:boolean;clearRecovery:()=>void};
 const empty:Identity={firstName:"",lastName:"",photoPath:null,avatarUrl:null};
 const Context=createContext<AuthContextValue|null>(null);
 
@@ -21,6 +21,7 @@ export function AuthProvider({children}:{children:ReactNode}){
  const [client]=useState(getWellnessClient);
  const [user,setUser]=useState<User|null>(null);
  const [status,setStatus]=useState<Status>("loading");
+ const [recoveryMode,setRecoveryMode]=useState(false);
  const [identity,setIdentity]=useState<Identity>(empty);
  const userId=useRef<string|null>(null);
  const currentRequest=useRef(0);
@@ -67,7 +68,7 @@ export function AuthProvider({children}:{children:ReactNode}){
    const {error}=await client.auth.signOut();
    if(error)return false;
    ++authRequest.current;++currentRequest.current;userId.current=null;
-   setUser(null);setIdentity(empty);setStatus("signed_out");
+   setUser(null);setIdentity(empty);setStatus("signed_out");setRecoveryMode(false);
    return true;
  },[client]);
  useEffect(()=>{
@@ -75,7 +76,8 @@ export function AuthProvider({children}:{children:ReactNode}){
    void refreshAuth();
    if(!client)return()=>{mounted.current=false};
    const {data:subscription}=client.auth.onAuthStateChange(event=>{
-     if(event==="SIGNED_OUT"){
+     if(event==="PASSWORD_RECOVERY"){setRecoveryMode(true);queueMicrotask(()=>{if(mounted.current)void refreshAuth()});}
+     else if(event==="SIGNED_OUT"){
        ++authRequest.current;++currentRequest.current;userId.current=null;
        setUser(null);setIdentity(empty);setStatus("signed_out");
      }else if(event==="SIGNED_IN"||event==="TOKEN_REFRESHED"||event==="USER_UPDATED"){
@@ -88,7 +90,7 @@ export function AuthProvider({children}:{children:ReactNode}){
    const refreshAvatar=setInterval(()=>{if(userId.current)void loadProfile(userId.current)},10*60*1000);
    return()=>{mounted.current=false;++authRequest.current;++currentRequest.current;subscription.subscription.unsubscribe();document.removeEventListener("visibilitychange",onVisible);clearInterval(refreshAvatar)};
  },[client,refreshAuth,loadProfile]);
- return <Context.Provider value={{client,user,status,identity,refreshProfile,refreshAuth,signOut}}>{children}</Context.Provider>;
+ return <Context.Provider value={{client,user,status,identity,refreshProfile,refreshAuth,signOut,recoveryMode,clearRecovery:()=>setRecoveryMode(false)}}>{children}</Context.Provider>;
 }
 export function useWellnessAuth(){
  const value=useContext(Context);
