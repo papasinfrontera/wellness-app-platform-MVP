@@ -794,67 +794,162 @@
   },
   {
     "id": 81,
-    "name": "Folate (Vitamin B9)"
+    "name": "Folato (vitamina B9)",
+    "name_en": "Folate (Vitamin B9)",
+    "aliases": [
+      "Folatos",
+      "Vitamina B9",
+      "Ácido fólico"
+    ],
+    "code": "REF-081"
   },
   {
     "id": 82,
-    "name": "Follicle Stimulating Hormone (FSH)"
+    "name": "Hormona foliculoestimulante (FSH)",
+    "name_en": "Follicle Stimulating Hormone (FSH)",
+    "aliases": [
+      "FSH",
+      "Hormona estimulante del folículo"
+    ],
+    "code": "REF-082"
   },
   {
     "id": 83,
-    "name": "Free T3 (FT3)"
+    "name": "Triyodotironina libre (T3 libre)",
+    "name_en": "Free T3 (FT3)",
+    "aliases": [
+      "T3 libre",
+      "FT3",
+      "T3L"
+    ],
+    "code": "REF-083"
   },
   {
     "id": 84,
-    "name": "Free T4 (FT4)"
+    "name": "Tiroxina libre (T4 libre)",
+    "name_en": "Free T4 (FT4)",
+    "aliases": [
+      "T4 libre",
+      "FT4",
+      "T4L"
+    ],
+    "code": "REF-084"
   },
   {
     "id": 85,
-    "name": "Free Testosterone"
+    "name": "Testosterona libre",
+    "name_en": "Free Testosterone",
+    "aliases": [
+      "Testosterona libre medida"
+    ],
+    "code": "REF-085"
   },
   {
     "id": 86,
-    "name": "Free Testosterone Calculated"
+    "name": "Testosterona libre calculada",
+    "name_en": "Free Testosterone Calculated",
+    "aliases": [
+      "Testosterona libre estimada",
+      "cFT"
+    ],
+    "code": "REF-086"
   },
   {
     "id": 87,
-    "name": "Fructosamine"
+    "name": "Fructosamina",
+    "name_en": "Fructosamine",
+    "aliases": [
+      "Fructosamina sérica"
+    ],
+    "code": "REF-087"
   },
   {
     "id": 88,
-    "name": "Gamma-Glutamyl Transferase (GGT)"
+    "name": "Gamma-glutamil transferasa (GGT)",
+    "name_en": "Gamma-Glutamyl Transferase (GGT)",
+    "aliases": [
+      "GGT",
+      "Gamma GT",
+      "Gamma-glutamiltranspeptidasa"
+    ],
+    "code": "REF-088"
   },
   {
     "id": 89,
-    "name": "HDL Large"
+    "name": "Partículas HDL grandes",
+    "name_en": "HDL Large",
+    "aliases": [
+      "HDL grandes",
+      "HDL de gran tamaño"
+    ],
+    "code": "REF-089"
   },
   {
     "id": 90,
-    "name": "HOMA-IR Score"
+    "name": "Índice HOMA-IR",
+    "name_en": "HOMA-IR Score",
+    "aliases": [
+      "HOMA-IR",
+      "Índice de resistencia a la insulina HOMA"
+    ],
+    "code": "REF-090"
   },
   {
     "id": 91,
-    "name": "Homocysteine"
+    "name": "Homocisteína",
+    "name_en": "Homocysteine",
+    "aliases": [
+      "Homocisteína total"
+    ],
+    "code": "REF-091"
   },
   {
     "id": 92,
-    "name": "IGF-1"
+    "name": "Factor de crecimiento similar a la insulina 1 (IGF-1)",
+    "name_en": "IGF-1",
+    "aliases": [
+      "IGF-1",
+      "Somatomedina C"
+    ],
+    "code": "REF-092"
   },
   {
     "id": 93,
-    "name": "Insulin"
+    "name": "Insulina",
+    "name_en": "Insulin",
+    "aliases": [
+      "Insulina sérica"
+    ],
+    "code": "REF-093"
   },
   {
     "id": 94,
-    "name": "Iodine"
+    "name": "Yodo",
+    "name_en": "Iodine",
+    "aliases": [
+      "Iodo"
+    ],
+    "code": "REF-094"
   },
   {
     "id": 95,
-    "name": "Iron"
+    "name": "Hierro",
+    "name_en": "Iron",
+    "aliases": [
+      "Hierro sérico",
+      "Ferremia"
+    ],
+    "code": "REF-095"
   },
   {
     "id": 96,
-    "name": "Iron % Saturation"
+    "name": "Saturación de transferrina (%)",
+    "name_en": "Iron % Saturation",
+    "aliases": [
+      "Porcentaje de saturación de transferrina",
+      "Saturación de hierro (%)"
+    ],
+    "code": "REF-096"
   },
   {
     "id": 97,
