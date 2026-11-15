@@ -24,6 +24,7 @@ export function AuthProvider({children}:{children:ReactNode}){
  const [identity,setIdentity]=useState<Identity>(empty);
  const userId=useRef<string|null>(null);
  const currentRequest=useRef(0);
+ const authRequest=useRef(0);
  const mounted=useRef(true);
  const loadProfile=useCallback(async(id:string)=>{
    if(!client)return;
@@ -37,15 +38,16 @@ export function AuthProvider({children}:{children:ReactNode}){
    if(!photoPath){setIdentity({...name,photoPath:null,avatarUrl:null});return}
    // Storage bucket remains private. Never use a public URL for patient avatars.
    const {data:result,error:storageError}=await client.storage.from("wellness-avatars")
-     .createSignedUrl(photoPath,3600);
+     .createSignedUrl(photoPath,900);
    if(!mounted.current||request!==currentRequest.current||userId.current!==id)return;
    setIdentity({...name,photoPath,avatarUrl:!storageError?(result?.signedUrl||null):null});
  },[client]);
  const refreshAuth=useCallback(async()=>{
+   const request=++authRequest.current;
    if(!client){setStatus("error");return}
    try{
      const {data,error}=await client.auth.getUser();
-     if(!mounted.current)return;
+     if(!mounted.current||request!==authRequest.current)return;
      if(error||!data.user){
        ++currentRequest.current;userId.current=null;setUser(null);setIdentity(empty);
        setStatus(error?"error":"signed_out");return;
@@ -56,7 +58,7 @@ export function AuthProvider({children}:{children:ReactNode}){
      if(changed){setIdentity(empty)}
      await loadProfile(data.user.id);
    }catch{
-     if(mounted.current){++currentRequest.current;userId.current=null;setUser(null);setIdentity(empty);setStatus("error")}
+     if(mounted.current&&request===authRequest.current){++currentRequest.current;userId.current=null;setUser(null);setIdentity(empty);setStatus("error")}
    }
  },[client,loadProfile]);
  const refreshProfile=useCallback(async()=>{if(userId.current)await loadProfile(userId.current)},[loadProfile]);
@@ -64,7 +66,7 @@ export function AuthProvider({children}:{children:ReactNode}){
    if(!client)return false;
    const {error}=await client.auth.signOut();
    if(error)return false;
-   ++currentRequest.current;userId.current=null;
+   ++authRequest.current;++currentRequest.current;userId.current=null;
    setUser(null);setIdentity(empty);setStatus("signed_out");
    return true;
  },[client]);
@@ -74,7 +76,7 @@ export function AuthProvider({children}:{children:ReactNode}){
    if(!client)return()=>{mounted.current=false};
    const {data:subscription}=client.auth.onAuthStateChange(event=>{
      if(event==="SIGNED_OUT"){
-       ++currentRequest.current;userId.current=null;
+       ++authRequest.current;++currentRequest.current;userId.current=null;
        setUser(null);setIdentity(empty);setStatus("signed_out");
      }else if(event==="SIGNED_IN"||event==="TOKEN_REFRESHED"||event==="USER_UPDATED"){
        // Do not await Supabase requests inside the auth change callback.
@@ -83,8 +85,8 @@ export function AuthProvider({children}:{children:ReactNode}){
    });
    const onVisible=()=>{if(document.visibilityState==="visible")void refreshAuth()};
    document.addEventListener("visibilitychange",onVisible);
-   const refreshAvatar=setInterval(()=>{if(userId.current)void loadProfile(userId.current)},30*60*1000);
-   return()=>{mounted.current=false;++currentRequest.current;subscription.subscription.unsubscribe();document.removeEventListener("visibilitychange",onVisible);clearInterval(refreshAvatar)};
+   const refreshAvatar=setInterval(()=>{if(userId.current)void loadProfile(userId.current)},10*60*1000);
+   return()=>{mounted.current=false;++authRequest.current;++currentRequest.current;subscription.subscription.unsubscribe();document.removeEventListener("visibilitychange",onVisible);clearInterval(refreshAvatar)};
  },[client,refreshAuth,loadProfile]);
  return <Context.Provider value={{client,user,status,identity,refreshProfile,refreshAuth,signOut}}>{children}</Context.Provider>;
 }
