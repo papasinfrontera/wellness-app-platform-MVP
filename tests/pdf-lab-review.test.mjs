@@ -88,7 +88,7 @@ test("regression: 22 rows in a five-column laboratory report, no personal identi
  assert.equal(result.rows[14].indicatorCode,"");
  assert.equal(result.rows[14].status,"review"); // Urea is not necessarily BUN
  assert.equal(result.rows[20].value,"1,33");
- assert.equal(result.rows[20].status,"review"); // Unitless ratio
+ assert.equal(result.rows[20].status,"candidate"); // Dimensionless A/G ratio with exact identity; still needs user confirmation
  assert.match(result.rows[21].value,/Negativo/);
  assert.equal(result.rows[21].status,"review"); // Non-hs CRP != high-sensitivity CRP
  assert.ok(result.rows.every(x=>!x.raw.includes("Nombre:")));
