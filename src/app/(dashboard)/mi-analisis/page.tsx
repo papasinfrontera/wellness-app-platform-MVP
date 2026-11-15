@@ -5,7 +5,8 @@ import catalogData from "./catalog-reference.json";
 import {ANALYSIS_CATEGORIES,categoryForId} from "@/lib/indicator-categories";
 import "./analisis.css";
 type Item={id:number;name:string;name_en?:string;aliases?:string[];code?:string};
-type Result={code:string;value:number;unit:string;status:string};
+type Result={id:string;code:string;value:number;unit:string;status:string};
+type Reference={observation_id:string;lower_bound:number;upper_bound:number;unit:string;checked_against_pdf:boolean;source_kind:string};
 const catalog=catalogData as Item[];
 const groups=[...ANALYSIS_CATEGORIES];
 const clean=(s:string)=>s.normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
@@ -15,7 +16,7 @@ const categoryCounts=groups.map((_,i)=>catalog.filter(m=>categoryFor(m)===i).len
 const resultLabel=(value:number)=>new Intl.NumberFormat("es-ES",{maximumFractionDigits:6}).format(value);
 
 export default function Analysis(){
- const [first,setFirst]=useState(""),[auth,setAuth]=useState<"loading"|"denied"|"ready"|"error">("loading"),[results,setResults]=useState<Result[]>([]);
+ const [first,setFirst]=useState(""),[auth,setAuth]=useState<"loading"|"denied"|"ready"|"error">("loading"),[results,setResults]=useState<Result[]>([]),[referenceRows,setReferenceRows]=useState<Reference[]>([]);
  const [search,setSearch]=useState(""),[group,setGroup]=useState(-1),[filter,setFilter]=useState(0),[reverse,setReverse]=useState(false),[page,setPage]=useState(1),[role,setRole]=useState("Usuario");
  useEffect(()=>{let active=true;void(async()=>{
   const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -23,19 +24,35 @@ export default function Analysis(){
   const db=createClient(url,key),{data:{user},error}=await db.auth.getUser();
   if(!active)return;
   if(error||!user){setAuth("denied");return}
-  const [p,o]=await Promise.all([db.from("wellness_profiles").select("first_name").eq("user_id",user.id).maybeSingle(),db.from("observations").select("value,unit,status,observed_at,indicators(code,name_es)").eq("user_id",user.id).order("observed_at",{ascending:false}).limit(3000)]);
+  const [p,o,refs]=await Promise.all([db.from("wellness_profiles").select("first_name").eq("user_id",user.id).maybeSingle(),db.from("observations").select("id,value,unit,status,observed_at,indicators(code,name_es)").eq("user_id",user.id).order("observed_at",{ascending:false}).limit(3000),db.from("observation_reference_intervals").select("observation_id,lower_bound,upper_bound,unit,checked_against_pdf,source_kind").eq("user_id",user.id).limit(3000)]);
   if(!active)return;
   if(p.error||o.error){setAuth("error");return}
   setFirst(p.data?.first_name||"");
   const found:Result[]=(o.data||[]).flatMap((v):Result[]=>{
-   const raw=v as unknown as {value:number;unit:string;status:string;indicators:{code?:string;name_es?:string}|{code?:string;name_es?:string}[]|null};
+   const raw=v as unknown as {id:string;value:number;unit:string;status:string;indicators:{code?:string;name_es?:string}|{code?:string;name_es?:string}[]|null};
    const marker=Array.isArray(raw.indicators)?raw.indicators[0]:raw.indicators;
-   return marker?.code&&typeof raw.value==="number"?[{code:marker.code,value:raw.value,unit:raw.unit||"",status:raw.status||"pending_review"}]:[];
+   return marker?.code&&typeof raw.value==="number"?[{id:raw.id,code:marker.code,value:raw.value,unit:raw.unit||"",status:raw.status||"pending_review"}]:[];
   });
-  setResults(found);setAuth("ready");
+  setResults(found);setReferenceRows(!refs.error?(refs.data||[]) as Reference[]:[]);setAuth("ready");
  })().catch(()=>{if(active)setAuth("error")});return()=>{active=false}},[]);
  const resultMap=useMemo(()=>{const m=new Map<string,Result>();for(const r of results)if(!m.has(r.code))m.set(r.code,r);return m},[results]);
  const measured=useMemo(()=>catalog.filter(x=>resultMap.has("REF-"+String(x.id).padStart(3,"0"))).length,[resultMap]);
+ const refMap=useMemo(()=>new Map(referenceRows.map(r=>[r.observation_id,r])),[referenceRows]);
+ const compareRef=(x:Result|undefined):"inside"|"outside"|"missing"=>{
+  if(!x)return "missing";
+  const r=refMap.get(x.id);
+  if(!r||!r.checked_against_pdf||r.source_kind!=="user_supplied_pdf"||r.unit!==x.unit||!Number.isFinite(r.lower_bound)||!Number.isFinite(r.upper_bound)||r.lower_bound>r.upper_bound)return "missing";
+  return x.value>=r.lower_bound&&x.value<=r.upper_bound?"inside":"outside";
+ };
+ const referenceSummary=useMemo(()=>{
+  let inside=0,outside=0,missing=0;
+  for(const x of resultMap.values()){const r=refMap.get(x.id);
+   if(!r||!r.checked_against_pdf||r.source_kind!=="user_supplied_pdf"||r.unit!==x.unit||!Number.isFinite(r.lower_bound)||!Number.isFinite(r.upper_bound)){missing++;continue}
+   if(x.value>=r.lower_bound&&x.value<=r.upper_bound)inside++;else outside++;
+  }
+  return {inside,outside,missing};
+ },[resultMap,refMap]);
+
  const rows=useMemo(()=>catalog.filter(x=>(group===-1||categoryFor(x)===group)&&[x.name,x.name_en||"",...(x.aliases||[])].some(v=>clean(v).includes(clean(search)))).filter(x=>filter===1?auth==="ready"&&resultMap.has("REF-"+String(x.id).padStart(3,"0")):filter===5?auth==="ready"&&!resultMap.has("REF-"+String(x.id).padStart(3,"0")):filter===0).sort((a,b)=>reverse?b.name.localeCompare(a.name,"es"):a.name.localeCompare(b.name,"es")),[group,search,filter,resultMap,reverse]);
  const pages=Math.max(1,Math.ceil(rows.length/15)),current=Math.min(page,pages);
  const counts=[catalog.length,auth==="ready"?measured:null,null,null,null,auth==="ready"?catalog.length-measured:null];
@@ -47,23 +64,26 @@ export default function Analysis(){
  <section className="wa-explorer"><div className="wa-explore-top"><h2>☷ &nbsp; Explorar mis indicadores</h2><div className="wa-mode-switch"><button className={role==="Usuario"?"on":""} onClick={()=>setRole("Usuario")}>Usuario</button><button className={role==="Médico"?"on":""} onClick={()=>setRole("Médico")}>Médico</button></div></div>
  <input aria-label="Buscar indicadores" className="wa-search" placeholder="⌕  Buscar: glucosa, glicemia, HbA1c, ApoB…" value={search} onChange={e=>{setSearch(e.target.value);setPage(1)}}/>
  <div className="wa-pills">{filters.map((f,i)=><button key={f} className={"wa-pill"+(filter===i?" on":"")} disabled={(i>=2&&i<=4)||((i===1||i===5)&&auth!=="ready")} title={i>=2&&i<=4?"Requiere reglas científicas aprobadas":auth!=="ready"&&[1,5].includes(i)?"Inicia sesión para consultar tus resultados":undefined} onClick={()=>{setFilter(i);setPage(1)}}>{f} ({counts[i]===null?"—":counts[i]})</button>)}</div>
+ {auth==="ready"&&measured>0&&<p className="wa-reference-note" role="status"><strong>Comparación con el informe:</strong> {referenceSummary.inside} dentro del intervalo · {referenceSummary.outside} fuera del intervalo · {referenceSummary.missing} sin referencia asociada. Esta comparación no equivale a los estados Óptimo o Suficiente.</p>}
  <div className="wa-tabletop"><span className="wa-caption">{rows.length?((current-1)*15+1)+"–"+Math.min(rows.length,current*15)+" de "+rows.length:"0"} indicadores</span><select className="wa-sort" aria-label="Ordenar" value={reverse?"za":"az"} onChange={e=>{setReverse(e.target.value==="za");setPage(1)}}><option value="az">Orden: A–Z</option><option value="za">Orden: Z–A</option></select></div>
  <div className="wa-table-scroll"><div role="table" className="wa-results">
  <div role="row" className="wa-result-head"><span>Indicador</span><span>Resultado</span><span>Unidad</span><span>Estado</span><span>Categoría</span><span className="wa-sr-only">Ver detalle</span></div>
  {rows.slice((current-1)*15,current*15).map(m=>{
  const x=resultMap.get("REF-"+String(m.id).padStart(3,"0"));
  const category=categoryFor(m);
+ const pdfReference=x?refMap.get(x.id):undefined;
+ const comparison=compareRef(x);
  return <a key={m.id} className="wa-result-row" style={{textDecoration:"none"}} href={"/mi-analisis/"+m.id} aria-label={"Abrir detalle de "+m.name}>
  <span className="wa-result-name">{m.name}</span>
  <span className="wa-result-value">{x?resultLabel(x.value):"—"}</span>
  <span className="wa-result-unit">{x?(x.unit||"—"):"—"}</span>
- <span><span className={"wa-result-status"+(x?.status==="approved"?" wa-result-status-confirmed":"")}>{x?(x.status==="approved"?"Confirmado · sin evaluar":"En revisión"):"Sin resultado"}</span></span>
+ <span className="wa-result-state-cell"><span className={"wa-result-status"+(x?.status==="approved"?" wa-result-status-confirmed":"")}>{x?(x.status==="approved"?"Confirmado · sin evaluar":"En revisión"):"Sin resultado"}</span>{x&&pdfReference&&comparison!=="missing"&&<span className={"wa-pdf-reference-label"+(comparison==="outside"?" outside":"")}>Informe: {comparison==="inside"?"dentro":"fuera"} de {resultLabel(pdfReference.lower_bound)}–{resultLabel(pdfReference.upper_bound)}{x.unit?" "+x.unit:""}</span>}</span>
  <span className="wa-result-category">{category>=0?groups[category]:"Pendiente de categoría"}</span>
  <span className="wa-result-chevron" aria-hidden="true">›</span>
  </a>})}
  {rows.length===0&&<div className="wa-result-empty">No hay indicadores que coincidan con el filtro.</div>}
  </div></div>
  <div className="wa-paginator"><button disabled={current<=1} onClick={()=>setPage(p=>Math.max(1,p-1))}>‹ Anterior</button><span>Página {current} de {pages}</span><button disabled={current>=pages} onClick={()=>setPage(p=>Math.min(pages,p+1))}>Siguiente ›</button></div>
- </section></div><p className="wa-disclaimer">{role==="Médico"?"La modalidad médica de Doctor Connect todavía no permite acceso a otros pacientes. ":""}Los 4 estados finales son Óptimo, Suficiente, Fuera de rango y Sin resultado. Los resultados importados pendientes de reglas verificadas se presentan como «Confirmado · sin evaluar»; «Todos» y «Con resultado» solo son filtros de navegación. Los datos provienen exclusivamente de la cuenta autenticada. Sin una importación validada, se mostrarán como “Sin resultados”. Las categorías usan el mapa de los 128 indicadores; son organizativas y no equivalen a una evaluación médica. Los estados clínicos permanecerán desactivados hasta que existan reglas aprobadas; no se inventan rangos ni calificaciones clínicas.</p></>
+ </section></div><p className="wa-disclaimer">{role==="Médico"?"La modalidad médica de Doctor Connect todavía no permite acceso a otros pacientes. ":""}Los cuatro estados finales son Óptimo, Suficiente, Fuera de rango y Sin resultado. La comparación con el PDF es documental; no asigna un estado clínico. Los resultados importados pendientes de reglas verificadas se presentan como «Confirmado · sin evaluar»; «Todos» y «Con resultado» solo son filtros de navegación. Los datos provienen exclusivamente de la cuenta autenticada. Sin una importación validada, se mostrarán como “Sin resultados”. Las categorías usan el mapa de los 128 indicadores; son organizativas y no equivalen a una evaluación médica. Los estados clínicos permanecerán desactivados hasta que existan reglas aprobadas; no se inventan rangos ni calificaciones clínicas.</p></>
  </main>
 }
