@@ -49,3 +49,59 @@ test("does not produce a patient-facing save payload",()=>{
  assert.equal(Object.hasOwn(r,"patient_id"),false);
  assert.equal(Object.hasOwn(r,"save"),false);
 });
+
+test("regression: 22 rows in a five-column laboratory report, no personal identifiers",()=>{
+ const table=[
+ ["Hemoglobina","13,9 g/dL","12–17 g/dL"],
+ ["Hematocrito","42,10 %","40–52 %"],
+ ["Glóbulos rojos","5,01 × 10⁶/µL","3–6 × 10⁶/µL"],
+ ["VCM","85,4 fL","80–100 fL"],
+ ["HCM","28,1 pg","27–34 pg"],
+ ["CHCM","33,2 g/dL","31–36 g/dL"],
+ ["Glóbulos blancos","7.800/µL","5.000–10.000/µL"],
+ ["Neutrófilos","65 %","No indicado"],
+ ["Linfocitos","30 %","No indicado"],
+ ["Monocitos","5 %","No indicado"],
+ ["Total de celularidad","100 %","No indicado"],
+ ["Plaquetas","250.000/µL","140.000–440.000/µL"],
+ ["Volumen plaquetario medio","9,5 fL","6,50–12 fL"],
+ ["Glicemia basal","90 mg/dL","65–110 mg/dL"],
+ ["Urea","30,30 mg/dL","15–40 mg/dL"],
+ ["Creatinina","1,10 mg/dL","0,70–1,20 mg/dL"],
+ ["Fosfatasa alcalina","75,60 U/L","27–100 U/L"],
+ ["Proteínas totales","7,00 g/dL","6–8 g/dL"],
+ ["Albúmina","4,00 g/dL","3,50–5 g/dL"],
+ ["Globulina","3,00 g/dL","No indicado"],
+ ["Relación albúmina/globulina","1,33","1,20–2,20"],
+ ["Proteína C reactiva (PCR)","Negativo, < 6 mg/L","Negativo: < 6,0 mg/L"]
+ ];
+ const report=table.map(([name,value,ref],i)=>String(i+1)+"\t"+name+"\t"+value+"\t"+ref+"\tHematología").join("\n");
+ const result=analyzeExtractedText(report,catalog);
+ assert.equal(result.rows.length,22);
+ assert.equal(result.rows[0].original,"Hemoglobina");
+ assert.equal(result.rows[0].value,"13,9");
+ assert.equal(result.rows[0].unit,"g/dL");
+ assert.equal(result.rows[2].unit,"× 10⁶/µL");
+ assert.equal(result.rows[6].value,"7.800");
+ assert.equal(result.rows[6].unit,"/µL");
+ assert.equal(result.rows[11].value,"250.000");
+ assert.equal(result.rows[14].indicatorCode,"");
+ assert.equal(result.rows[14].status,"review"); // Urea is not necessarily BUN
+ assert.equal(result.rows[20].value,"1,33");
+ assert.equal(result.rows[20].status,"review"); // Unitless ratio
+ assert.match(result.rows[21].value,/Negativo/);
+ assert.equal(result.rows[21].status,"review"); // Non-hs CRP != high-sensitivity CRP
+ assert.ok(result.rows.every(x=>!x.raw.includes("Nombre:")));
+});
+test("regression: plain-space columns do not replace measured value with a reference interval",()=>{
+ const r=analyzeExtractedText("1  Hemoglobina                   14,7 g/dL            12–17 g/dL             Hematología\n2  Creatinina                    1,17 mg/dL          0,70–1,20 mg/dL     Bioquímica",catalog);
+ assert.equal(r.rows.length,2);
+ assert.equal(r.rows[0].value,"14,7");
+ assert.equal(r.rows[1].value,"1,17");
+});
+test("regression: standard CRP must not be mapped to high sensitivity CRP",()=>{
+ const r=analyzeExtractedText("22\tProteína C reactiva (PCR)\tNegativo, < 6 mg/L\tNegativo: < 6,0 mg/L\tSerología",catalog);
+ assert.equal(r.rows.length,1);
+ assert.equal(r.rows[0].status,"review");
+ assert.notEqual(r.rows[0].indicatorCode,"REF-020");
+});
