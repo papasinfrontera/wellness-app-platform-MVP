@@ -4,8 +4,9 @@ import {useParams} from "next/navigation";
 import {createClient} from "@supabase/supabase-js";
 import catalogNames from "../catalog-reference.json";
 import "../analisis.css";
+import {applyLabCorrections,type LabCorrection} from "@/lib/lab-corrections";
 type Metric={name:string;code?:string};
-type Point={value:number;unit:string;observed_at:string};
+type Point={id:string;value:number;unit:string;observed_at:string;corrected?:boolean};
 const names=catalogNames as {id:number;name:string;name_en?:string;aliases?:string[];code?:string}[];
 const tabs=["Impacto en Healthspan","Qué es","Por qué es importante","Otros indicadores","Dispositivos conectados","Cómo mejorar","Fuentes científicas"];
 const date=(s:string)=>new Intl.DateTimeFormat("es",{day:"numeric",month:"short",year:"numeric"}).format(new Date(s));
@@ -36,10 +37,14 @@ export default function IndicatorDetail(){
   if(!alive)return;
   if(lookupError){setMode("error");return}
   if(!possible?.length){setPoints([]);setMode("ready");return}
-  const {data,error:observationsError}=await db.from("observations").select("value,unit,observed_at").eq("user_id",user.id).eq("indicator_id",possible[0].id).order("observed_at",{ascending:true}).limit(500);
+  const [observations,corrections]=await Promise.all([
+   db.from("observations").select("id,value,unit,observed_at").eq("user_id",user.id).eq("indicator_id",possible[0].id).order("observed_at",{ascending:true}).limit(500),
+   db.from("lab_observation_corrections").select("id,observation_id,corrected_value,corrected_unit,reason,created_at").eq("user_id",user.id).order("created_at",{ascending:false}).limit(2000)
+  ]);
   if(!alive)return;
-  if(observationsError){setMode("error");return}
-  setPoints((data||[]).filter(p=>typeof p.value==="number") as Point[]);setMode("ready");
+  if(observations.error||corrections.error){setMode("error");return}
+  const measured=(observations.data||[]).filter(p=>typeof p.value==="number") as Point[];
+  setPoints(applyLabCorrections(measured,(corrections.data||[]) as LabCorrection[]));setMode("ready");
  })().catch(()=>{if(alive)setMode("error")});return()=>{alive=false}},[item?.id]);
  const last=points.at(-1),prior=points.length>=2?points.at(-2):undefined;
  const difference=last&&prior?last.value-prior.value:null;
@@ -59,7 +64,7 @@ export default function IndicatorDetail(){
   <p className="wa-subtitle">{(item.name_en||item.name).match(/apolipoprotein b|apob/i)?"La ApoB es una proteína presente en las principales partículas que transportan colesterol y otros lípidos. Su medición ayuda a evaluar el riesgo cardiovascular.":"Información del indicador y evolución personal cuando se disponga de resultados asociados."}</p>
   <div className="wa-tags"><span className="wa-tag">Análisis de laboratorio</span><span className="wa-tag">Historial personal</span><span className="wa-tag">Fuentes en validación</span></div>
   <section className="wa-detail-metrics">
-   <article className="wa-detail-metric"><h3>Resultado seleccionado {last?"· "+date(last.observed_at):""}</h3><strong>{last?val(last.value):"—"}</strong> {last?.unit||""}<p className="wa-future">{last?"Interpretación pendiente de validación":"Sin datos disponibles"}</p></article>
+   <article className="wa-detail-metric"><h3>Resultado seleccionado {last?"· "+date(last.observed_at):""}</h3><strong>{last?val(last.value):"—"}</strong> {last?.unit||""}<p className="wa-future">{last?"(last.corrected?"Valor corregido con historial de cambios. ":"")+"Interpretación pendiente de validación":"Sin datos disponibles"}</p></article>
    <article className="wa-detail-metric"><h3>Distancia al nivel óptimo de referencia</h3><strong>—</strong><p className="wa-future">Requiere referencia científica aprobada y método de medición compatible.</p></article>
    <article className="wa-detail-metric"><h3>Cambio longitudinal</h3><strong>{difference===null?"—":(difference>0?"+":"")+val(difference)}</strong> {last?.unit||""}<p className="wa-future">{percent===null?"Se necesitan dos mediciones comparables":(percent>0?"+":"")+val(percent)+" % · cambio descriptivo"}</p></article>
   </section>
@@ -68,6 +73,7 @@ export default function IndicatorDetail(){
    {view==="chart"?<LineChart points={points}/>:<div style={{marginTop:20}}>{points.length?points.map((p,i)=><div key={i} style={{display:"flex",justifyContent:"space-between",gap:10,padding:12,borderBottom:"1px solid #eeeaf4",fontSize:12}}><span>{date(p.observed_at)}</span><b>{val(p.value)} {p.unit}</b></div>):<div className="wa-chart-placeholder">No existen mediciones en el historial de esta cuenta.</div>}</div>}
   </article>
   <article className="wa-detail-panel"><h2>Conoce tu indicador</h2><div className="wa-detail-tabs">{tabs.map((tab,i)=><button key={tab} className={active===tab?"on":""} onClick={()=>setActive(tab)}>{tab}</button>)}</div><p className="wa-explainer">{text}</p></article></section>
+  <p style={{fontSize:12}}><a href="/mi-analisis/correcciones" style={{color:"#5B40F5",fontWeight:800}}>Consultar o registrar correcciones →</a></p>
   <p className="wa-disclaimer">Los valores personales provienen de la cuenta autenticada. Los límites de referencia, estados clínicos y explicaciones están sujetos a validación y no sustituyen asesoramiento profesional.</p>
   </>}
  </main>
