@@ -2,7 +2,7 @@ name: PDF importer validation
 on:
   push:
     branches:
-      - sprint-6-8-h-unmatched-recovery-audit
+      - sprint-6-8-i-document-history
   workflow_dispatch:
 
 permissions:
@@ -24,3 +24,4 @@ jobs:
           npm run test:pdf-unmatched
           npm run test:pdf-reconcile
           npm run test:pdf-bulk
+          node --test tests/pdf-document-history.test.mjs
