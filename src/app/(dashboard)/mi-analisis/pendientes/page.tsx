@@ -1,7 +1,7 @@
 "use client";
 import {useEffect,useState} from "react";
 import {createClient} from "@supabase/supabase-js";
-import "../../analisis.css";
+import "../analisis.css";
 type PendingReading={id:string;original_label:string;raw_value:string;unit:string;kind:"unmapped"|"qualitative"|"complementary";collected_on:string;created_at:string};
 const labels={unmapped:"Sin equivalente",qualitative:"Resultado cualitativo",complementary:"Dato complementario"} as const;
 export default function PendingReadingsPage(){
