@@ -2,6 +2,13 @@ export type ReferenceIndicator={id:number;code?:string;name:string;name_en?:stri
 export type PdfRow={id:string;raw:string;original:string;value:string;unit:string;indicatorCode:string;indicatorName:string;status:"candidate"|"review";reason:string;};
 export type PdfReview={rows:PdfRow[];linesExamined:number;truncated:boolean;warning:string|null};
 export const normalizePdfLabel=(s:string)=>s.normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim().replace(/\s+/g," ");
+export type UnmatchedKind="unmapped"|"qualitative"|"complementary";
+export function classifyUnmatchedReading(label:string,value:string):UnmatchedKind{
+ const k=normalizePdfLabel(label);
+ if(k==="total de celularidad"||k==="total celularidad")return "complementary";
+ if(/^(?:negativo|positivo|reactivo|no reactivo|indetectable)\b/i.test(value.trim())||/proteina c reactiva/.test(k))return "qualitative";
+ return "unmapped";
+}
 const rejectContext=/\b(urin[ae]|urina|orina|urinary|saliva|salival|csf|liquor|lcr|liquido cefalorraquideo|postprandial|posprandial|fasting|ayunas|plasma|serum|suero|capilar|fingerstick|immunoassay|inmunoensayo|calculated|calculado|calculada|25.oh|1.25)\b/i;
 const numeric=/^[<>≤≥]?\s*[+-]?\d+(?:[.,]\d+)?$/;
 const valueStart=/^(Negativo\s*,?\s*[<>≤≥]?\s*\d+(?:[.,]\d+)?|[<>≤≥]?\s*[+-]?(?:\d{1,3}(?:[.,]\d{3})+|\d+(?:[.,]\d+)?))(.*)$/i;
@@ -31,6 +38,18 @@ export function identifyPdfIndicator(original:string,unit:string,catalog:Referen
   const code=hint[k]||"";
   const suggested=catalog.find(x=>x.code===code);
   if(code&&suggested)return {status:"review" as const,code,name:suggested.name,reason:code==="REF-017"?"Glucemia basal: posible glucosa medida; confirmar ayuno, muestra y método.":(["REF-030","REF-026"].includes(code)?"Sinónimo de transaminasa detectado; confirmar AST/ALT, tipo de muestra y unidad antes de aprobar.":"Correspondencia orientativa: revisar magnitud, muestra, método y unidad.")};
+  if(k==="urea"||k==="urea serica"){
+   return {status:"review" as const,code:"",name:"",reason:"Urea total no equivale a nitrógeno ureico (BUN). Conservar pendiente hasta incorporar el indicador específico y comprobar la unidad."};
+  }
+  if(k==="colesterol vldl"||k==="vldl colesterol"||k==="colesterol de lipoproteinas de muy baja densidad"){
+   return {status:"review" as const,code:"",name:"",reason:"VLDL no es LDL ni colesterol total. Conservar pendiente; verificar si el resultado fue medido o calculado."};
+  }
+  if(k==="total de celularidad"||k==="total celularidad"){
+   return {status:"review" as const,code:"",name:"",reason:"Dato complementario del diferencial: no asignar un indicador clínico independiente sin validación."};
+  }
+  if(k==="proteina c reactiva pcr"||k==="proteina c reactiva"){
+   return {status:"review" as const,code:"",name:"",reason:"PCR convencional o resultado cualitativo: no asociar a PCR ultrasensible sin verificar el método."};
+  }
   return {status:"review" as const,code:"",name:"",reason:"Etiqueta sin coincidencia exacta; requiere identificación manual."};
  }
  const x=matched[0],code=x.code||"";
