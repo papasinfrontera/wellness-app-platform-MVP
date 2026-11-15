@@ -96,14 +96,14 @@ export default function PdfPilotPage(){
    if(!response.ok)throw new Error(json.error||"No se pudo analizar el PDF");
    const parsed:Row[]=(json.rows||[]).map((x:PdfRow)=>({...x,decision:"pending"}));
    setReport(json);setRows(parsed);
-   if(identity!=="signed_in")return;
+   if(identity!=="signed_in"){setReconcileMessage("Se extrajeron los resultados. Para comprobar coincidencias con una importación previa, inicia sesión en esta vista.");return;}
    const u=process.env.NEXT_PUBLIC_SUPABASE_URL,k=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
    if(!u||!k)return;
    // Only the exact previously uploaded PDF fingerprint can reuse a prior review.
    const digest=await crypto.subtle.digest("SHA-256",await file.arrayBuffer());
    const sha=[...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,"0")).join("");
    const db=createClient(u,k),{data:{user},error:authError}=await db.auth.getUser();
-   if(authError||!user)return;
+   if(authError||!user){setIdentity("signed_out");setReconcileMessage("Inicia sesión para consultar las importaciones anteriores.");return;}
    const {data:stored,error:readError}=await db.from("observations")
     .select("value,unit,raw_label,source_key,observed_at,indicators(code)")
     .eq("user_id",user.id).eq("origin","laboratory").eq("status","approved")
@@ -124,14 +124,13 @@ export default function PdfPilotPage(){
     });
    });
    if(matches.length===0){setReconcileMessage("No se encontró una revisión previa de este mismo archivo. Revisa las filas antes de importar.");return;}
-   const dates=[...new Set(existing.map(x=>x.observed_at.slice(0,10)))];
+   const dates=[...new Set(existing.filter(x=>matches.some(row=>{const marker=Array.isArray(x.indicators)?x.indicators[0]:x.indicators;return marker?.code===row.indicatorCode && Number(x.value)===asNumber(row.value) && normalizeUnit(x.unit)===normalizeUnit(row.unit) && normalize(x.raw_label||"")===normalize(row.original)})).map(x=>x.observed_at.slice(0,10)))];
    if(dates.length!==1){setReconcileMessage("Hay fechas distintas para este archivo. Se requiere revisión manual.");return;}
    setRecognized(matches.map(x=>x.id));
    setRecognizedDate(dates[0]);
-   setReconcileMessage("Se reconocieron "+matches.length+" resultados idénticos ya guardados para este PDF. Puedes recuperar sus decisiones y revisar las lecturas restantes.");
+   setReconcileMessage("Se reconocieron "+matches.length+" resultados idénticos de este PDF. Las "+(parsed.length-matches.length)+" filas restantes seguirán pendientes de comprobación; no se guardarán sin tu aprobación.");
   }catch(e){
-   if(!report){setError(e instanceof Error?e.message:"Error al leer PDF");}
-   else setReconcileMessage("La comprobación de resultados anteriores no se completó; los resultados extraídos siguen disponibles.");
+   setReconcileMessage("No fue posible completar la comparación con el historial. Las filas extraídas siguen disponibles para revisión manual.");
   }finally{setBusy(false)}
  }
  function applyPriorReview(){
@@ -141,8 +140,9 @@ export default function PdfPilotPage(){
    ...r,decision:ids.has(r.id)?"confirmed":r.decision==="pending"?"deferred":r.decision
   })));
   setCollectionDate(recognizedDate);
-  setReconcileMessage("Decisiones recuperadas: "+recognized.length+" resultados existentes y "+(rows.length-recognized.length)+" lecturas pendientes de comprobar. Revisa el resumen antes de guardar.");
+  setReconcileMessage("Confirmaciones recuperadas: "+recognized.length+". Se muestra ahora el filtro de lecturas pendientes ("+(rows.length-recognized.length)+"). Comprueba las filas antes de finalizar.");
   setRecognized([]);
+  setFilter("deferred");
  }
  function edit(i:number,patch:Partial<Row>){setBulkReviewed(false);setRows(prev=>prev.map((r,j)=>j===i?{...r,...patch,decision:"pending"}:r))}
  function decide(i:number,decision:Decision){setRows(prev=>prev.map((r,j)=>j===i?{...r,decision}:r))}
