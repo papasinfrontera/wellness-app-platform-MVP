@@ -25,3 +25,7 @@ jobs:
           npm run test:pdf-reconcile
           npm run test:pdf-bulk
           node --test tests/pdf-document-history.test.mjs
+      - name: Install dependencies for TypeScript verification
+        run: npm install --ignore-scripts --no-package-lock --no-audit --no-fund
+      - name: Type-check Next.js source
+        run: npm run typecheck
