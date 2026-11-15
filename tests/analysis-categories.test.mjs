@@ -29,6 +29,8 @@ test("ambiguous labels are mapped by catalog code, not by substring",()=>{
 test("clinical optimization labels remain disabled until clinically approved rules are available",()=>{
  const page=readFileSync("src/app/(dashboard)/mi-analisis/page.tsx","utf8");
  assert.match(page,/Confirmado · sin evaluar/);
- assert.match(page,/disabled=\{i>=2&&i<=4\}/);
+ assert.match(page,/disabled=\\{\\(i>=2&&i<=4\\)/);
+ assert.match(page,/const filters=\\["Todos","Con resultado","Óptimo","Suficiente","Fuera de rango","Sin resultado"\\]/);
+ assert.match(page,/auth==="ready"\\?measured:null/);
  assert.match(page,/categoryForId\(item\.id\)/);
 });
