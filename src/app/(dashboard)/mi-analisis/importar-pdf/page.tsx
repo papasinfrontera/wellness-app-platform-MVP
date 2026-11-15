@@ -31,7 +31,9 @@ export default function PdfPilotPage(){
  const [reconcileMessage,setReconcileMessage]=useState("");
  const [recognizedDate,setRecognizedDate]=useState("");
  const [selectedIds,setSelectedIds]=useState<string[]>([]);
- const [bulkAction,setBulkAction]=useState<"confirmed"|"deferred"|"excluded">("confirmed");
+ const [groupSelection,setGroupSelection]=useState<string[]>([]);
+ const [groupAcknowledged,setGroupAcknowledged]=useState(false);
+ const [rowAction,setRowAction]=useState<"confirmed"|"deferred"|"excluded">("confirmed");
  const [bulkPreview,setBulkPreview]=useState(false);
  const [bulkMessage,setBulkMessage]=useState("");
 
@@ -88,11 +90,11 @@ export default function PdfPilotPage(){
    }catch(e){setSaveNotice(e instanceof Error?e.message:"No fue posible guardar los análisis.");}
    finally{setSaveBusy(false)}
  }
- const reset=()=>{setSelectedIds([]);setBulkPreview(false);setBulkMessage("");setFile(null);setReport(null);setRows([]);setRecognized([]);setRecognizedDate("");setReconcileMessage("");setSaved(false);setSaveNotice("");setCollectionDate("");setError("");setSearch({});setFinished(false);setBulkReviewed(false);setFilter("all");if(input.current)input.current.value=""};
+ const reset=()=>{setSelectedIds([]);setBulkPreview(false);setBulkMessage("");setGroupSelection([]);setGroupAcknowledged(false);setFile(null);setReport(null);setRows([]);setRecognized([]);setRecognizedDate("");setReconcileMessage("");setSaved(false);setSaveNotice("");setCollectionDate("");setError("");setSearch({});setFinished(false);setBulkReviewed(false);setFilter("all");if(input.current)input.current.value=""};
  async function analyze(){
   if(!file)return;
   if(file.size>5*1024*1024){setError("El tamaño máximo es 5 MB.");return}
-  setBusy(true);setSelectedIds([]);setBulkPreview(false);setBulkMessage("");setError("");setReport(null);setRows([]);setRecognized([]);setRecognizedDate("");setReconcileMessage("");setFinished(false);setBulkReviewed(false);
+  setBusy(true);setGroupSelection([]);setGroupAcknowledged(false);setSelectedIds([]);setBulkPreview(false);setBulkMessage("");setError("");setReport(null);setRows([]);setRecognized([]);setRecognizedDate("");setReconcileMessage("");setFinished(false);setBulkReviewed(false);
   try{
    const body=new FormData();body.append("file",file);
    const response=await fetch("/api/lab-pdf-preview",{method:"POST",body,cache:"no-store"});
@@ -160,22 +162,54 @@ export default function PdfPilotPage(){
  const visibleIds=visible.map(({row})=>row.id);
  const selectedVisible=visibleIds.filter(id=>selectedIds.includes(id));
  const allVisibleSelected=visibleIds.length>0&&selectedVisible.length===visibleIds.length;
- const eligibleSelected=rows.filter(r=>selectedIds.includes(r.id)&&r.decision==="pending"&&(bulkAction!=="confirmed"||valid(r)&&r.status==="candidate"));
+ const groupFor=(r:Row):"candidates"|"review"|"unmapped"|"excluded"|"confirmed"|"deferred"=>{
+   if(r.decision==="excluded")return "excluded";
+   if(r.decision==="confirmed")return "confirmed";
+   if(r.decision==="deferred")return "deferred";
+   if(!r.indicatorCode)return "unmapped";
+   return r.status==="candidate"&&valid(r)?"candidates":"review";
+ };
+ const groupConfig=[
+  {key:"candidates",label:"Candidatos válidos",count:rows.filter(r=>groupFor(r)==="candidates").length},
+  {key:"review",label:"Requieren revisión",count:rows.filter(r=>groupFor(r)==="review").length},
+  {key:"unmapped",label:"Sin equivalencia",count:rows.filter(r=>groupFor(r)==="unmapped").length},
+  {key:"excluded",label:"Excluidos",count:rows.filter(r=>groupFor(r)==="excluded").length}
+ ];
+ const groupConfirmed=rows.filter(r=>groupSelection.includes("candidates")&&groupFor(r)==="candidates");
+ const groupDeferred=rows.filter(r=>groupSelection.includes("unmapped")&&groupFor(r)==="unmapped");
+ const groupNeedsReview=rows.filter(r=>groupSelection.includes("review")&&groupFor(r)==="review");
+ const groupExcludedReview=rows.filter(r=>groupSelection.includes("excluded")&&groupFor(r)==="excluded");
+ const eligibleSelected=rows.filter(r=>selectedIds.includes(r.id)&&r.decision==="pending"&&(rowAction!=="confirmed"||(valid(r)&&r.status==="candidate")));
  const ineligibleSelected=selectedIds.length-eligibleSelected.length;
+ const isGroupMode=groupSelection.length>0;
  function selectVisible(){
-  setBulkPreview(false);setBulkMessage("");
+  setBulkPreview(false);setBulkMessage("");setGroupSelection([]);setGroupAcknowledged(false);
   setSelectedIds(prev=>allVisibleSelected?prev.filter(id=>!visibleIds.includes(id)):[...new Set([...prev,...visibleIds])]);
  }
+ function toggleGroup(key:string,enabled:boolean){
+  setBulkPreview(false);setBulkMessage("");setSelectedIds([]);setGroupAcknowledged(false);
+  setGroupSelection(prev=>enabled?[...prev,key]:prev.filter(id=>id!==key));
+ }
  function prepareBulk(){
-  if(!selectedIds.length){setBulkMessage("Selecciona al menos una fila.");return;}
-  if(bulkAction==="excluded"&&!selectedIds.length){return;}
+  if(!isGroupMode&&!selectedIds.length){setBulkMessage("Selecciona al menos una categoría o una fila.");return;}
+  if(isGroupMode&&!groupAcknowledged){setBulkMessage("Marca que revisaste los grupos seleccionados antes de continuar.");return;}
   setBulkPreview(true);setBulkMessage("");
  }
  function applyBulk(){
-  if(!bulkPreview||eligibleSelected.length===0)return;
-  const approved=new Set(eligibleSelected.map(r=>r.id));
-  setRows(prev=>prev.map(r=>approved.has(r.id)?{...r,decision:bulkAction}:r));
-  setBulkMessage("Se actualizaron "+approved.size+" decisiones de esta revisión. Ninguna medición se ha guardado en Supabase.");
+  if(!bulkPreview)return;
+  if(isGroupMode){
+   const confirmations=new Set(groupConfirmed.map(r=>r.id));
+   const deferrals=new Set(groupDeferred.map(r=>r.id));
+   if(!confirmations.size&&!deferrals.size){setBulkMessage("Estos grupos requieren revisión individual; no se cambió ninguna decisión.");setBulkPreview(false);return;}
+   setRows(prev=>prev.map(r=>confirmations.has(r.id)?{...r,decision:"confirmed"}:deferrals.has(r.id)?{...r,decision:"deferred"}:r));
+   setBulkMessage("Se confirmaron "+confirmations.size+" candidatos válidos y se marcaron "+deferrals.size+" lecturas sin equivalencia como pendientes. Los demás grupos no se modificaron; aún no se guardó en Supabase.");
+   setGroupSelection([]);setGroupAcknowledged(false);
+  }else{
+   if(!eligibleSelected.length)return;
+   const approved=new Set(eligibleSelected.map(r=>r.id));
+   setRows(prev=>prev.map(r=>approved.has(r.id)?{...r,decision:rowAction}:r));
+   setBulkMessage("Se actualizaron "+approved.size+" decisiones seleccionadas. Nada se ha guardado en Supabase.");
+  }
   setSelectedIds([]);setBulkPreview(false);setBulkReviewed(false);
  }
  const summary=()=>{
@@ -188,7 +222,7 @@ export default function PdfPilotPage(){
  <p className="wa-subtitle">Identifica, corrige y clasifica los resultados del PDF. La revisión es temporal; al guardar, las mediciones confirmadas entran en tu historial y las lecturas sin equivalencia quedan en una bandeja privada de pendientes.</p>
  <section className="wa-explorer" style={{marginTop:17,padding:18}}>
   <h2>1. Selecciona el PDF</h2><p className="wa-subtitle">Máximo 5 MB y 12 páginas · PDF digital con texto seleccionable · Sin OCR</p>
-  <input ref={input} type="file" accept=".pdf,application/pdf" aria-label="Archivo PDF de laboratorio" style={{...fieldStyle,marginTop:12}} onChange={e=>{setFile(e.target.files?.[0]||null);setSelectedIds([]);setBulkPreview(false);setBulkMessage("");setRows([]);setRecognized([]);setRecognizedDate("");setReconcileMessage("");setReport(null);setFinished(false);setError("")}}/>
+  <input ref={input} type="file" accept=".pdf,application/pdf" aria-label="Archivo PDF de laboratorio" style={{...fieldStyle,marginTop:12}} onChange={e=>{setFile(e.target.files?.[0]||null);setGroupSelection([]);setGroupAcknowledged(false);setSelectedIds([]);setBulkPreview(false);setBulkMessage("");setRows([]);setRecognized([]);setRecognizedDate("");setReconcileMessage("");setReport(null);setFinished(false);setError("")}}/>
   <div style={{display:"flex",gap:9,flexWrap:"wrap",marginTop:12,alignItems:"center"}}>
    <button type="button" disabled={!file||busy} onClick={analyze} style={{...buttonStyle,background:primary,color:"#fff",opacity:!file||busy?.5:1}}>{busy?"Extrayendo…":"Extraer resultados del PDF"}</button>
    <button type="button" onClick={reset} style={{...buttonStyle,background:"#f0edfb",color:primary}}>Limpiar sesión</button>
@@ -242,25 +276,42 @@ export default function PdfPilotPage(){
      <button type="button" onClick={summary} disabled={!done} style={{...buttonStyle,background:primary,color:"white",opacity:done?1:.4}}>Finalizar revisión</button>
      <label style={{fontSize:11,fontWeight:700,marginLeft:"auto"}}>Mostrar <select aria-label="Filtrar resultados" value={filter} onChange={e=>setFilter(e.target.value)} style={{...fieldStyle,width:"auto",marginLeft:5}}><option value="all">Todos</option><option value="pending">Por revisar</option><option value="candidates">Candidatos</option><option value="confirmed">Confirmados</option><option value="deferred">Pendientes declarados</option><option value="excluded">Excluidos</option></select></label>
     </div>
-    <div className="wa-bulk-pdf-bar" style={{display:"flex",flexWrap:"wrap",gap:8,marginTop:12,padding:12,background:"#f8f6ff",borderRadius:11,alignItems:"center"}}>
-      <label style={{fontSize:11,display:"inline-flex",alignItems:"center",gap:6,fontWeight:700}}>
-       <input type="checkbox" aria-label="Seleccionar todas las filas visibles" checked={allVisibleSelected} onChange={selectVisible} disabled={visibleIds.length===0}/> Seleccionar todas las visibles ({visible.length})
-      </label>
-      <span style={{fontSize:11,color:"#60597b"}}>{selectedIds.length} seleccionadas</span>
-      <label style={{fontSize:11,fontWeight:700}}>Acción
-       <select aria-label="Acción masiva" value={bulkAction} onChange={e=>{setBulkAction(e.target.value as "confirmed"|"deferred"|"excluded");setBulkPreview(false);setBulkMessage("");}} style={{...fieldStyle,width:"auto",marginLeft:6}}>
-        <option value="confirmed">Confirmar candidatos válidos</option>
-        <option value="deferred">Marcar pendientes</option>
-        <option value="excluded">Excluir seleccionados</option>
-       </select>
-      </label>
-      <button type="button" onClick={prepareBulk} disabled={selectedIds.length===0} style={{...buttonStyle,background:primary,color:"white",opacity:selectedIds.length?1:.45}}>Preparar acción</button>
-      <button type="button" disabled={selectedIds.length===0} onClick={()=>{setSelectedIds([]);setBulkPreview(false);setBulkMessage("");}} style={{...buttonStyle,background:"#eeeaf7",color:"#5b40a0"}}>Limpiar selección</button>
+    <div className="wa-bulk-pdf-bar" style={{marginTop:12,padding:12,background:"#f8f6ff",borderRadius:11}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+        <strong style={{fontSize:12,color:"#282043"}}>Aprobación por grupos</strong>
+        <div role="group" aria-label="Categorías para aprobación masiva" style={{display:"flex",justifyContent:"flex-end",flexWrap:"wrap",alignItems:"center",gap:8,marginLeft:"auto"}}>
+         {groupConfig.map(g=><label key={g.key} style={{display:"inline-flex",alignItems:"center",gap:6,border:"1px solid #e5dff5",borderRadius:9,background:groupSelection.includes(g.key)?"#eee9ff":"#fff",padding:"8px 10px",fontSize:11,fontWeight:700,color:"#44346e",cursor:g.count?"pointer":"default",whiteSpace:"nowrap"}}>
+          <input type="checkbox" disabled={g.count===0} checked={groupSelection.includes(g.key)} onChange={e=>toggleGroup(g.key,e.target.checked)} aria-label={g.label+" ("+g.count+")"}/>
+          {g.label} <span style={{borderRadius:12,background:"#f3efff",padding:"2px 6px",fontVariantNumeric:"tabular-nums"}}>{g.count}</span>
+         </label>)}
+        </div>
+      </div>
+      <div style={{display:"flex",justifyContent:"flex-end",alignItems:"center",gap:9,flexWrap:"wrap",marginTop:10}}>
+       <label style={{display:"inline-flex",alignItems:"center",gap:6,fontSize:11,color:"#625879"}}>
+        <input type="checkbox" checked={groupAcknowledged} disabled={!isGroupMode} onChange={e=>{setGroupAcknowledged(e.target.checked);setBulkPreview(false)}}/> Revisé los grupos seleccionados
+       </label>
+       <button type="button" disabled={!isGroupMode||!groupAcknowledged} onClick={prepareBulk} style={{...buttonStyle,background:primary,color:"white",opacity:isGroupMode&&groupAcknowledged?1:.45}}>Revisar acciones seleccionadas</button>
+       <button type="button" disabled={!isGroupMode} onClick={()=>{setGroupSelection([]);setGroupAcknowledged(false);setBulkPreview(false);setBulkMessage("");}} style={{...buttonStyle,background:"#eeeaf7",color:"#5b40a0"}}>Limpiar grupos</button>
+      </div>
+      <div style={{marginTop:12,paddingTop:10,borderTop:"1px solid #e9e3f4",display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+       <label style={{fontSize:11,display:"inline-flex",alignItems:"center",gap:6,fontWeight:700}}>
+        <input type="checkbox" aria-label="Seleccionar todas las filas visibles" checked={allVisibleSelected} onChange={selectVisible} disabled={visibleIds.length===0}/> Seleccionar visibles ({visible.length})
+       </label>
+       <span style={{fontSize:11,color:"#60597b"}}>{selectedIds.length} filas seleccionadas</span>
+       <label style={{fontSize:11,fontWeight:700}}>Acción individual por selección
+        <select aria-label="Acción para filas seleccionadas" value={rowAction} onChange={e=>{setRowAction(e.target.value as "confirmed"|"deferred"|"excluded");setBulkPreview(false)}} style={{...fieldStyle,width:"auto",marginLeft:6}}>
+         <option value="confirmed">Confirmar válidos</option><option value="deferred">Marcar pendientes</option><option value="excluded">Excluir seleccionados</option>
+        </select>
+       </label>
+       <button type="button" disabled={!selectedIds.length} onClick={prepareBulk} style={{...buttonStyle,background:"#eeeaff",color:primary,opacity:selectedIds.length?1:.45}}>Revisar filas</button>
+       <button type="button" disabled={!selectedIds.length} onClick={()=>{setSelectedIds([]);setBulkPreview(false);setBulkMessage("");}} style={{...buttonStyle,background:"#eeeaf7",color:"#5b40a0"}}>Limpiar filas</button>
+      </div>
     </div>
     {bulkPreview&&<div role="status" style={{marginTop:8,border:"1px solid #e5dcf9",borderRadius:11,padding:12,background:"#fffdf8",fontSize:12}}>
-      <strong>Comprobar antes de aplicar:</strong> {eligibleSelected.length} filas cambiarán a {bulkAction==="confirmed"?"Confirmado":bulkAction==="deferred"?"Pendiente":"Excluido"}. {ineligibleSelected>0&&<span>{ineligibleSelected} filas no reúnen las condiciones y permanecerán sin cambios. </span>}
-      <p style={{margin:"6px 0"}}>Solo se modificarán las decisiones de esta sesión. El guardado de resultados se realiza en un paso posterior.</p>
-      <button type="button" disabled={!eligibleSelected.length} onClick={applyBulk} style={{...buttonStyle,background:bulkAction==="excluded"?"#8b4650":primary,color:"white",opacity:eligibleSelected.length?1:.45}}>Aplicar a {eligibleSelected.length} filas</button>
+      <strong>Resumen antes de aplicar decisiones</strong>
+      {isGroupMode?<p style={{margin:"7px 0"}}>{groupConfirmed.length} candidatos válidos se confirmarán; {groupDeferred.length} lecturas sin equivalencia se marcarán como pendientes. {groupNeedsReview.length} filas requieren revisión manual y {groupExcludedReview.length} excluidas se conservarán sin cambios. Ningún grupo se aprobará a ciegas.</p>:<p style={{margin:"7px 0"}}>{eligibleSelected.length} filas seleccionadas se cambiarán a {rowAction==="confirmed"?"Confirmado":rowAction==="deferred"?"Pendiente":"Excluido"}. {ineligibleSelected>0&&ineligibleSelected+" no cumplen los requisitos y seguirán sin cambios."}</p>}
+      <p style={{margin:"6px 0"}}>La acción solo clasifica la revisión actual. Guardar en el historial es un paso posterior.</p>
+      <button type="button" disabled={isGroupMode?groupConfirmed.length+groupDeferred.length===0:eligibleSelected.length===0} onClick={applyBulk} style={{...buttonStyle,background:primary,color:"#fff",opacity:(isGroupMode?groupConfirmed.length+groupDeferred.length:eligibleSelected.length)?1:.45}}>Aplicar decisiones</button>
       <button type="button" onClick={()=>setBulkPreview(false)} style={{...buttonStyle,marginLeft:7,background:"#efedf6",color:"#574e72"}}>Cancelar</button>
     </div>}
     {bulkMessage&&<p role="status" style={{fontSize:11,color:"#625078",margin:"8px 0"}}>{bulkMessage}</p>}
@@ -270,7 +321,7 @@ export default function PdfPilotPage(){
     <table style={{borderCollapse:"separate",borderSpacing:"0 6px",width:"100%",minWidth:740,fontSize:11}}>
      <thead><tr>{["Seleccionar","Análisis original","Indicador sugerido · buscar y elegir","Resultado","Estado y acción"].map(x=><th key={x} style={{textAlign:"left",padding:"5px 8px",color:"#6e6687"}}>{x}</th>)}</tr></thead>
      <tbody>{visible.map(({row,index:i})=><tr key={row.id} style={{verticalAlign:"top",background:row.decision==="confirmed"?"#f8fdf9":"#faf9ff"}}>
-      <td style={{padding:"14px 8px",width:35}}><input type="checkbox" aria-label={"Seleccionar fila "+(i+1)+" "+row.original} checked={selectedIds.includes(row.id)} onChange={e=>{setBulkPreview(false);setBulkMessage("");setSelectedIds(prev=>e.target.checked?[...new Set([...prev,row.id])]:prev.filter(id=>id!==row.id));}}/></td>
+      <td style={{padding:"14px 8px",width:35}}><input type="checkbox" aria-label={"Seleccionar fila "+(i+1)+" "+row.original} checked={selectedIds.includes(row.id)} onChange={e=>{setGroupSelection([]);setGroupAcknowledged(false);setBulkPreview(false);setBulkMessage("");setSelectedIds(prev=>e.target.checked?[...new Set([...prev,row.id])]:prev.filter(id=>id!==row.id));}}/></td>
       <td style={{padding:10,width:"23%",borderRadius:"10px 0 0 10px"}}><strong>{i+1}. {row.original}</strong><div style={{fontSize:10,marginTop:5,color:"#757087",lineHeight:1.4}}>{row.reason}</div></td>
       <td style={{padding:9,width:"35%"}}>
        <input aria-label={"Buscar indicador fila "+(i+1)} placeholder="Buscar por nombre o código…" style={{...fieldStyle,marginBottom:5}} value={search[row.id]??""} onChange={e=>setSearch(prev=>({...prev,[row.id]:e.target.value}))}/>
