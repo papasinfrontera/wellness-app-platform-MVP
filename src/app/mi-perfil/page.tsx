@@ -46,7 +46,7 @@ export default function Perfil(){
    if(!user){setProfile(empty);setAvatar(null);setLoading(false);return}
    let active=true;
    setLoading(true);
-   void db.from("wellness_profiles").select("*").eq("user_id",user.id).maybeSingle().then(res=>{
+   void Promise.resolve(db.from("wellness_profiles").select("*").eq("user_id",user.id).maybeSingle()).then(res=>{
      if(!active)return;
      if(!res.error&&res.data){const p=normalize(res.data as Record<string,unknown>);setProfile(p);setStep(p.completed_step);void signed(p.photo_path)}
      if(res.error)setNote("No pudimos cargar tu perfil. Actualiza la página para intentarlo nuevamente.");
