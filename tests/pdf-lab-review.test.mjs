@@ -137,5 +137,5 @@ test("A.2 never assigns Urea to BUN or generic CRP to hs-CRP",()=>{
 test("A.2 interface has finalization and explicit pending classification with no DB writes",()=>{
  const page=readFileSync("src/app/(dashboard)/mi-analisis/importar-pdf/page.tsx","utf8");
  assert.match(page,/Finalizar revisión/);assert.match(page,/Pendiente/);assert.match(page,/Volver a editar/);
- assert.doesNotMatch(page,/\.from\(["']observations["']\)|\.insert\(|\.upsert\(/);
+ assert.doesNotMatch(page,/\\.insert\\(|\\.upsert\\(|\\.update\\(|\\.delete\\(/);
 });
