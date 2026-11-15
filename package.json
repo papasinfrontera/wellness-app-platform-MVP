@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run test:pilot && npm run test:catalog128 && npm run test:audit && npm run test:pdf && npm run test:analysis && npm run test:categories && npm run test:references && npm run test:lab-reference && npm run test:pdf-unmatched && next build",
+    "build": "npm run test:pilot && npm run test:catalog128 && npm run test:audit && npm run test:pdf && npm run test:analysis && npm run test:categories && npm run test:references && npm run test:lab-reference && npm run test:pdf-unmatched && npm run test:pdf-reconcile && next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "catalog:refresh": "node scripts/extract-public-reference-catalog.mjs",
@@ -24,7 +24,8 @@
     "test:categories": "node --experimental-strip-types --test tests/analysis-categories.test.mjs",
     "test:references": "node --experimental-strip-types --test tests/lab-reference-evaluation.test.mjs",
     "test:lab-reference": "node --test tests/analysis-lab-reference.test.mjs",
-    "test:pdf-unmatched": "node --test tests/pdf-unmatched-recovery.test.mjs"
+    "test:pdf-unmatched": "node --test tests/pdf-unmatched-recovery.test.mjs",
+    "test:pdf-reconcile": "node --test tests/pdf-reconcile-existing.test.mjs"
   },
   "dependencies": {
     "next": "^15.5.0",
