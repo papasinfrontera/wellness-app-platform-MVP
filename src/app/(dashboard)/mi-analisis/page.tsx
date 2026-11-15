@@ -2,21 +2,15 @@
 import {useEffect,useMemo,useState} from "react";
 import {createClient} from "@supabase/supabase-js";
 import catalogData from "./catalog-reference.json";
+import {ANALYSIS_CATEGORIES,categoryForId} from "@/lib/indicator-categories";
 import "./analisis.css";
 type Item={id:number;name:string;name_en?:string;aliases?:string[];code?:string};
 type Result={code:string;value:number;unit:string;status:string};
 const catalog=catalogData as Item[];
-const groups=["Sangre","Salud cerebral","Salud digestiva","Corazón y circulación","Hormonas","Inflamación","Riñones","Salud metabólica","Vitaminas y nutrientes","Estrés y energía","Exposición y toxinas"];
-const patterns=[/hemoglobin|hematocrit|blood cell|platelet|corpuscular|basophil|eosinophil|lymphocyte|monocyte|neutrophil|red cell|reticulocyte|rdw|mcv|mch|rbc|wbc/i,/vitamin b12|folate|homocysteine|thyroid/i,/albumin|globulin|bilirubin|alkaline phosphatase|aminotransferase|total protein|fib-4|ggt/i,/cholesterol|apolipoprotein|atherogenic|lipoprotein|triglyceride|ldl|hdl|homocysteine/i,/testosterone|estradiol|cortisol|dhea|thyroid|tsh|free t3|free t4|prolactin|progesterone|shbg/i,/crp|inflammation|immune|myeloperoxidase|mpo/i,/creatinine|blood urea|bun\/|uric acid|potassium|sodium|chloride|osmolality|cystatin|egfr/i,/glucose|a1c|insulin|homa|fructosamine|triglyceride|atherogenic/i,/vitamin|calcium|magnesium|iron|ferritin|folate|potassium|phosphorus|zinc|selenium|iodine/i,/cortisol|dhea|thyroid|glucose|testosterone|creatine kinase/i,/lead|mercury|cadmium|arsenic|toxin/i];
+const groups=[...ANALYSIS_CATEGORIES];
 const clean=(s:string)=>s.normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 const filters=["Todos","Con resultado","Óptimos","Suficientes","Fuera de rango","Sin resultados"];
-// A single presentation category per indicator, distinct from clinical classification.
-const categoryFor=(item:Item):number=>{
- const label=item.name_en||item.name;
- const priority=[0,4,5,6,7,3,2,8,9,1,10];
- const match=priority.find(i=>patterns[i].test(label));
- return match===undefined?-1:match;
-};
+const categoryFor=(item:Item):number=>categoryForId(item.id)??-1;
 const categoryCounts=groups.map((_,i)=>catalog.filter(m=>categoryFor(m)===i).length);
 const resultLabel=(value:number)=>new Intl.NumberFormat("es-ES",{maximumFractionDigits:6}).format(value);
 
@@ -70,6 +64,6 @@ export default function Analysis(){
  {rows.length===0&&<div className="wa-result-empty">No hay indicadores que coincidan con el filtro.</div>}
  </div></div>
  <div className="wa-paginator"><button disabled={current<=1} onClick={()=>setPage(p=>Math.max(1,p-1))}>‹ Anterior</button><span>Página {current} de {pages}</span><button disabled={current>=pages} onClick={()=>setPage(p=>Math.min(pages,p+1))}>Siguiente ›</button></div>
- </section></div><p className="wa-disclaimer">{role==="Médico"?"La modalidad médica de Doctor Connect todavía no permite acceso a otros pacientes. ":""}Los nombres provienen del catálogo aprobado de la demo; los resultados se obtienen exclusivamente de la cuenta autenticada. Sin una importación validada, se mostrarán como “Sin resultados”. La categoría es organizativa, no una evaluación médica. Los estados clínicos permanecerán desactivados hasta que existan reglas aprobadas; no se inventan rangos ni calificaciones clínicas.</p></>
+ </section></div><p className="wa-disclaimer">{role==="Médico"?"La modalidad médica de Doctor Connect todavía no permite acceso a otros pacientes. ":""}Los nombres provienen del catálogo aprobado de la demo; los resultados se obtienen exclusivamente de la cuenta autenticada. Sin una importación validada, se mostrarán como “Sin resultados”. Las categorías usan el mapa de los 128 indicadores; son organizativas y no equivalen a una evaluación médica. Los estados clínicos permanecerán desactivados hasta que existan reglas aprobadas; no se inventan rangos ni calificaciones clínicas.</p></>
  </main>
 }
