@@ -2,12 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 const importer=readFileSync("src/app/(dashboard)/mi-analisis/importar-pdf/page.tsx","utf8");
+const parser=readFileSync("src/lib/pdf-lab-review.ts","utf8");
 const inbox=readFileSync("src/app/(dashboard)/mi-analisis/pendientes/page.tsx","utf8");
 const migration=readFileSync("supabase/migrations/202611150002_lab_unmatched_readings_v2.sql","utf8");
 test("unmapped, qualitative and complementary readings are distinct",()=>{
- assert.match(importer,/unmapped.*qualitative.*complementary/);
- assert.match(importer,/total de celularidad/);
- assert.match(importer,/proteina c reactiva/);
+ assert.match(importer,/classifyUnmatchedReading\(r\.original,r\.value\)/);
+ assert.match(parser,/export function classifyUnmatchedReading/);
+ assert.match(parser,/total de celularidad/);
+ assert.match(parser,/proteina c reactiva/);
  assert.match(importer,/save_lab_review_v2/);
 });
 test("numeric and pending rows saved together without fabricating catalog observations",()=>{
