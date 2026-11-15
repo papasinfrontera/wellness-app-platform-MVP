@@ -25,7 +25,7 @@ test("preparation requires review acknowledgment, and persistence is separate",(
  assert.ok(page.includes('if(isGroupMode&&!groupAcknowledged)'));
  assert.ok(page.includes('function prepareBulk()'));
  assert.ok(page.includes('function applyBulk()'));
- assert.ok(page.includes('db.rpc("save_lab_review_v2"'));
+ assert.ok(page.includes('db.rpc("save_lab_review_v3"'));
  assert.ok(page.includes('Guardar en el historial es un paso posterior'));
 });
 test("per-row checkboxes remain available with selection scoped to visible rows",()=>{
