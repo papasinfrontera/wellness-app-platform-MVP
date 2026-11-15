@@ -2,7 +2,7 @@
 import {useEffect,useRef,useState} from "react";
 import {createClient} from "@supabase/supabase-js";
 import catalog from "../catalog-reference.json";
-import type {PdfRow,PdfReview} from "@/lib/pdf-lab-review";
+import {classifyUnmatchedReading,type PdfRow,type PdfReview} from "@/lib/pdf-lab-review";
 import "../analisis.css";
 type Decision="pending"|"confirmed"|"excluded"|"deferred";
 type Row=PdfRow&{decision:Decision};
@@ -13,7 +13,7 @@ const fieldStyle={width:"100%",minWidth:0,border:"1px solid #e3def3",borderRadiu
 const buttonStyle={border:0,borderRadius:9,padding:"9px 12px",fontSize:11,fontWeight:750 as const,cursor:"pointer"};
 const normalize=(s:string)=>s.normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 const numerical=/^[<>≤≥]?\s*[+-]?\d+(?:[.,]\d+)?$/;
-const kindFor=(label:string):"unmapped"|"qualitative"|"complementary"=>{const k=normalize(label);return /total de celularidad/.test(k)?"complementary":/proteina c reactiva|pcr/.test(k)?"qualitative":"unmapped"};
+
 const valid=(r:Row)=>!!r.indicatorCode&&!!r.value.trim()&&(!!r.unit.trim()||r.indicatorCode==="REF-028")&&numerical.test(r.value.trim());
 function candidateList(query:string,code:string){
  const q=normalize(query.trim());
@@ -81,7 +81,7 @@ export default function PdfPilotPage(){
      if(authError||!user){setIdentity("signed_out");throw new Error("Inicia sesión de nuevo para guardar.");}
      const digest=await crypto.subtle.digest("SHA-256",await file.arrayBuffer());
      const sha=[...new Uint8Array(digest)].map(b=>b.toString(16).padStart(2,"0")).join("");
-     const payload=rows.map(r=>({decision:r.decision,code:r.indicatorCode,original:r.original,value:r.value,unit:r.unit,numeric_value:r.decision==="confirmed"?asNumber(r.value):null,kind:kindFor(r.original)}));
+     const payload=rows.map(r=>({decision:r.decision,code:r.indicatorCode,original:r.original,value:r.value,unit:r.unit,numeric_value:r.decision==="confirmed"?asNumber(r.value):null,kind:classifyUnmatchedReading(r.original,r.value)}));
      const {data,error}=await db.rpc("save_lab_review_v2",{p_rows:payload,p_observed_on:collectionDate,p_sha256:sha});
      if(error)throw new Error("No se pudo completar el guardado seguro. No se registró una importación parcial.");
      setSaved(true);
@@ -158,6 +158,13 @@ export default function PdfPilotPage(){
  function confirmCandidates(){if(!bulkReviewed)return;setBulkReviewed(false);setRows(prev=>prev.map(r=>r.decision==="pending"&&r.status==="candidate"&&valid(r)?{...r,decision:"confirmed"}:r))}
  function deferUnmapped(){setBulkReviewed(false);setRows(prev=>prev.map(r=>r.decision==="pending"&&!r.indicatorCode?{...r,decision:"deferred"}:r));}
  const unmappedToReview=rows.filter(r=>r.decision==="pending"&&!r.indicatorCode).length;
+ const unresolvedRows=rows.filter(r=>!r.indicatorCode&&r.decision!=="excluded");
+ const unresolvedByKind={
+  qualitative:unresolvedRows.filter(r=>classifyUnmatchedReading(r.original,r.value)==="qualitative").length,
+  complementary:unresolvedRows.filter(r=>classifyUnmatchedReading(r.original,r.value)==="complementary").length,
+  unmapped:unresolvedRows.filter(r=>classifyUnmatchedReading(r.original,r.value)==="unmapped").length
+ };
+
 
  const visibleIds=visible.map(({row})=>row.id);
  const selectedVisible=visibleIds.filter(id=>selectedIds.includes(id));
@@ -274,6 +281,9 @@ export default function PdfPilotPage(){
      <button type="button" onClick={summary} disabled={!done} style={{...buttonStyle,background:primary,color:"white",opacity:done?1:.4}}>Finalizar revisión</button>
      <label style={{fontSize:11,fontWeight:700,marginLeft:"auto"}}>Mostrar <select aria-label="Filtrar resultados" value={filter} onChange={e=>setFilter(e.target.value)} style={{...fieldStyle,width:"auto",marginLeft:5}}><option value="all">Todos</option><option value="pending">Por revisar</option><option value="candidates">Candidatos</option><option value="confirmed">Confirmados</option><option value="deferred">Pendientes declarados</option><option value="excluded">Excluidos</option></select></label>
     </div>
+    {unresolvedRows.length>0&&<div role="note" style={{marginTop:12,padding:"10px 13px",borderRadius:10,border:"1px solid #e9dcbf",background:"#fffcf5",fontSize:11,color:"#675538",lineHeight:1.6}}>
+      <strong>Lecturas sin equivalencia ({unresolvedRows.length}):</strong> {unresolvedByKind.unmapped} sin indicador, {unresolvedByKind.qualitative} cualitativas y {unresolvedByKind.complementary} complementarias. Usa «Sin equivalencia» para conservarlas como pendientes y revisarlas después; no las fuerces a un indicador diferente. Solo las confirmaciones válidas entrarán en el historial de mediciones.
+    </div>}
     <div className="wa-bulk-pdf-bar" style={{marginTop:12,padding:12,background:"#f8f6ff",borderRadius:11}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:12,flexWrap:"wrap"}}>
         <strong style={{fontSize:12,color:"#282043"}}>Aprobación por grupos</strong>
