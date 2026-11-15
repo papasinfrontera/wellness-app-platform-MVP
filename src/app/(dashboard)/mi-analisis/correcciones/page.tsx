@@ -2,7 +2,7 @@
 import {useEffect,useMemo,useState} from "react";
 import {useWellnessAuth} from "../../components/WellnessAuthProvider";
 import {applyLabCorrections,type LabCorrection} from "@/lib/lab-corrections";
-import "../mi-analisis/analisis.css";
+import "../analisis.css";
 
 type Reading={id:string;value:number;unit:string;observed_at:string;raw_label:string|null;source_key:string|null;
  indicators:{code:string;name_es:string}|{code:string;name_es:string}[]|null};
