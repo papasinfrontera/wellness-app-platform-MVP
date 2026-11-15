@@ -93,3 +93,46 @@ body:has(.wb-app){background:#F8F8F5}
  .wb-sidebar-toggle{width:40px;height:40px}
 }
 @media(prefers-reduced-motion:reduce){.wb-app{transition:none}}
+
+
+/* Sprint 6.8-K — private identity in the global header */
+.wb-topbar-side{display:flex;align-items:center;justify-content:flex-end;min-width:0}
+.wb-account{display:flex;align-items:center;gap:13px}
+.wb-session-live{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:#477443}
+.wb-session-dot{width:7px;height:7px;border-radius:50%;background:#68AE5C;display:inline-block}
+.wb-account-details{position:relative}
+.wb-account-trigger{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;border:1px solid #E7E4EC;background:#fff;border-radius:99px;padding:5px 12px 5px 5px;min-height:48px;color:#161620}
+.wb-account-trigger::-webkit-details-marker{display:none}
+.wb-account-trigger::marker{content:""}
+.wb-account-trigger:hover,.wb-account-details[open]>.wb-account-trigger{border-color:#C6BBF5;background:#F9F7FF}
+.wb-account-trigger:focus-visible,.wb-account-option:focus-visible,.wb-session-retry:focus-visible,.wb-auth-link:focus-visible{outline:3px solid #8B79FF;outline-offset:3px}
+.wb-avatar{width:38px;height:38px;border-radius:50%;background:#EDE8FF;color:#5B40F5;display:grid;place-items:center;overflow:hidden;flex:0 0 38px;font-size:12px;font-weight:800;letter-spacing:.02em}
+.wb-avatar-img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+.wb-account-ident{display:grid;gap:2px;min-width:75px;max-width:130px}
+.wb-account-ident strong{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wb-account-ident small{font-size:10px;color:#817B90}
+.wb-account-chevron{font-size:18px;color:#8A829B;line-height:1}
+.wb-account-popover{position:absolute;z-index:50;right:0;top:calc(100% + 10px);width:min(290px,calc(100vw - 32px));padding:8px;background:#fff;border:1px solid #E9E6F1;box-shadow:0 18px 45px rgba(37,25,68,.13);border-radius:16px}
+.wb-account-popover-head{padding:11px 12px 12px;display:grid;gap:4px;border-bottom:1px solid #F0EDF5;overflow-wrap:anywhere}
+.wb-account-popover-head strong{font-size:13px}
+.wb-account-popover-head small{font-size:11px;color:#477443}
+.wb-account-option{width:100%;box-sizing:border-box;display:flex;align-items:center;gap:13px;padding:13px 11px;text-decoration:none;background:transparent;border:0;border-radius:10px;text-align:left;cursor:pointer;color:#423B56;font-size:12px;font-weight:700;font-family:inherit}
+.wb-account-option:hover{background:#F4F1FF;color:#5B40F5}
+.wb-account-option span{flex:1}
+.wb-account-rule{height:1px;background:#EEEAF5;margin:5px 4px}
+.wb-account-logout{color:#9E3D4B}
+.wb-account-logout:disabled{opacity:.55;cursor:wait}
+.wb-account-message{font-size:11px;color:#9E3D4B;padding:0 10px}
+.wb-auth-link,.wb-session-retry{display:inline-flex;align-items:center;justify-content:center;border:1px solid #DDD4FC;border-radius:99px;padding:11px 15px;background:#F5F1FF;color:#5B40F5;font-weight:800;text-decoration:none;font-size:12px;cursor:pointer}
+.wb-session-wait{font-size:12px;color:#7C768A}
+@media(max-width:810px){
+ .wb-topbar{display:flex;height:62px;padding:0 18px;justify-content:flex-end;position:relative;z-index:10}
+ .wb-topbar-logo{display:none}
+ .wb-account{gap:8px}
+ .wb-session-live{font-size:10px}
+ .wb-account-trigger{min-height:43px;padding-right:9px}
+ .wb-avatar{width:34px;height:34px;flex-basis:34px}
+ .wb-account-ident{max-width:95px;min-width:50px}
+ .wb-account-popover{top:calc(100% + 6px)}
+}
+@media(max-width:360px){.wb-account-ident small{display:none}.wb-session-live{font-size:0}.wb-session-dot{width:8px;height:8px}}
