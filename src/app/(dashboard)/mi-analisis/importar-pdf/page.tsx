@@ -33,16 +33,35 @@ export default function PdfPilotPage(){
    void db.auth.getUser().then(({data})=>{if(mounted)setIdentity(data.user?"signed_in":"signed_out")}).catch(()=>{if(mounted)setIdentity("signed_out")});
    return()=>{mounted=false};
  },[]);
- const asNumber=(s:string):number|null=>{const t=s.trim();if(!/^[+-]?(?:\\d{1,3}(?:[.,]\\d{3})+|\\d+)(?:[.,]\\d+)?$/.test(t))return null;
-   const v=/^[+-]?\\d{1,3}(?:\\.\\d{3})+(?:,\\d+)?$/.test(t)?t.replace(/\\./g,"").replace(",","."):
-     /^[+-]?\\d{1,3}(?:,\\d{3})+(?:\\.\\d+)?$/.test(t)?t.replace(/,/g,""):t.replace(",",".");
-   const n=Number(v);return Number.isFinite(n)?n:null;
+ const asNumber=(input:string):number|null=>{
+   const text=input.normalize("NFKC").trim().replace(/[\u00a0\u202f\u2009\u2007\s]/g,"").replace(/[−–]/g,"-");
+   if(!/^[+-]?[0-9.,]+$/.test(text))return null;
+   const decimalComma=text.includes(",")&&(text.lastIndexOf(",")>text.lastIndexOf(".")||!text.includes("."));
+   const decimalDot=!decimalComma&&text.includes(".");
+   const sep=decimalComma?",":decimalDot?".":"";
+   const parts=sep?text.split(sep):[text];
+   let normalized="";
+   if(parts.length>1){
+     const final=parts.at(-1)||"";
+     const prefix=parts.slice(0,-1).join("");
+     const thousandPattern=sep===","?/^[+-]?\d{1,3}(,\d{3})+$/:/^[+-]?\d{1,3}(\.\d{3})+$/;
+     if(parts.length===2&&final.length===3&&thousandPattern.test(text)){
+       normalized=text.replace(/[.,]/g,"");
+     }else if(parts.length>2&&final.length===3&&thousandPattern.test(text)){
+       normalized=text.replace(/[.,]/g,"");
+     }else{
+       normalized=prefix.replace(/[.,]/g,"")+"."+final;
+     }
+   }else normalized=text;
+   const value=Number(normalized);
+   return normalized!==""&&Number.isFinite(value)?value:null;
  };
  async function saveReviewed(){
    if(!file||!done||saveBusy||saved||!collectionDate||identity!=="signed_in")return;
    const confirmedRows=rows.filter(r=>r.decision==="confirmed");
    const payload=confirmedRows.map(r=>({code:r.indicatorCode,original:r.original,unit:r.unit,value:asNumber(r.value)}));
-   if(!payload.length||payload.some(x=>x.value===null)){setSaveNotice("Revisa los valores numéricos antes de guardar.");return}
+   const invalid=payload.map((p,i)=>p.value===null?confirmedRows[i].original:null).filter((x):x is string=>x!==null);
+   if(!payload.length||invalid.length){setSaveNotice("No se pudo interpretar el valor de: "+invalid.join(", ")+". Vuelve a editar esos resultados antes de guardar.");return}
    setSaveBusy(true);setSaveNotice("");
    try{
      const u=process.env.NEXT_PUBLIC_SUPABASE_URL,k=process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
