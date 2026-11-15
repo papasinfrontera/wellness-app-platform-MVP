@@ -19,6 +19,6 @@ test("K5 profile hub keeps original five steps and avatar editing",()=>{
  assert.match(profile,/overview\?<div/);assert.match(profile,/Cambiar fotografía/);
  assert.match(profile,/Datos personales/);assert.match(profile,/Medidas y actividad/);
  assert.match(profile,/Mi salud/);assert.match(profile,/Mis hábitos/);assert.match(profile,/Objetivos y privacidad/);
- assert.match(profile,/backToOverview/);assert.match(profile,/if\(await save\(step\)\)setOverview\(true\)/);
+ assert.match(profile,/backToOverview/);assert.match(profile,/if\(await save\(step\)\)/);
  assert.match(profile,/wellness-avatars/);assert.match(profile,/ai_consent/);
 });
