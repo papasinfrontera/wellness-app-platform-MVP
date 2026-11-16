@@ -14,7 +14,7 @@ const buttonStyle={border:0,borderRadius:9,padding:"9px 12px",fontSize:11,fontWe
 const normalize=(s:string)=>s.normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
 const numerical=/^[<>≤≥]?\s*[+-]?\d+(?:[.,]\d+)?$/;
 
-const valid=(r:Row)=>!!r.indicatorCode&&!!r.value.trim()&&(!!r.unit.trim()||r.indicatorCode==="REF-028")&&numerical.test(r.value.trim());
+const valid=(r:Row)=>r.specimen!=="urine"&&!!r.indicatorCode&&!!r.value.trim()&&(!!r.unit.trim()||r.indicatorCode==="REF-028")&&numerical.test(r.value.trim());
 function candidateList(query:string,code:string){
  const q=normalize(query.trim());
  const filtered=q?entries.filter(x=>[x.name,x.name_en,x.code,...(x.aliases||[])].some(y=>normalize(y).includes(q))):entries.filter(x=>x.code===code);
@@ -379,7 +379,7 @@ export default function PdfPilotPage(){
      <thead><tr>{["Seleccionar","Análisis original","Indicador sugerido · buscar y elegir","Resultado","Estado y acción"].map(x=><th key={x} style={{textAlign:"left",padding:"5px 8px",color:"#6e6687"}}>{x}</th>)}</tr></thead>
      <tbody>{visible.map(({row,index:i})=><tr key={row.id} style={{verticalAlign:"top",background:row.decision==="confirmed"?"#f8fdf9":"#faf9ff"}}>
       <td style={{padding:"14px 8px",width:35}}><input type="checkbox" aria-label={"Seleccionar fila "+(i+1)+" "+row.original} checked={selectedIds.includes(row.id)} onChange={e=>{setGroupSelection([]);setGroupAcknowledged(false);setBulkPreview(false);setBulkMessage("");setSelectedIds(prev=>e.target.checked?[...new Set([...prev,row.id])]:prev.filter(id=>id!==row.id));}}/></td>
-      <td style={{padding:10,width:"23%",borderRadius:"10px 0 0 10px"}}><strong>{i+1}. {row.original}</strong><div style={{fontSize:10,marginTop:5,color:"#757087",lineHeight:1.4}}>{row.reason}</div></td>
+      <td style={{padding:10,width:"23%",borderRadius:"10px 0 0 10px"}}><strong>{i+1}. {row.original}</strong>{row.section&&<div style={{fontSize:10,marginTop:4,color:row.specimen==="urine"?"#925320":"#6b57ac",fontWeight:700}}>{row.section} · {row.specimen==="urine"?"Muestra de orina":"Muestra de sangre / serología"}</div>}<div style={{fontSize:10,marginTop:5,color:"#757087",lineHeight:1.4}}>{row.reason}</div></td>
       <td style={{padding:9,width:"35%"}}>
        <input aria-label={"Buscar indicador fila "+(i+1)} placeholder="Buscar por nombre o código…" style={{...fieldStyle,marginBottom:5}} value={search[row.id]??""} onChange={e=>setSearch(prev=>({...prev,[row.id]:e.target.value}))}/>
        <select size={1} aria-label={"Indicador fila "+(i+1)} style={fieldStyle} value={row.indicatorCode} onChange={e=>{const entry=entries.find(x=>x.code===e.target.value);edit(i,{indicatorCode:e.target.value,indicatorName:entry?.name||"",status:"review",reason:"Selección manual; comprobar analito, método y unidad."});setSearch(prev=>({...prev,[row.id]:""}))}}>
