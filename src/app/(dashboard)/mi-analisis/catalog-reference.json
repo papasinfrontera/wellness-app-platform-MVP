@@ -4,10 +4,12 @@
     "name": "Apolipoproteína B (ApoB)",
     "name_en": "Apolipoprotein B (ApoB)",
     "aliases": [
-      "Apolipoproteína B",
-      "Apolipoprotein B",
+      "Apo B",
       "ApoB",
-      "Apo B"
+      "Apolipoprotein B",
+      "Apolipoprotein B (ApoB)",
+      "Apolipoproteína B",
+      "Apolipoproteína B (ApoB)"
     ],
     "code": "REF-001"
   },
@@ -16,8 +18,10 @@
     "name": "Índice aterogénico del plasma (AIP)",
     "name_en": "Atherogenic Index of Plasma (AIP)",
     "aliases": [
-      "Índice aterogénico plasmático",
-      "AIP"
+      "AIP",
+      "Atherogenic Index of Plasma (AIP)",
+      "Índice aterogénico del plasma (AIP)",
+      "Índice aterogénico plasmático"
     ],
     "code": "REF-002"
   },
@@ -26,8 +30,10 @@
     "name": "Relación nitrógeno ureico/creatinina (BUN/creatinina)",
     "name_en": "BUN/Creatinine Ratio",
     "aliases": [
+      "BUN/Creatinine Ratio",
+      "Cociente BUN/creatinina",
       "Relación BUN/creatinina",
-      "Cociente BUN/creatinina"
+      "Relación nitrógeno ureico/creatinina (BUN/creatinina)"
     ],
     "code": "REF-003"
   },
@@ -36,8 +42,10 @@
     "name": "Nitrógeno ureico en sangre (BUN)",
     "name_en": "Blood Urea Nitrogen",
     "aliases": [
+      "Blood Urea Nitrogen",
       "BUN",
-      "Nitrógeno ureico"
+      "Nitrógeno ureico",
+      "Nitrógeno ureico en sangre (BUN)"
     ],
     "code": "REF-004"
   },
@@ -46,8 +54,10 @@
     "name": "Colesterol LDL",
     "name_en": "LDL Cholesterol",
     "aliases": [
-      "LDL-C",
-      "Colesterol de lipoproteínas de baja densidad"
+      "Colesterol de lipoproteínas de baja densidad",
+      "Colesterol LDL",
+      "LDL Cholesterol",
+      "LDL-C"
     ],
     "code": "REF-005"
   },
@@ -57,7 +67,9 @@
     "name_en": "LDL/HDL Ratio",
     "aliases": [
       "Cociente LDL/HDL",
-      "LDL/HDL"
+      "LDL/HDL",
+      "LDL/HDL Ratio",
+      "Relación colesterol LDL/HDL"
     ],
     "code": "REF-006"
   },
@@ -66,7 +78,9 @@
     "name": "Lipoproteína(a) [Lp(a)]",
     "name_en": "Lipoprotein (a)",
     "aliases": [
+      "Lipoprotein (a)",
       "Lipoproteína (a)",
+      "Lipoproteína(a) [Lp(a)]",
       "Lp(a)"
     ],
     "code": "REF-007"
@@ -77,7 +91,9 @@
     "name_en": "Mean Corpuscular Hemoglobin (MCH)",
     "aliases": [
       "HCM",
-      "MCH"
+      "Hemoglobina corpuscular media (HCM)",
+      "MCH",
+      "Mean Corpuscular Hemoglobin (MCH)"
     ],
     "code": "REF-008"
   },
@@ -87,7 +103,9 @@
     "name_en": "Mean Corpuscular Hemoglobin Concentration (MCHC)",
     "aliases": [
       "CHCM",
-      "MCHC"
+      "Concentración de hemoglobina corpuscular media (CHCM)",
+      "MCHC",
+      "Mean Corpuscular Hemoglobin Concentration (MCHC)"
     ],
     "code": "REF-009"
   },
@@ -96,8 +114,10 @@
     "name": "Colesterol no HDL",
     "name_en": "Non-HDL Cholesterol",
     "aliases": [
+      "Colesterol no HDL",
       "Colesterol no-HDL",
-      "No-HDL-C"
+      "No-HDL-C",
+      "Non-HDL Cholesterol"
     ],
     "code": "REF-010"
   },
@@ -106,7 +126,9 @@
     "name": "Osmolalidad plasmática",
     "name_en": "Plasma Osmolality",
     "aliases": [
-      "Osmolalidad del plasma"
+      "Osmolalidad del plasma",
+      "Osmolalidad plasmática",
+      "Plasma Osmolality"
     ],
     "code": "REF-011"
   },
@@ -115,7 +137,9 @@
     "name": "Colesterol remanente",
     "name_en": "Remnant Cholesterol",
     "aliases": [
-      "Colesterol de remanentes"
+      "Colesterol de remanentes",
+      "Colesterol remanente",
+      "Remnant Cholesterol"
     ],
     "code": "REF-012"
   },
@@ -124,7 +148,9 @@
     "name": "Colesterol total",
     "name_en": "Total Cholesterol",
     "aliases": [
-      "Colesterol sérico total"
+      "Colesterol sérico total",
+      "Colesterol total",
+      "Total Cholesterol"
     ],
     "code": "REF-013"
   },
@@ -133,7 +159,9 @@
     "name": "Triglicéridos",
     "name_en": "Triglycerides",
     "aliases": [
-      "Triglicéridos séricos"
+      "Triglicéridos",
+      "Triglicéridos séricos",
+      "Triglycerides"
     ],
     "code": "REF-014"
   },
@@ -143,7 +171,9 @@
     "name_en": "Triglycerides/HDL Ratio",
     "aliases": [
       "Cociente triglicéridos/HDL",
-      "TG/HDL"
+      "Relación triglicéridos/HDL",
+      "TG/HDL",
+      "Triglycerides/HDL Ratio"
     ],
     "code": "REF-015"
   },
@@ -152,8 +182,10 @@
     "name": "Glucosa media estimada (eAG)",
     "name_en": "Estimated Average Glucose (eAG)",
     "aliases": [
+      "eAG",
+      "Estimated Average Glucose (eAG)",
       "Glucemia media estimada",
-      "eAG"
+      "Glucosa media estimada (eAG)"
     ],
     "code": "REF-016"
   },
@@ -162,10 +194,12 @@
     "name": "Glucosa",
     "name_en": "Glucose",
     "aliases": [
+      "Blood glucose",
       "Glicemia",
       "Glucemia",
-      "Blood glucose",
-      "Glucosa en sangre"
+      "Glucosa",
+      "Glucosa en sangre",
+      "Glucose"
     ],
     "code": "REF-017"
   },
@@ -174,8 +208,10 @@
     "name": "Colesterol HDL",
     "name_en": "HDL Cholesterol",
     "aliases": [
-      "HDL-C",
-      "Colesterol de lipoproteínas de alta densidad"
+      "Colesterol de lipoproteínas de alta densidad",
+      "Colesterol HDL",
+      "HDL Cholesterol",
+      "HDL-C"
     ],
     "code": "REF-018"
   },
@@ -184,9 +220,11 @@
     "name": "Hemoglobina glucosilada (HbA1c)",
     "name_en": "Hemoglobin A1c (HbA1c)",
     "aliases": [
-      "Hemoglobina glicosilada",
+      "HbA1c",
+      "Hemoglobin A1c (HbA1c)",
       "Hemoglobina A1c",
-      "HbA1c"
+      "Hemoglobina glicosilada",
+      "Hemoglobina glucosilada (HbA1c)"
     ],
     "code": "REF-019"
   },
@@ -195,9 +233,11 @@
     "name": "Proteína C reactiva de alta sensibilidad (PCR-us)",
     "name_en": "High-Sensitivity C-Reactive Protein (hs-CRP)",
     "aliases": [
-      "PCR ultrasensible",
+      "High-Sensitivity C-Reactive Protein (hs-CRP)",
+      "hs-CRP",
       "PCR de alta sensibilidad",
-      "hs-CRP"
+      "PCR ultrasensible",
+      "Proteína C reactiva de alta sensibilidad (PCR-us)"
     ],
     "code": "REF-020"
   },
@@ -206,7 +246,9 @@
     "name": "Fósforo",
     "name_en": "Phosphorus",
     "aliases": [
-      "Fósforo sérico"
+      "Fósforo",
+      "Fósforo sérico",
+      "Phosphorus"
     ],
     "code": "REF-021"
   },
@@ -215,7 +257,9 @@
     "name": "Potasio",
     "name_en": "Potassium",
     "aliases": [
-      "Potasio sérico"
+      "Potasio",
+      "Potasio sérico",
+      "Potassium"
     ],
     "code": "REF-022"
   },
@@ -224,9 +268,11 @@
     "name": "Recuento de glóbulos rojos (RBC)",
     "name_en": "Red Blood Cell Count (RBC)",
     "aliases": [
-      "Recuento de eritrocitos",
       "Hematíes",
-      "RBC"
+      "RBC",
+      "Recuento de eritrocitos",
+      "Recuento de glóbulos rojos (RBC)",
+      "Red Blood Cell Count (RBC)"
     ],
     "code": "REF-023"
   },
@@ -235,8 +281,10 @@
     "name": "Ácido úrico",
     "name_en": "Uric Acid (UA)",
     "aliases": [
-      "Uricemia",
-      "Urato"
+      "Ácido úrico",
+      "Urato",
+      "Uric Acid (UA)",
+      "Uricemia"
     ],
     "code": "REF-024"
   },
@@ -245,10 +293,12 @@
     "name": "Recuento de glóbulos blancos (WBC)",
     "name_en": "White Blood Cells (WBC)",
     "aliases": [
-      "Leucocitos",
-      "Recuento de leucocitos",
       "Glóbulos blancos",
-      "WBC"
+      "Leucocitos",
+      "Recuento de glóbulos blancos (WBC)",
+      "Recuento de leucocitos",
+      "WBC",
+      "White Blood Cells (WBC)"
     ],
     "code": "REF-025"
   },
@@ -257,6 +307,8 @@
     "name": "Alanina aminotransferasa (ALT)",
     "name_en": "Alanine Aminotransferase (ALT)",
     "aliases": [
+      "Alanina aminotransferasa (ALT)",
+      "Alanine Aminotransferase (ALT)",
       "ALT",
       "TGP",
       "Transaminasa glutámico-pirúvica"
@@ -268,6 +320,8 @@
     "name": "Albúmina",
     "name_en": "Albumin",
     "aliases": [
+      "Albumin",
+      "Albúmina",
       "Albúmina sérica"
     ],
     "code": "REF-027"
@@ -277,8 +331,10 @@
     "name": "Relación albúmina/globulina",
     "name_en": "Albumin/Globulin Ratio",
     "aliases": [
+      "Albumin/Globulin Ratio",
       "Cociente albúmina/globulina",
-      "Relación A/G"
+      "Relación A/G",
+      "Relación albúmina/globulina"
     ],
     "code": "REF-028"
   },
@@ -287,9 +343,11 @@
     "name": "Fosfatasa alcalina (ALP)",
     "name_en": "Alkaline Phosphatase (ALP)",
     "aliases": [
-      "Fosfatasa alcalina",
+      "Alkaline Phosphatase (ALP)",
       "ALP",
-      "FA"
+      "FA",
+      "Fosfatasa alcalina",
+      "Fosfatasa alcalina (ALP)"
     ],
     "code": "REF-029"
   },
@@ -298,6 +356,8 @@
     "name": "Aspartato aminotransferasa (AST)",
     "name_en": "Aspartate Aminotransferase (AST)",
     "aliases": [
+      "Aspartate Aminotransferase (AST)",
+      "Aspartato aminotransferasa (AST)",
       "AST",
       "TGO",
       "Transaminasa glutámico-oxalacética"
@@ -309,8 +369,10 @@
     "name": "Basófilos (%)",
     "name_en": "Basophil %",
     "aliases": [
-      "Porcentaje de basófilos",
-      "Basófilos relativos"
+      "Basófilos (%)",
+      "Basófilos relativos",
+      "Basophil %",
+      "Porcentaje de basófilos"
     ],
     "code": "REF-031"
   },
@@ -319,8 +381,10 @@
     "name": "Basófilos (recuento absoluto)",
     "name_en": "Basophils",
     "aliases": [
-      "Recuento de basófilos",
-      "Basófilos absolutos"
+      "Basófilos (recuento absoluto)",
+      "Basófilos absolutos",
+      "Basophils",
+      "Recuento de basófilos"
     ],
     "code": "REF-032"
   },
@@ -329,7 +393,9 @@
     "name": "Calcio",
     "name_en": "Calcium",
     "aliases": [
-      "Calcio total"
+      "Calcio",
+      "Calcio total",
+      "Calcium"
     ],
     "code": "REF-033"
   },
@@ -338,7 +404,9 @@
     "name": "Cloruro",
     "name_en": "Chloride",
     "aliases": [
+      "Chloride",
       "Cloro sérico",
+      "Cloruro",
       "Cloruros"
     ],
     "code": "REF-034"
@@ -349,7 +417,9 @@
     "name_en": "Corrected Calcium",
     "aliases": [
       "Calcio ajustado por albúmina",
-      "Calcio total corregido"
+      "Calcio corregido",
+      "Calcio total corregido",
+      "Corrected Calcium"
     ],
     "code": "REF-035"
   },
@@ -358,7 +428,9 @@
     "name": "Creatinina",
     "name_en": "Creatinine",
     "aliases": [
-      "Creatinina sérica"
+      "Creatinina",
+      "Creatinina sérica",
+      "Creatinine"
     ],
     "code": "REF-036"
   },
@@ -367,8 +439,10 @@
     "name": "Eosinófilos (%)",
     "name_en": "Eosinophil %",
     "aliases": [
-      "Porcentaje de eosinófilos",
-      "Eosinófilos relativos"
+      "Eosinófilos (%)",
+      "Eosinófilos relativos",
+      "Eosinophil %",
+      "Porcentaje de eosinófilos"
     ],
     "code": "REF-037"
   },
@@ -377,8 +451,10 @@
     "name": "Eosinófilos (recuento absoluto)",
     "name_en": "Eosinophils",
     "aliases": [
-      "Recuento de eosinófilos",
-      "Eosinófilos absolutos"
+      "Eosinófilos (recuento absoluto)",
+      "Eosinófilos absolutos",
+      "Eosinophils",
+      "Recuento de eosinófilos"
     ],
     "code": "REF-038"
   },
@@ -387,8 +463,10 @@
     "name": "Índice FIB-4",
     "name_en": "FIB-4 Index",
     "aliases": [
-      "Puntuación FIB-4",
-      "FIB-4"
+      "FIB-4",
+      "FIB-4 Index",
+      "Índice FIB-4",
+      "Puntuación FIB-4"
     ],
     "code": "REF-039"
   },
@@ -397,6 +475,8 @@
     "name": "Globulina",
     "name_en": "Globulin",
     "aliases": [
+      "Globulin",
+      "Globulina",
       "Globulinas"
     ],
     "code": "REF-040"
@@ -406,8 +486,10 @@
     "name": "Hematocrito",
     "name_en": "Hematocrit",
     "aliases": [
-      "Hto",
-      "Hct"
+      "Hct",
+      "Hematocrit",
+      "Hematocrito",
+      "Hto"
     ],
     "code": "REF-041"
   },
@@ -417,6 +499,8 @@
     "name_en": "Hemoglobin",
     "aliases": [
       "Hb",
+      "Hemoglobin",
+      "Hemoglobina",
       "Hgb"
     ],
     "code": "REF-042"
@@ -426,8 +510,10 @@
     "name": "Linfocitos (%)",
     "name_en": "Lymphocyte %",
     "aliases": [
-      "Porcentaje de linfocitos",
-      "Linfocitos relativos"
+      "Linfocitos (%)",
+      "Linfocitos relativos",
+      "Lymphocyte %",
+      "Porcentaje de linfocitos"
     ],
     "code": "REF-043"
   },
@@ -436,8 +522,10 @@
     "name": "Linfocitos (recuento absoluto)",
     "name_en": "Lymphocytes",
     "aliases": [
-      "Recuento de linfocitos",
-      "Linfocitos absolutos"
+      "Linfocitos (recuento absoluto)",
+      "Linfocitos absolutos",
+      "Lymphocytes",
+      "Recuento de linfocitos"
     ],
     "code": "REF-044"
   },
@@ -446,8 +534,10 @@
     "name": "Volumen corpuscular medio (VCM)",
     "name_en": "Mean Corpuscular Volume (MCV)",
     "aliases": [
+      "MCV",
+      "Mean Corpuscular Volume (MCV)",
       "VCM",
-      "MCV"
+      "Volumen corpuscular medio (VCM)"
     ],
     "code": "REF-045"
   },
@@ -456,8 +546,10 @@
     "name": "Volumen plaquetario medio (VPM)",
     "name_en": "Mean Platelet Volume (MPV)",
     "aliases": [
-      "VPM",
-      "MPV"
+      "Mean Platelet Volume (MPV)",
+      "MPV",
+      "Volumen plaquetario medio (VPM)",
+      "VPM"
     ],
     "code": "REF-046"
   },
@@ -466,8 +558,10 @@
     "name": "Monocitos (%)",
     "name_en": "Monocyte %",
     "aliases": [
-      "Porcentaje de monocitos",
-      "Monocitos relativos"
+      "Monocitos (%)",
+      "Monocitos relativos",
+      "Monocyte %",
+      "Porcentaje de monocitos"
     ],
     "code": "REF-047"
   },
@@ -476,8 +570,10 @@
     "name": "Monocitos (recuento absoluto)",
     "name_en": "Monocytes",
     "aliases": [
-      "Recuento de monocitos",
-      "Monocitos absolutos"
+      "Monocitos (recuento absoluto)",
+      "Monocitos absolutos",
+      "Monocytes",
+      "Recuento de monocitos"
     ],
     "code": "REF-048"
   },
@@ -486,8 +582,10 @@
     "name": "Neutrófilos (%)",
     "name_en": "Neutrophil %",
     "aliases": [
-      "Porcentaje de neutrófilos",
-      "Neutrófilos relativos"
+      "Neutrófilos (%)",
+      "Neutrófilos relativos",
+      "Neutrophil %",
+      "Porcentaje de neutrófilos"
     ],
     "code": "REF-049"
   },
@@ -496,8 +594,10 @@
     "name": "Neutrófilos (recuento absoluto)",
     "name_en": "Neutrophils",
     "aliases": [
-      "Recuento de neutrófilos",
-      "Neutrófilos absolutos"
+      "Neutrófilos (recuento absoluto)",
+      "Neutrófilos absolutos",
+      "Neutrophils",
+      "Recuento de neutrófilos"
     ],
     "code": "REF-050"
   },
@@ -506,9 +606,11 @@
     "name": "Plaquetas (recuento)",
     "name_en": "Platelets",
     "aliases": [
-      "Recuento de plaquetas",
       "Plaquetas",
-      "PLT"
+      "Plaquetas (recuento)",
+      "Platelets",
+      "PLT",
+      "Recuento de plaquetas"
     ],
     "code": "REF-051"
   },
@@ -517,8 +619,10 @@
     "name": "Amplitud de distribución eritrocitaria (RDW)",
     "name_en": "Red Cell Distribution Width (RDW)",
     "aliases": [
+      "Amplitud de distribución eritrocitaria (RDW)",
+      "Ancho de distribución de eritrocitos",
       "RDW",
-      "Ancho de distribución de eritrocitos"
+      "Red Cell Distribution Width (RDW)"
     ],
     "code": "REF-052"
   },
@@ -527,7 +631,9 @@
     "name": "Sodio",
     "name_en": "Sodium",
     "aliases": [
-      "Sodio sérico"
+      "Sodio",
+      "Sodio sérico",
+      "Sodium"
     ],
     "code": "REF-053"
   },
@@ -536,8 +642,10 @@
     "name": "Índice de inflamación inmunitaria sistémica (SII)",
     "name_en": "Systemic Immune-Inflammation Index (SII)",
     "aliases": [
+      "Índice de inflamación inmunitaria sistémica (SII)",
       "Índice inmunoinflamatorio sistémico",
-      "SII"
+      "SII",
+      "Systemic Immune-Inflammation Index (SII)"
     ],
     "code": "REF-054"
   },
@@ -546,7 +654,9 @@
     "name": "Bilirrubina total",
     "name_en": "Total Bilirubin",
     "aliases": [
-      "Bilirrubina sérica total"
+      "Bilirrubina sérica total",
+      "Bilirrubina total",
+      "Total Bilirubin"
     ],
     "code": "REF-055"
   },
@@ -555,7 +665,9 @@
     "name": "Proteínas totales",
     "name_en": "Total Protein",
     "aliases": [
-      "Proteína total"
+      "Proteína total",
+      "Proteínas totales",
+      "Total Protein"
     ],
     "code": "REF-056"
   },
@@ -565,7 +677,9 @@
     "name_en": "1,5-Anhydroglucitol (1,5-AG)",
     "aliases": [
       "1,5-AG",
-      "1,5-anhidro-D-glucitol"
+      "1,5-anhidro-D-glucitol",
+      "1,5-anhidroglucitol (1,5-AG)",
+      "1,5-Anhydroglucitol (1,5-AG)"
     ],
     "code": "REF-057"
   },
@@ -574,6 +688,8 @@
     "name": "Adiponectina",
     "name_en": "Adiponectin",
     "aliases": [
+      "Adiponectin",
+      "Adiponectina",
       "Adiponectina sérica"
     ],
     "code": "REF-058"
@@ -583,8 +699,10 @@
     "name": "Relación adiponectina/leptina (LAR)",
     "name_en": "Adiponectin / Leptin Ratio (LAR)",
     "aliases": [
+      "Adiponectin / Leptin Ratio (LAR)",
       "Cociente adiponectina/leptina",
-      "LAR"
+      "LAR",
+      "Relación adiponectina/leptina (LAR)"
     ],
     "code": "REF-059"
   },
@@ -594,6 +712,8 @@
     "name_en": "Anion Gap",
     "aliases": [
       "Anion gap",
+      "Anion Gap",
+      "Brecha aniónica",
       "Diferencia aniónica"
     ],
     "code": "REF-060"
@@ -603,8 +723,10 @@
     "name": "Hormona antimülleriana (AMH)",
     "name_en": "Anti-Müllerian Hormone (AMH)",
     "aliases": [
+      "AMH",
+      "Anti-Müllerian Hormone (AMH)",
       "Hormona anti-Müller",
-      "AMH"
+      "Hormona antimülleriana (AMH)"
     ],
     "code": "REF-061"
   },
@@ -613,8 +735,10 @@
     "name": "Ácido araquidónico (AA)",
     "name_en": "Arachidonic Acid (AA)",
     "aliases": [
+      "AA",
       "Ácido araquidónico",
-      "AA"
+      "Ácido araquidónico (AA)",
+      "Arachidonic Acid (AA)"
     ],
     "code": "REF-062"
   },
@@ -623,8 +747,10 @@
     "name": "Relación ácido araquidónico/EPA (AA/EPA)",
     "name_en": "Arachidonic Acid/EPA Ratio (AA/EPA)",
     "aliases": [
+      "AA/EPA",
+      "Arachidonic Acid/EPA Ratio (AA/EPA)",
       "Cociente AA/EPA",
-      "AA/EPA"
+      "Relación ácido araquidónico/EPA (AA/EPA)"
     ],
     "code": "REF-063"
   },
@@ -633,7 +759,9 @@
     "name": "Dimetilarginina asimétrica (ADMA)",
     "name_en": "Asymmetric Dimethylarginine (ADMA)",
     "aliases": [
-      "ADMA"
+      "ADMA",
+      "Asymmetric Dimethylarginine (ADMA)",
+      "Dimetilarginina asimétrica (ADMA)"
     ],
     "code": "REF-064"
   },
@@ -642,8 +770,10 @@
     "name": "Péptido C",
     "name_en": "C-Peptide",
     "aliases": [
-      "Péptido-C",
-      "C-péptido"
+      "C-Peptide",
+      "C-péptido",
+      "Péptido C",
+      "Péptido-C"
     ],
     "code": "REF-065"
   },
@@ -652,8 +782,10 @@
     "name": "Dióxido de carbono total (CO₂)",
     "name_en": "Carbon Dioxide",
     "aliases": [
+      "Bicarbonato total (CO₂ total)",
+      "Carbon Dioxide",
       "CO2 total",
-      "Bicarbonato total (CO₂ total)"
+      "Dióxido de carbono total (CO₂)"
     ],
     "code": "REF-066"
   },
@@ -662,8 +794,10 @@
     "name": "Relación colesterol total/HDL",
     "name_en": "Cholesterol / HDL Ratio",
     "aliases": [
+      "Cholesterol / HDL Ratio",
       "Cociente colesterol/HDL",
-      "Colesterol total/HDL"
+      "Colesterol total/HDL",
+      "Relación colesterol total/HDL"
     ],
     "code": "REF-067"
   },
@@ -672,8 +806,10 @@
     "name": "Cobre sérico",
     "name_en": "Copper (serum)",
     "aliases": [
+      "Cobre (suero)",
       "Cobre en suero",
-      "Cobre (suero)"
+      "Cobre sérico",
+      "Copper (serum)"
     ],
     "code": "REF-068"
   },
@@ -682,6 +818,7 @@
     "name": "Cortisol",
     "name_en": "Cortisol",
     "aliases": [
+      "Cortisol",
       "Cortisol sérico"
     ],
     "code": "REF-069"
@@ -692,8 +829,10 @@
     "name_en": "Creatine Kinase (CK)",
     "aliases": [
       "CK",
-      "Creatinfosfoquinasa (CPK)",
-      "CPK"
+      "CPK",
+      "Creatina quinasa (CK)",
+      "Creatine Kinase (CK)",
+      "Creatinfosfoquinasa (CPK)"
     ],
     "code": "REF-070"
   },
@@ -702,7 +841,9 @@
     "name": "Cistatina C",
     "name_en": "Cystatin C",
     "aliases": [
-      "Cistatina C sérica"
+      "Cistatina C",
+      "Cistatina C sérica",
+      "Cystatin C"
     ],
     "code": "REF-071"
   },
@@ -711,8 +852,10 @@
     "name": "Filtrado glomerular estimado por cistatina C (eGFR)",
     "name_en": "Cystatin C eGFR",
     "aliases": [
-      "TFGe por cistatina C",
-      "eGFR por cistatina C"
+      "Cystatin C eGFR",
+      "eGFR por cistatina C",
+      "Filtrado glomerular estimado por cistatina C (eGFR)",
+      "TFGe por cistatina C"
     ],
     "code": "REF-072"
   },
@@ -721,7 +864,9 @@
     "name": "Sulfato de dehidroepiandrosterona (DHEA-S)",
     "name_en": "DHEA Sulfate",
     "aliases": [
+      "DHEA Sulfate",
       "DHEA-S",
+      "Sulfato de dehidroepiandrosterona (DHEA-S)",
       "Sulfato de DHEA"
     ],
     "code": "REF-073"
@@ -731,7 +876,9 @@
     "name": "Dihidrotestosterona (DHT)",
     "name_en": "Dihydrotestosterone (DHT)",
     "aliases": [
-      "DHT"
+      "DHT",
+      "Dihidrotestosterona (DHT)",
+      "Dihydrotestosterone (DHT)"
     ],
     "code": "REF-074"
   },
@@ -740,7 +887,9 @@
     "name": "Ácido docosahexaenoico (DHA)",
     "name_en": "Docosahexaenoic Acid (DHA)",
     "aliases": [
-      "DHA"
+      "Ácido docosahexaenoico (DHA)",
+      "DHA",
+      "Docosahexaenoic Acid (DHA)"
     ],
     "code": "REF-075"
   },
@@ -749,6 +898,8 @@
     "name": "Ácido docosapentaenoico (DPA)",
     "name_en": "Docosapentaenoic Acid (DPA)",
     "aliases": [
+      "Ácido docosapentaenoico (DPA)",
+      "Docosapentaenoic Acid (DPA)",
       "DPA"
     ],
     "code": "REF-076"
@@ -758,6 +909,8 @@
     "name": "Ácido eicosapentaenoico (EPA)",
     "name_en": "Eicosapentaenoic Acid (EPA)",
     "aliases": [
+      "Ácido eicosapentaenoico (EPA)",
+      "Eicosapentaenoic Acid (EPA)",
       "EPA"
     ],
     "code": "REF-077"
@@ -767,9 +920,11 @@
     "name": "Tasa de filtración glomerular estimada (eGFR)",
     "name_en": "Estimated Glomerular Filtration Rate (eGFR)",
     "aliases": [
-      "TFGe",
+      "eGFR",
+      "Estimated Glomerular Filtration Rate (eGFR)",
       "Filtrado glomerular estimado",
-      "eGFR"
+      "Tasa de filtración glomerular estimada (eGFR)",
+      "TFGe"
     ],
     "code": "REF-078"
   },
@@ -778,8 +933,9 @@
     "name": "Estradiol",
     "name_en": "Estradiol",
     "aliases": [
-      "Estradiol (E2)",
-      "E2"
+      "E2",
+      "Estradiol",
+      "Estradiol (E2)"
     ],
     "code": "REF-079"
   },
@@ -788,6 +944,8 @@
     "name": "Ferritina",
     "name_en": "Ferritin",
     "aliases": [
+      "Ferritin",
+      "Ferritina",
       "Ferritina sérica"
     ],
     "code": "REF-080"
@@ -797,9 +955,11 @@
     "name": "Folato (vitamina B9)",
     "name_en": "Folate (Vitamin B9)",
     "aliases": [
+      "Ácido fólico",
+      "Folate (Vitamin B9)",
+      "Folato (vitamina B9)",
       "Folatos",
-      "Vitamina B9",
-      "Ácido fólico"
+      "Vitamina B9"
     ],
     "code": "REF-081"
   },
@@ -808,8 +968,10 @@
     "name": "Hormona foliculoestimulante (FSH)",
     "name_en": "Follicle Stimulating Hormone (FSH)",
     "aliases": [
+      "Follicle Stimulating Hormone (FSH)",
       "FSH",
-      "Hormona estimulante del folículo"
+      "Hormona estimulante del folículo",
+      "Hormona foliculoestimulante (FSH)"
     ],
     "code": "REF-082"
   },
@@ -818,9 +980,11 @@
     "name": "Triyodotironina libre (T3 libre)",
     "name_en": "Free T3 (FT3)",
     "aliases": [
-      "T3 libre",
+      "Free T3 (FT3)",
       "FT3",
-      "T3L"
+      "T3 libre",
+      "T3L",
+      "Triyodotironina libre (T3 libre)"
     ],
     "code": "REF-083"
   },
@@ -829,9 +993,11 @@
     "name": "Tiroxina libre (T4 libre)",
     "name_en": "Free T4 (FT4)",
     "aliases": [
-      "T4 libre",
+      "Free T4 (FT4)",
       "FT4",
-      "T4L"
+      "T4 libre",
+      "T4L",
+      "Tiroxina libre (T4 libre)"
     ],
     "code": "REF-084"
   },
@@ -840,6 +1006,8 @@
     "name": "Testosterona libre",
     "name_en": "Free Testosterone",
     "aliases": [
+      "Free Testosterone",
+      "Testosterona libre",
       "Testosterona libre medida"
     ],
     "code": "REF-085"
@@ -849,8 +1017,10 @@
     "name": "Testosterona libre calculada",
     "name_en": "Free Testosterone Calculated",
     "aliases": [
-      "Testosterona libre estimada",
-      "cFT"
+      "cFT",
+      "Free Testosterone Calculated",
+      "Testosterona libre calculada",
+      "Testosterona libre estimada"
     ],
     "code": "REF-086"
   },
@@ -859,7 +1029,9 @@
     "name": "Fructosamina",
     "name_en": "Fructosamine",
     "aliases": [
-      "Fructosamina sérica"
+      "Fructosamina",
+      "Fructosamina sérica",
+      "Fructosamine"
     ],
     "code": "REF-087"
   },
@@ -868,9 +1040,11 @@
     "name": "Gamma-glutamil transferasa (GGT)",
     "name_en": "Gamma-Glutamyl Transferase (GGT)",
     "aliases": [
-      "GGT",
       "Gamma GT",
-      "Gamma-glutamiltranspeptidasa"
+      "Gamma-glutamil transferasa (GGT)",
+      "Gamma-glutamiltranspeptidasa",
+      "Gamma-Glutamyl Transferase (GGT)",
+      "GGT"
     ],
     "code": "REF-088"
   },
@@ -879,8 +1053,10 @@
     "name": "Partículas HDL grandes",
     "name_en": "HDL Large",
     "aliases": [
+      "HDL de gran tamaño",
       "HDL grandes",
-      "HDL de gran tamaño"
+      "HDL Large",
+      "Partículas HDL grandes"
     ],
     "code": "REF-089"
   },
@@ -890,7 +1066,9 @@
     "name_en": "HOMA-IR Score",
     "aliases": [
       "HOMA-IR",
-      "Índice de resistencia a la insulina HOMA"
+      "HOMA-IR Score",
+      "Índice de resistencia a la insulina HOMA",
+      "Índice HOMA-IR"
     ],
     "code": "REF-090"
   },
@@ -899,7 +1077,9 @@
     "name": "Homocisteína",
     "name_en": "Homocysteine",
     "aliases": [
-      "Homocisteína total"
+      "Homocisteína",
+      "Homocisteína total",
+      "Homocysteine"
     ],
     "code": "REF-091"
   },
@@ -908,6 +1088,7 @@
     "name": "Factor de crecimiento similar a la insulina 1 (IGF-1)",
     "name_en": "IGF-1",
     "aliases": [
+      "Factor de crecimiento similar a la insulina 1 (IGF-1)",
       "IGF-1",
       "Somatomedina C"
     ],
@@ -918,6 +1099,8 @@
     "name": "Insulina",
     "name_en": "Insulin",
     "aliases": [
+      "Insulin",
+      "Insulina",
       "Insulina sérica"
     ],
     "code": "REF-093"
@@ -927,7 +1110,9 @@
     "name": "Yodo",
     "name_en": "Iodine",
     "aliases": [
-      "Iodo"
+      "Iodine",
+      "Iodo",
+      "Yodo"
     ],
     "code": "REF-094"
   },
@@ -936,8 +1121,10 @@
     "name": "Hierro",
     "name_en": "Iron",
     "aliases": [
+      "Ferremia",
+      "Hierro",
       "Hierro sérico",
-      "Ferremia"
+      "Iron"
     ],
     "code": "REF-095"
   },
@@ -946,8 +1133,10 @@
     "name": "Saturación de transferrina (%)",
     "name_en": "Iron % Saturation",
     "aliases": [
+      "Iron % Saturation",
       "Porcentaje de saturación de transferrina",
-      "Saturación de hierro (%)"
+      "Saturación de hierro (%)",
+      "Saturación de transferrina (%)"
     ],
     "code": "REF-096"
   },
@@ -956,7 +1145,9 @@
     "name": "Partículas LDL medianas",
     "name_en": "LDL Medium",
     "aliases": [
-      "LDL medianas"
+      "LDL medianas",
+      "LDL Medium",
+      "Partículas LDL medianas"
     ],
     "code": "REF-097"
   },
@@ -965,8 +1156,10 @@
     "name": "Número de partículas LDL (LDL-P)",
     "name_en": "LDL Particle Number",
     "aliases": [
+      "Concentración de partículas LDL",
+      "LDL Particle Number",
       "LDL-P",
-      "Concentración de partículas LDL"
+      "Número de partículas LDL (LDL-P)"
     ],
     "code": "REF-098"
   },
@@ -975,6 +1168,8 @@
     "name": "Patrón de partículas LDL",
     "name_en": "LDL Pattern",
     "aliases": [
+      "LDL Pattern",
+      "Patrón de partículas LDL",
       "Patrón LDL"
     ],
     "code": "REF-099"
@@ -984,6 +1179,8 @@
     "name": "Tamaño de pico de partículas LDL",
     "name_en": "LDL Peak Size",
     "aliases": [
+      "LDL Peak Size",
+      "Tamaño de pico de partículas LDL",
       "Tamaño de pico LDL"
     ],
     "code": "REF-100"
@@ -993,7 +1190,9 @@
     "name": "Partículas LDL pequeñas",
     "name_en": "LDL Small",
     "aliases": [
-      "LDL pequeñas"
+      "LDL pequeñas",
+      "LDL Small",
+      "Partículas LDL pequeñas"
     ],
     "code": "REF-101"
   },
@@ -1002,6 +1201,8 @@
     "name": "Leptina",
     "name_en": "Leptin",
     "aliases": [
+      "Leptin",
+      "Leptina",
       "Leptina sérica"
     ],
     "code": "REF-102"
@@ -1012,7 +1213,9 @@
     "name_en": "Linoleic Acid (LA)",
     "aliases": [
       "Ácido linoleico",
-      "LA"
+      "Ácido linoleico (LA)",
+      "LA",
+      "Linoleic Acid (LA)"
     ],
     "code": "REF-103"
   },
@@ -1021,8 +1224,10 @@
     "name": "Fosfolipasa A₂ asociada a lipoproteínas (Lp-PLA₂)",
     "name_en": "Lipoprotein-Associated Phospholipase A₂ (LP-PLA₂)",
     "aliases": [
-      "Lp-PLA₂",
-      "Fosfolipasa A2 asociada a lipoproteínas"
+      "Fosfolipasa A2 asociada a lipoproteínas",
+      "Fosfolipasa A₂ asociada a lipoproteínas (Lp-PLA₂)",
+      "Lipoprotein-Associated Phospholipase A₂ (LP-PLA₂)",
+      "Lp-PLA₂"
     ],
     "code": "REF-104"
   },
@@ -1031,7 +1236,9 @@
     "name": "Hormona luteinizante (LH)",
     "name_en": "Luteinizing Hormone (LH)",
     "aliases": [
+      "Hormona luteinizante (LH)",
       "LH",
+      "Luteinizing Hormone (LH)",
       "Lutropina"
     ],
     "code": "REF-105"
@@ -1041,7 +1248,9 @@
     "name": "Magnesio",
     "name_en": "Magnesium",
     "aliases": [
-      "Magnesio sérico"
+      "Magnesio",
+      "Magnesio sérico",
+      "Magnesium"
     ],
     "code": "REF-106"
   },
@@ -1050,7 +1259,9 @@
     "name": "Mieloperoxidasa (MPO)",
     "name_en": "Myeloperoxidase (MPO)",
     "aliases": [
-      "MPO"
+      "Mieloperoxidasa (MPO)",
+      "MPO",
+      "Myeloperoxidase (MPO)"
     ],
     "code": "REF-107"
   },
@@ -1059,7 +1270,8 @@
     "name": "Omega-3 total",
     "name_en": "Omega-3 Total",
     "aliases": [
-      "Ácidos grasos omega-3 totales"
+      "Ácidos grasos omega-3 totales",
+      "Omega-3 total"
     ],
     "code": "REF-108"
   },
@@ -1068,7 +1280,8 @@
     "name": "Omega-6 total",
     "name_en": "Omega-6 Total",
     "aliases": [
-      "Ácidos grasos omega-6 totales"
+      "Ácidos grasos omega-6 totales",
+      "Omega-6 total"
     ],
     "code": "REF-109"
   },
@@ -1077,7 +1290,9 @@
     "name": "Relación omega-6/omega-3",
     "name_en": "Omega-6/Omega-3 Ratio",
     "aliases": [
-      "Cociente omega-6/omega-3"
+      "Cociente omega-6/omega-3",
+      "Omega-6/Omega-3 Ratio",
+      "Relación omega-6/omega-3"
     ],
     "code": "REF-110"
   },
@@ -1086,6 +1301,8 @@
     "name": "Porcentaje de PSA libre",
     "name_en": "PSA %, Free",
     "aliases": [
+      "Porcentaje de PSA libre",
+      "PSA %, Free",
       "PSA libre (%)",
       "Relación PSA libre/total (%)"
     ],
@@ -1096,8 +1313,10 @@
     "name": "Antígeno prostático específico libre (PSA libre)",
     "name_en": "PSA, Free",
     "aliases": [
+      "Antígeno prostático específico libre (PSA libre)",
       "PSA libre",
-      "PSA no unido"
+      "PSA no unido",
+      "PSA, Free"
     ],
     "code": "REF-112"
   },
@@ -1106,8 +1325,10 @@
     "name": "Antígeno prostático específico total (PSA total)",
     "name_en": "PSA, Total",
     "aliases": [
+      "Antígeno prostático específico total",
+      "Antígeno prostático específico total (PSA total)",
       "PSA total",
-      "Antígeno prostático específico total"
+      "PSA, Total"
     ],
     "code": "REF-113"
   },
@@ -1116,7 +1337,9 @@
     "name": "Progesterona",
     "name_en": "Progesterone",
     "aliases": [
-      "Progesterona sérica"
+      "Progesterona",
+      "Progesterona sérica",
+      "Progesterone"
     ],
     "code": "REF-114"
   },
@@ -1126,6 +1349,8 @@
     "name_en": "Prolactin",
     "aliases": [
       "PRL",
+      "Prolactin",
+      "Prolactina",
       "Prolactina sérica"
     ],
     "code": "REF-115"
@@ -1135,8 +1360,10 @@
     "name": "Recuento de reticulocitos (RET)",
     "name_en": "Reticulocyte Count (RET)",
     "aliases": [
+      "Recuento de reticulocitos (RET)",
+      "RET",
       "Reticulocitos",
-      "RET"
+      "Reticulocyte Count (RET)"
     ],
     "code": "REF-116"
   },
@@ -1145,7 +1372,9 @@
     "name": "Índice de reticulocitos (RI)",
     "name_en": "Reticulocyte Index (RI)",
     "aliases": [
+      "Índice de reticulocitos (RI)",
       "Índice reticulocitario",
+      "Reticulocyte Index (RI)",
       "RI"
     ],
     "code": "REF-117"
@@ -1155,7 +1384,9 @@
     "name": "Selenio",
     "name_en": "Selenium",
     "aliases": [
-      "Selenio sérico"
+      "Selenio",
+      "Selenio sérico",
+      "Selenium"
     ],
     "code": "REF-118"
   },
@@ -1164,8 +1395,10 @@
     "name": "Globulina fijadora de hormonas sexuales (SHBG)",
     "name_en": "Sex Hormone Binding Globulin (SHBG)",
     "aliases": [
-      "SHBG",
-      "Globulina transportadora de hormonas sexuales"
+      "Globulina fijadora de hormonas sexuales (SHBG)",
+      "Globulina transportadora de hormonas sexuales",
+      "Sex Hormone Binding Globulin (SHBG)",
+      "SHBG"
     ],
     "code": "REF-119"
   },
@@ -1174,7 +1407,9 @@
     "name": "Dimetilarginina simétrica (SDMA)",
     "name_en": "Symmetric Dimethylarginine (SDMA)",
     "aliases": [
-      "SDMA"
+      "Dimetilarginina simétrica (SDMA)",
+      "SDMA",
+      "Symmetric Dimethylarginine (SDMA)"
     ],
     "code": "REF-120"
   },
@@ -1183,7 +1418,9 @@
     "name": "Testosterona",
     "name_en": "Testosterone",
     "aliases": [
-      "Testosterona total"
+      "Testosterona",
+      "Testosterona total",
+      "Testosterone"
     ],
     "code": "REF-121"
   },
@@ -1192,8 +1429,10 @@
     "name": "Testosterona por inmunoensayo",
     "name_en": "Testosterone Immunoassay",
     "aliases": [
+      "Inmunoensayo de testosterona",
       "Testosterona medida por inmunoensayo",
-      "Inmunoensayo de testosterona"
+      "Testosterona por inmunoensayo",
+      "Testosterone Immunoassay"
     ],
     "code": "REF-122"
   },
@@ -1204,6 +1443,8 @@
     "aliases": [
       "Anti-TPO",
       "Anticuerpos antiperoxidasa tiroidea",
+      "Anticuerpos contra la peroxidasa tiroidea (anti-TPO)",
+      "Thyroid Peroxidase Antibodies (TPOAb)",
       "TPOAb"
     ],
     "code": "REF-123"
@@ -1213,8 +1454,10 @@
     "name": "Hormona estimulante de la tiroides (TSH)",
     "name_en": "Thyroid-Stimulating Hormone (TSH)",
     "aliases": [
-      "TSH",
-      "Tirotropina"
+      "Hormona estimulante de la tiroides (TSH)",
+      "Thyroid-Stimulating Hormone (TSH)",
+      "Tirotropina",
+      "TSH"
     ],
     "code": "REF-124"
   },
@@ -1223,9 +1466,11 @@
     "name": "Capacidad total de fijación del hierro (TIBC)",
     "name_en": "Total Iron-Binding Capacity (TIBC)",
     "aliases": [
-      "TIBC",
+      "Capacidad total de fijación del hierro (TIBC)",
       "Capacidad total de unión al hierro",
-      "CTFH"
+      "CTFH",
+      "TIBC",
+      "Total Iron-Binding Capacity (TIBC)"
     ],
     "code": "REF-125"
   },
@@ -1235,7 +1480,9 @@
     "name_en": "Vitamin B12 (cobalamin)",
     "aliases": [
       "Cobalamina",
-      "Vitamina B12"
+      "Vitamin B12 (cobalamin)",
+      "Vitamina B12",
+      "Vitamina B12 (cobalamina)"
     ],
     "code": "REF-126"
   },
@@ -1244,6 +1491,8 @@
     "name": "Vitamina D",
     "name_en": "Vitamin D",
     "aliases": [
+      "Vitamin D",
+      "Vitamina D",
       "Vitamina D sérica"
     ],
     "code": "REF-127"
@@ -1253,8 +1502,10 @@
     "name": "Zinc sérico",
     "name_en": "Zinc (serum)",
     "aliases": [
+      "Zinc (serum)",
+      "Zinc (suero)",
       "Zinc en suero",
-      "Zinc (suero)"
+      "Zinc sérico"
     ],
     "code": "REF-128"
   }
