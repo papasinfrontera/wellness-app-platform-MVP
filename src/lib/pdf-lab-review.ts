@@ -84,7 +84,7 @@ function parseResultCell(raw:string):{value:string;unit:string}|null{
  if(!m)return null;
  const value=m[1].trim(),rest=m[2].trim();
  const u=rest.match(possibleUnit);
- if(u)return {value,unit:u[0].replace(/\s+/g,"")};
+ if(u)return {value,unit:u[0].trim().replace(/\s*\/\s*/g,"/").replace(/^([×x])\s*(10)/,"$1 $2")};
  if(!rest||/^(?:\d|No indicado|Negativo|Hematolog|Bioquim|Serolog)/i.test(rest))return {value,unit:""};
  return null;
 }
