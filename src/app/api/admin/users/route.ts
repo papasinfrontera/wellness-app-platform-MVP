@@ -57,6 +57,7 @@ export async function GET(request:Request){
     created_at:u.created_at,
     email_confirmed:Boolean(u.email_confirmed_at),
     last_sign_in_at:u.last_sign_in_at||null,
+    banned_until:u.banned_until||null,
     admin_role:roles.get(u.id)?.is_active?roles.get(u.id)?.role||null:null
    }))
   });
