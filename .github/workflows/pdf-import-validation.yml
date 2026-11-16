@@ -2,7 +2,7 @@ name: Wellness platform validation
 on:
   push:
     branches:
-      - sprint-pdf-v2-1-layout-reconciliation
+      - sprint-pdf-v2-2-identity-validation
   workflow_dispatch:
 
 permissions:
@@ -22,6 +22,7 @@ jobs:
         run: |
           node --experimental-strip-types --test tests/pdf-v2-1-layout.test.mjs
           node --experimental-strip-types --test tests/pdf-v2-1-geometry.test.mjs
+          node --experimental-strip-types --test tests/pdf-v2-2-identity.test.mjs
           npm run test:pdf
           npm run test:pdf-unmatched
           npm run test:pdf-reconcile
