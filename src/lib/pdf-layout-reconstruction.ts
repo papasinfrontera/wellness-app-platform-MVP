@@ -28,6 +28,7 @@ export function reconstructPdfRows(items:PositionedPdfText[]):string{
   const result=anchor.find(x=>x.x>(number?.x??0)+150&&/^[<>≤≥]?\s*\d/.test(x.text));
   if(!number||!result)continue;
   const anchorY=number.y;
+  if(anchor.some(x=>x.x>=number.x+12&&x.x<result.x-10&&/[\p{L}]/u.test(x.text)))continue;
   for(let fragmentIndex=0;fragmentIndex<lines.length;fragmentIndex++){
    if(fragmentIndex===anchorIndex||absorbed.has(fragmentIndex))continue;
    const fragment=lines[fragmentIndex];
@@ -36,8 +37,6 @@ export function reconstructPdfRows(items:PositionedPdfText[]):string{
    if(Math.abs(part.y-anchorY)>8.5)continue;
    if(part.x<=number.x+12||part.x>=result.x-10)continue;
    if(!/[\p{L}]/u.test(part.text)||/^\d{1,3}$/.test(part.text))continue;
-   if(anchor.some(x=>x.x>=number.x+12&&x.x<result.x-10&&
-      /[\p{L}]/u.test(x.text)))continue;
    anchor.push(part);
    absorbed.add(fragmentIndex);
   }
