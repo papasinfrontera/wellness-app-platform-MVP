@@ -94,7 +94,7 @@ export default function AdminPage(){
        <div style={{width:32,height:5,borderRadius:10,background:"#5B40F5",marginBottom:14}}/>
        <strong>{name}</strong>
        <p style={{fontSize:13,color:"#777480",lineHeight:1.5}}>{description}</p>
-       <span style={{fontSize:11,color:"#92909A"}}>Próxima implementación</span>
+       {name==="Usuarios"&&role==="super_admin"?<a href="/admin/usuarios" style={{fontSize:12,fontWeight:800,color:"#5B40F5",display:"inline-block",marginTop:10}}>Abrir directorio de usuarios →</a>:<span style={{fontSize:11,color:"#92909A"}}>Próxima implementación</span>}
       </article>)}
     </div>
    </div>}
