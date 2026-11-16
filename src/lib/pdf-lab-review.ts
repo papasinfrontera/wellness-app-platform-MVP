@@ -1,3 +1,4 @@
+import {curatedIdentity,validateExistingIdentity} from "./pdf-indicator-identity";
 export type ReferenceIndicator={id:number;code?:string;name:string;name_en?:string;aliases?:string[]};
 export type PdfRow={id:string;raw:string;original:string;value:string;unit:string;indicatorCode:string;indicatorName:string;status:"candidate"|"review";reason:string;};
 export type PdfReview={rows:PdfRow[];linesExamined:number;truncated:boolean;warning:string|null};
@@ -34,6 +35,12 @@ export function identifyPdfIndicator(original:string,unit:string,catalog:Referen
  }
  // Footers and method/specimen qualifiers must not become automatic identities.
  if(/\b(?:rdws|rdw s)\b/.test(labelKey))return {status:"review" as const,code:"",name:"",reason:"RDW-SD no equivale a RDW-CV; requiere indicador y unidad específicos."};
+ // Curated synonyms are checked before raw text matching. Never trust a fuzzy match.
+ const vetted=curatedIdentity(original,unit);
+ if(vetted){
+  const indicator=catalog.find(c=>c.code===vetted.code);
+  if(indicator)return {status:vetted.status,code:vetted.code,name:indicator.name,reason:vetted.reason};
+ }
  const matched=uniqueMatches(original,catalog);
  if(matched.length>1)return {status:"review" as const,code:"",name:"",reason:"Etiqueta ambigua: coincide con indicadores diferentes."};
  if(matched.length===0){
@@ -68,6 +75,8 @@ export function identifyPdfIndicator(original:string,unit:string,catalog:Referen
   return {status:"review" as const,code:"",name:"",reason:"Etiqueta sin coincidencia exacta; requiere identificación manual."};
  }
  const x=matched[0],code=x.code||"";
+ const invalid=validateExistingIdentity(original,unit,code);
+ if(invalid)return {status:invalid.status,code:invalid.code,name:invalid.code?x.name:"",reason:invalid.reason};
  if(["REF-111","REF-112"].includes(code))return {status:"review" as const,code,name:x.name,reason:"PSA libre: diferenciar porcentaje de concentración, método y unidad."};
  if(rejectContext.test(original))return {status:"review" as const,code,name:x.name,reason:"La etiqueta contiene información adicional de muestra o método; revisar equivalencia."};
  if(!unit){if(code==="REF-028")return {status:"candidate" as const,code,name:x.name,reason:"Cociente sin unidad; comprobar que sea la relación albúmina/globulina indicada."};return {status:"review" as const,code,name:x.name,reason:"No se identificó unidad; comprobar tipo de prueba."};}
