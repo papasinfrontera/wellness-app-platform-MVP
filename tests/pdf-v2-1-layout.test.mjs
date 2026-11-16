@@ -48,3 +48,14 @@ test("original and reference are distinct even when references begin with a numb
  assert.equal(r.rows[0].value,"49.0");
  assert.equal(r.rows[0].unit,"%");
 });
+
+test("HDL explanatory reference ranges never count as laboratory observations",()=>{
+ const r=analyzeExtractedText([
+  "Colesterol HDL\t43\tmg/dL\tBajo: <55",
+  "Bajo: <55 / Moderado: 35 - 55 / Alto: >35",
+  "Alto: >35",
+  "Hemoglobina\t15.40\tg/dL\t13 - 17.5"
+ ].join("\n"),catalog);
+ assert.equal(r.rows.length,2);
+ assert.deepEqual(r.rows.map(x=>x.original),["Colesterol HDL","Hemoglobina"]);
+});
