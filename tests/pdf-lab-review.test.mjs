@@ -107,14 +107,13 @@ test("regression: standard CRP must not be mapped to high sensitivity CRP",()=>{
 });
 
 
-test("PDF layout renderer emits real newlines and tab separators, not literal slash escapes",()=>{
+test("PDF layout renderer uses geometric reconstruction for newline and tab separators",()=>{
  const route=readFileSync("src/app/api/lab-pdf-preview/route.ts","utf8");
- assert.ok(route.includes('output+="\\n"'.replace("\\\\n","\\n")));
- assert.ok(route.includes('?"\\t":" "'.replace("\\\\t","\\t")));
- assert.ok(!route.includes('output+="\\\\n"'));
- assert.ok(!route.includes('?"\\\\t":" "'));
+ const layout=readFileSync("src/lib/pdf-layout-reconstruction.ts","utf8");
+ assert.match(route,/reconstructPdfRows\(content\.items\)/);
+ assert.ok(layout.includes('join("\\n")'.replace("\\\\n","\\n")));
+ assert.ok(layout.includes('?"\\t":" "'.replace("\\\\t","\\t")));
 });
-
 
 test("A.2 candidate mapping helps without auto-approval",()=>{
  for(const [label,unit,code] of [["Volumen plaquetario medio","fL","REF-046"],["Glicemia basal","mg/dL","REF-017"]]){
