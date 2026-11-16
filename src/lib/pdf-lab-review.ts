@@ -19,6 +19,21 @@ function uniqueMatches(label:string,catalog:ReferenceIndicator[]){
  return catalog.filter(x=>[x.name,x.name_en,...(x.aliases||[])].some(n=>n&&normalizePdfLabel(n)===key));
 }
 export function identifyPdfIndicator(original:string,unit:string,catalog:ReferenceIndicator[]){
+ const labelKey=normalizePdfLabel(original);
+ // Absolute differentials and percentages are distinct determinations. Preserve
+ // '#' and '%' semantics before applying the punctuation-stripping normalizer.
+ const countCodes:Record<string,string>={
+  linfocitos:"REF-044",neutrofilos:"REF-050",monocitos:"REF-048",eosinofilos:"REF-038",basofilos:"REF-032"
+ };
+ if(/\(\s*#\s*\)/.test(original)){
+  const base=normalizePdfLabel(original).replace(/\s+/g," ").trim();
+  const countCode=countCodes[base];
+  const candidate=catalog.find(x=>x.code===countCode);
+  if(candidate)return {status:"review" as const,code:countCode,name:candidate.name,reason:"Recuento absoluto identificado; comprobar unidad de recuento, muestra y método. No corresponde al porcentaje."};
+  return {status:"review" as const,code:"",name:"",reason:"Recuento absoluto sin correspondencia segura; nunca asignar al porcentaje."};
+ }
+ // Footers and method/specimen qualifiers must not become automatic identities.
+ if(/\b(?:rdws|rdw s)\b/.test(labelKey))return {status:"review" as const,code:"",name:"",reason:"RDW-SD no equivale a RDW-CV; requiere indicador y unidad específicos."};
  const matched=uniqueMatches(original,catalog);
  if(matched.length>1)return {status:"review" as const,code:"",name:"",reason:"Etiqueta ambigua: coincide con indicadores diferentes."};
  if(matched.length===0){
@@ -59,38 +74,43 @@ export function identifyPdfIndicator(original:string,unit:string,catalog:Referen
  if(["REF-069","REF-081","REF-085","REF-086","REF-121","REF-122","REF-127"].includes(code))return {status:"review" as const,code,name:x.name,reason:"Prueba dependiente de determinación, fracción, muestra u hora; confirmar con el PDF."};
  return {status:"candidate" as const,code,name:x.name,reason:"Coincidencia textual única. Confirmar muestra, método, unidad y fecha antes de utilizar."};
 }
+// Units can live in their own positioned PDF column; never read a range as a unit.
+const possibleUnit=/^(?:[×x]\s*)?(?:10(?:\^?[369]|[³⁶⁹])\s*\/\s*[µμu]L|(?:[µμu]m(?:³|\^3)|fL|pg|%|g\s*\/\s*dL|mg\s*\/\s*dL|mg\s*\/\s*L|mmol\s*\/\s*L|U\s*\/\s*L|ng\s*\/\s*mL|(?:[µμu]L|\/[µμu]L)))(?!\w)/i;
+const qualitative=/^(?:no\s+reactivo|reactivo|no\s+detectado|indetectable|negativo|positivo|normal|amarillo|límpido|limpido|escasa|escasas)$/i;
 function parseResultCell(raw:string):{value:string;unit:string}|null{
- const str=raw.trim();
+ const str=raw.trim().replace(/\s+/g," ");
+ if(qualitative.test(str))return {value:str,unit:""};
  const m=str.match(valueStart);
  if(!m)return null;
- let value=m[1].replace(/\s+/g," ").trim(), remainder=m[2].trim();
- // Retain scientific multiplier as part of the unit, without losing the measured mantissa.
- const sci=remainder.match(/^[×x]\s*10[⁰¹²³⁴⁵⁶⁷⁸⁹]+\s*\/\s*[µμu]L/i);
- if(sci)return {value,unit:sci[0].replace(/\s+/g," ")};
- const unit=remainder.match(unitStart);
- if(unit)return {value,unit:unit[0].replace(/\s+/g,"")};
- // A reference range may follow a unitless value, separated into subsequent columns.
- if(!remainder||/^\s*(?:\d|No indicado|Negativo|Hematolog|Bioquim|Serolog)/i.test(remainder))return {value,unit:""};
+ const value=m[1].trim(),rest=m[2].trim();
+ const u=rest.match(possibleUnit);
+ if(u)return {value,unit:u[0].replace(/\s+/g,"")};
+ if(!rest||/^(?:\d|No indicado|Negativo|Hematolog|Bioquim|Serolog)/i.test(rest))return {value,unit:""};
  return null;
 }
-/** Reads only one value cell, never the reference range. PDF text coordinates should insert tabs for column breaks. */
+function fromColumns(cols:string[]):{original:string;value:string;unit:string}|null{
+ if(cols.length<2||cols[0].length<2||!/[\p{L}]/u.test(cols[0]))return null;
+ const parsed=parseResultCell(cols[1]);
+ if(!parsed)return null;
+ let unit=parsed.unit;
+ if(!unit&&cols.length>=3){
+  const standalone=cols[2].trim().match(possibleUnit);
+  if(standalone)unit=standalone[0].replace(/\s+/g,"");
+ }
+ return {original:cols[0],value:parsed.value,unit};
+}
+/** Parse one reconstructed visual row; no reference interval can become the measured value. */
 function parseRow(line:string):{original:string;value:string;unit:string}|null{
  const numbered=line.match(/^\s*(\d{1,3})\s+(.*)$/);
  const text=numbered?numbered[2]:line;
- // Preferred: layout reconstruction keeps tab-separated columns.
  const tabs=text.split(/\t+/).map(s=>s.trim()).filter(Boolean);
- if(tabs.length>=2&&tabs[0].length>=2){
-  const result=parseResultCell(tabs[1]);
-  if(result&&/[a-záéíóúñü]/i.test(tabs[0]))return {original:tabs[0],...result};
- }
- // Fallback for pdf-parse layouts with >=2 spaces between cells.
+ const byTabs=fromColumns(tabs);
+ if(byTabs)return byTabs;
  const cols=text.split(/\s{2,}/).map(s=>s.trim()).filter(Boolean);
- if(cols.length>=2&&cols[0].length>=2){
-  const result=parseResultCell(cols[1]);
-  if(result&&/[a-záéíóúñü]/i.test(cols[0]))return {original:cols[0],...result};
- }
- // Single-spacing fallback: include only the FIRST value and unit; ignore reference and area.
- const first=text.match(/^(.+?)\s+((?:Negativo\s*,?\s*)?[<>≤≥]?\s*[+-]?(?:\d{1,3}(?:[.,]\d{3})+|\d+(?:[.,]\d+)?)(?:\s*[×x]\s*10[⁰¹²³⁴⁵⁶⁷⁸⁹]+\s*\/\s*[µμu]L)?(?:\s*(?:mg\s*\/\s*dL|mg\s*\/\s*L|mmol\s*\/\s*L|ng\s*\/\s*mL|pg\s*\/\s*mL|g\s*\/\s*dL|g\s*\/\s*L|U\s*\/\s*L|mIU\s*\/\s*L|fL|pg|%|\/?[µμu]L))?)(?=\s|$)/i);
+ const bySpaces=fromColumns(cols);
+ if(bySpaces)return bySpaces;
+ // Single-spacing fallback supports qualitative values while never consuming reference ranges.
+ const first=text.match(/^(.+?)\s+((?:no\s+reactivo|reactivo|no\s+detectado|indetectable|negativo|positivo|normal|amarillo|límpido|limpido|escasa|escasas)|(?:negativo\s*,?\s*)?[<>≤≥]?\s*[+-]?(?:\d{1,3}(?:[.,]\d{3})+|\d+(?:[.,]\d+)?)(?:\s*[×x]\s*10[⁰¹²³⁴⁵⁶⁷⁸⁹]+\s*\/\s*[µμu]L)?(?:\s*(?:mg\s*\/\s*dL|mg\s*\/\s*L|mmol\s*\/\s*L|ng\s*\/\s*mL|pg\s*\/\s*mL|g\s*\/\s*dL|g\s*\/\s*L|U\s*\/\s*L|[µμu]m³|fL|pg|%|\/?[µμu]L))?)(?=\s|$)/i);
  if(!first)return null;
  const parsed=parseResultCell(first[2]);
  if(!parsed||first[1].length<2||!/\p{L}/u.test(first[1]))return null;
@@ -103,9 +123,9 @@ export function analyzeExtractedText(text:string,catalog:ReferenceIndicator[],ma
  for(let i=0;i<lines.length;i++){
   if(rows.length>=maxRows)break;
   const line=lines[i];
-  if(line.length>400||line.length<4||/^(?:N\.?º|N\.?°|Indicador|Resultado|Valor de referencia|Área|Nombre:|Edad:)/i.test(line))continue;
+  if(line.length>400||line.length<4||/^(?:N\.?º|N\.?°|Indicador|Resultado|Valor de referencia|Área|Nombre:|Edad:|Página\s*\d*\s*$|P[aá]gina\s*\d*\s*$)/i.test(line))continue;
   // A report count is metadata, not a lab observation. "Total de celularidad" stays.
-  if(/^\s*(?:\d{1,3}\s+)?total\s*:\s*\d+(?:\s*(?:indicadores|pruebas|analisis|resultados))?\s*$/i.test(line))continue;
+  if(/^\s*(?:\d{1,3}\s+)?total\s*:\s*\d+(?:\s*(?:indicadores|pruebas|an[aá]lisis|resultados))?\s*$/i.test(line))continue;
   const parsed=parseRow(line);
   if(!parsed||parsed.original.length>120)continue;
   const {original,value,unit}=parsed,match=identifyPdfIndicator(original,unit,catalog);
