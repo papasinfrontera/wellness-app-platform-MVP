@@ -2,22 +2,23 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 const route=readFileSync("src/app/api/admin/users/route.ts","utf8");
+const authorization=readFileSync("src/lib/admin/authorization.ts","utf8");
 const page=readFileSync("src/app/admin/usuarios/page.tsx","utf8");
 const admin=readFileSync("src/app/admin/page.tsx","utf8");
 test("privileged auth management stays exclusively on the server",()=>{
  assert.match(route,/export async function GET/);
- assert.match(route,/process\.env\.SUPABASE_SERVICE_ROLE_KEY/);
+ assert.match(authorization,/process\.env\.SUPABASE_SERVICE_ROLE_KEY/);
  assert.doesNotMatch(page,/SERVICE_ROLE_KEY/);
  assert.match(route,/admin\.listUsers/);
- assert.match(route,/claims\.aal!=="aal2"/);
- assert.match(route,/getClaims\(match\[1\]\)/);
- assert.match(route,/auth\.getUser\(match\[1\]\)/);
+ assert.match(authorization,/claims\.claims\.aal!=="aal2"/);
+ assert.match(authorization,/getClaims\(token\)/);
+ assert.match(authorization,/auth\.getUser\(token\)/);
 });
 test("superadministrator authorization enforced after token verification",()=>{
- assert.match(route,/eq\("user_id",userData\.user\.id\)/);
- assert.match(route,/role!=="super_admin"/);
- assert.match(route,/adminRole\.is_active!==true/);
- assert.match(route,/return denied\(403\)/);
+ assert.match(authorization,/eq\("user_id",user\.user\.id\)/);
+ assert.match(authorization,/role\?\.role!=="super_admin"/);
+ assert.match(authorization,/role\.is_active!==true/);
+ assert.match(route,/verifySuperadmin\(request\)/);
  assert.match(admin,/name==="Usuarios"&&role==="super_admin"/);
 });
 test("directory returns only account metadata with no clinical or profile data",()=>{
@@ -29,7 +30,7 @@ test("directory returns only account metadata with no clinical or profile data",
  assert.doesNotMatch(route,/from\("documents"\)/);
  assert.doesNotMatch(route,/auth\.admin\.updateUserById/);
  assert.doesNotMatch(route,/auth\.admin\.deleteUser/);
- assert.match(route,/no-store/);
+ assert.match(authorization,/no-store/);
 });
 test("UI paginates and communicates restrictions accurately",()=>{
  assert.match(page,/Página \{page\}/);
