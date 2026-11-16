@@ -133,7 +133,7 @@ export function analyzeExtractedText(text:string,catalog:ReferenceIndicator[],ma
  let specimen:"blood"|"urine"|"unknown"="unknown";
  const sectionHeading=(line:string)=>{
   const h=normalizePdfLabel(line);
-  if(/^(?:hematologia|hematologia completa)$/.test(h))return "Hematología";
+  if(/^(?:hematologia|hematologia completa|reporte de hematologia|informe de hematologia|hemograma)$/.test(h))return "Hematología";
   if(h==="bioquimica")return "Bioquímica";
   if(h==="serologia")return "Serología";
   if(h==="uroanalisis"||h==="examen de orina")return "Uroanálisis";
