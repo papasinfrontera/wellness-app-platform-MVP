@@ -124,6 +124,10 @@ export function analyzeExtractedText(text:string,catalog:ReferenceIndicator[],ma
   if(rows.length>=maxRows)break;
   const line=lines[i];
   if(line.length>400||line.length<4||/^(?:N\.?º|N\.?°|Indicador|Resultado|Valor de referencia|Área|Nombre:|Edad:|Página\s*\d*\s*$|P[aá]gina\s*\d*\s*$)/i.test(line))continue;
+  // HDL and other reference legends are *not* measured indicators. In the
+  // test report they occur on independent lines: "Bajo: <55 / Moderado: ..."
+  // and "Alto: >35". Without this guard they become two false observations.
+  if(/^(?:bajo|alto|moderado|intermedio|deseable|riesgo\s+(?:alto|bajo)|low|high|normal\s+range)\s*:/i.test(line))continue;
   // A report count is metadata, not a lab observation. "Total de celularidad" stays.
   if(/^\s*(?:\d{1,3}\s+)?total\s*:\s*\d+(?:\s*(?:indicadores|pruebas|an[aá]lisis|resultados))?\s*$/i.test(line))continue;
   const parsed=parseRow(line);
