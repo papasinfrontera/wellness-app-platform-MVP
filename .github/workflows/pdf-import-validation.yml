@@ -2,7 +2,7 @@ name: Wellness platform validation
 on:
   push:
     branches:
-      - sprint-6-9-c2-admin-session-hardening
+      - sprint-pdf-v2-1-layout-reconciliation
   workflow_dispatch:
 
 permissions:
@@ -20,6 +20,7 @@ jobs:
           node-version: '22'
       - name: Verify PDF parser and safety
         run: |
+          node --experimental-strip-types --test tests/pdf-v2-1-layout.test.mjs
           npm run test:pdf
           npm run test:pdf-unmatched
           npm run test:pdf-reconcile
