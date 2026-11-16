@@ -26,7 +26,7 @@ test("role changes cannot assign superadmin or modify protected accounts",()=>{
  assert.match(route,/target===auth\.actorId/);
  assert.match(route,/targetRole\?\.role==="super_admin"/);
  assert.match(route,/targetUser\.user/);
- assert.match(route,/role!==null/);
+ assert.match(route,/newRole!==null/);
  assert.match(route,/user_role_requested/);
  assert.match(route,/user_role_completed/);
 });
