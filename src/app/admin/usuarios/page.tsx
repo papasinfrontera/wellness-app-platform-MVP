@@ -2,7 +2,7 @@
 import {useCallback,useEffect,useMemo,useState} from "react";
 import {useWellnessAuth} from "../../components/WellnessAuthProvider";
 
-type UserRow={id:string;email:string|null;created_at:string;email_confirmed:boolean;last_sign_in_at:string|null;admin_role:string|null};
+type UserRow={id:string;email:string|null;created_at:string;email_confirmed:boolean;last_sign_in_at:string|null;admin_role:string|null;banned_until:string|null};
 type Response={page:number;perPage:number;total:number|null;users:UserRow[];error?:string};
 type Status="loading"|"signin"|"mfa"|"denied"|"error"|"ready";
 const shell={maxWidth:1120,margin:"0 auto",padding:"48px 22px 95px",color:"#201831"};
@@ -16,6 +16,42 @@ export default function AdminUsers(){
  const [result,setResult]=useState<Response|null>(null);
  const [error,setError]=useState("");
  const [refresh,setRefresh]=useState(0);
+ const [action,setAction]=useState<"invite"|"set_role"|"suspend"|"reactivate"|null>(null);
+ const [target,setTarget]=useState<UserRow|null>(null);
+ const [inviteEmail,setInviteEmail]=useState("");
+ const [selectedRole,setSelectedRole]=useState("support_admin");
+ const [confirmation,setConfirmation]=useState("");
+ const [reason,setReason]=useState("");
+ const [actionBusy,setActionBusy]=useState(false);
+ const [actionNotice,setActionNotice]=useState("");
+ function startAction(next:"invite"|"set_role"|"suspend"|"reactivate",row:UserRow|null=null){
+  setAction(next);setTarget(row);setReason("");setConfirmation("");setActionNotice("");
+  if(next==="set_role")setSelectedRole(row?.admin_role||"support_admin");
+ }
+ async function executeAction(event:React.FormEvent<HTMLFormElement>){
+  event.preventDefault();
+  if(!client||!user||!action||actionBusy)return;
+  const targetEmail=(action==="invite"?inviteEmail:target?.email||"").trim().toLowerCase();
+  if(!targetEmail||confirmation.trim().toLowerCase()!==targetEmail||reason.trim().length<12)return;
+  setActionBusy(true);setActionNotice("");
+  try{
+   const {data:{session}}=await client.auth.getSession();
+   if(!session?.access_token)throw new Error("Sesión administrativa vencida.");
+   const response=await fetch("/api/admin/users/actions",{
+    method:"POST",credentials:"same-origin",cache:"no-store",
+    headers:{"Content-Type":"application/json",Authorization:"Bearer "+session.access_token},
+    body:JSON.stringify({action,user_id:target?.id,email:targetEmail,
+     role:action==="set_role"?(selectedRole==="none"?null:selectedRole):undefined,
+     confirmation:confirmation.trim().toLowerCase(),reason:reason.trim()})
+   });
+   const output=await response.json() as {ok?:boolean;error?:string;message?:string};
+   if(!response.ok)throw new Error(output.error||"Operación rechazada por el servidor.");
+   setActionNotice(output.message||"Operación completada.");
+   setAction(null);setTarget(null);setInviteEmail("");setRefresh(n=>n+1);
+  }catch(e){setActionNotice(e instanceof Error?e.message:"No fue posible ejecutar la acción.");}
+  finally{setActionBusy(false)}
+ }
+
  const fetchData=useCallback(async()=>{
   if(authStatus==="loading"){setStatus("loading");return}
   if(!client||!user||authStatus!=="signed_in"){setStatus("signin");setResult(null);return}
@@ -47,7 +83,7 @@ export default function AdminUsers(){
     <h1 style={{fontSize:"clamp(28px,4vw,40px)",letterSpacing:"-.04em",margin:"7px 0"}}>Gestión de usuarios</h1>
     <p style={{fontSize:13,color:"#777087",lineHeight:1.6,maxWidth:690}}>Directorio de cuentas y roles. Los datos de laboratorio, hábitos, fotografías y antecedentes de salud permanecen fuera de esta vista.</p>
    </div>
-   <button type="button" onClick={()=>setRefresh(n=>n+1)} disabled={status==="loading"} style={{padding:"10px 14px",background:"#F4F0FF",border:"1px solid #D9D0FA",borderRadius:10,fontWeight:700,color:"#5B40F5",cursor:"pointer"}}>Actualizar</button>
+   <button type="button" onClick={()=>setRefresh(n=>n+1)} disabled={status==="loading"} style={{padding:"10px 14px",background:"#F4F0FF",border:"1px solid #D9D0FA",borderRadius:10,fontWeight:700,color:"#5B40F5",cursor:"pointer"}}>Actualizar</button><button type="button" onClick={()=>startAction("invite")} style={{padding:"10px 14px",marginLeft:8,border:0,borderRadius:10,color:"white",background:"#4B9B5D",cursor:"pointer"}}>+ Invitar usuario</button>
   </div>
   {status==="loading"&&<div role="status" style={surface}>Verificando permisos y consultando cuentas…</div>}
   {status==="signin"&&<div role="status" style={surface}>Inicia sesión para acceder. <a href="/sprint-6-2/persistencia">Ir al acceso</a></div>}
@@ -63,13 +99,13 @@ export default function AdminUsers(){
    </div>
    <div style={{overflowX:"auto"}}>
     <table style={{width:"100%",minWidth:720,borderCollapse:"collapse",fontSize:12,textAlign:"left"}}>
-     <thead><tr style={{background:"#F3EFFF"}}>{["Correo","Registro","Verificación","Último acceso","Rol administrativo"].map(h=><th key={h} scope="col" style={{padding:12,color:"#4C3C6A"}}>{h}</th>)}</tr></thead>
+     <thead><tr style={{background:"#F3EFFF"}}>{["Correo","Registro","Verificación","Acceso","Último acceso","Rol administrativo","Acciones"].map(h=><th key={h} scope="col" style={{padding:12,color:"#4C3C6A"}}>{h}</th>)}</tr></thead>
      <tbody>{visible.map(row=><tr key={row.id} style={{borderBottom:"1px solid #EEEAF7"}}>
       <td style={{padding:12,overflowWrap:"anywhere",fontWeight:700}}>{row.email||"Sin correo"}</td>
       <td style={{padding:12}}>{date(row.created_at)}</td>
       <td style={{padding:12}}>{row.email_confirmed?"Confirmado":"Pendiente"}</td>
-      <td style={{padding:12}}>{date(row.last_sign_in_at)}</td>
-      <td style={{padding:12}}>{row.admin_role?.replaceAll("_"," ")||"Usuario"}</td>
+      <td style={{padding:12}}>{row.banned_until&&Date.parse(row.banned_until)>Date.now()?"Suspendido":"Activo"}</td><td style={{padding:12}}>{date(row.last_sign_in_at)}</td>
+      <td style={{padding:12}}>{row.admin_role?.replaceAll("_"," ")||"Usuario"}</td><td style={{padding:12}}>{row.admin_role==="super_admin"||row.id===user?.id?"Cuenta protegida":<div style={{display:"flex",gap:7}}><button type="button" onClick={()=>startAction("set_role",row)}>Rol</button><button type="button" onClick={()=>startAction(row.banned_until&&Date.parse(row.banned_until)>Date.now()?"reactivate":"suspend",row)}>{row.banned_until&&Date.parse(row.banned_until)>Date.now()?"Reactivar":"Suspender"}</button></div>}</td>
      </tr>)}</tbody>
     </table>
     {visible.length===0&&<p style={{fontSize:12,padding:15,color:"#777087"}}>No hay coincidencias en esta página.</p>}
@@ -80,6 +116,36 @@ export default function AdminUsers(){
     <button type="button" disabled={!hasNext} onClick={()=>{setPage(n=>n+1);setFilter("")}} style={{padding:"10px 14px",borderRadius:9,border:"1px solid #DDD5F2",background:"#fff"}}>Siguiente</button>
    </div>
   </section>}
-  <p style={{fontSize:11,color:"#847C91",marginTop:19}}>Vista de solo lectura. Invitaciones, suspensión de cuentas y cambios de roles requieren un flujo privilegiado adicional, con confirmaciones y auditoría.</p>
+
+  {actionNotice&&<p role="status" aria-live="polite" style={{fontSize:13,padding:13,borderRadius:10,background:"#F3EFFF"}}>{actionNotice}</p>}
+  {action&&<section aria-label="Confirmar operación administrativa" style={{...surface,marginTop:18,borderColor:"#BEB2E9"}}>
+   <h2 style={{fontSize:19,margin:"0 0 9px"}}>{action==="invite"?"Invitar usuario":action==="set_role"?"Modificar rol":action==="suspend"?"Suspender acceso":"Reactivar acceso"}</h2>
+   <p style={{fontSize:12,color:"#6D6778"}}>Esta operación requiere MFA, autorización en servidor y registro de auditoría.</p>
+   {action==="suspend"&&<p style={{fontSize:12,padding:11,borderRadius:10,background:"#FFF3E4",color:"#93552C"}}>La suspensión impide nuevas autenticaciones, pero los tokens activos podrían continuar válidos hasta expirar. No equivale a una revocación clínica inmediata.</p>}
+   <form onSubmit={e=>{void executeAction(e)}} style={{display:"grid",gap:12,maxWidth:550}}>
+    {action==="invite"?<label style={{display:"grid",gap:5,fontSize:12,fontWeight:700}}>Correo para la invitación
+     <input type="email" required maxLength={254} value={inviteEmail} onChange={e=>setInviteEmail(e.target.value)} style={{padding:10,border:"1px solid #DDD4EE",borderRadius:8}}/>
+    </label>:<p style={{fontSize:12}}>Usuario seleccionado: <strong>{target?.email}</strong></p>}
+    {action==="set_role"&&<label style={{display:"grid",gap:5,fontSize:12,fontWeight:700}}>Nuevo rol
+     <select value={selectedRole} onChange={e=>setSelectedRole(e.target.value)} style={{padding:10,border:"1px solid #DDD4EE",borderRadius:8}}>
+      <option value="none">Usuario sin permisos administrativos</option>
+      <option value="support_admin">Administrador de soporte</option>
+      <option value="operations_admin">Administrador de operaciones</option>
+      <option value="scientific_admin">Administrador científico</option>
+     </select>
+    </label>}
+    <label style={{display:"grid",gap:5,fontSize:12,fontWeight:700}}>Motivo documentado
+     <textarea value={reason} onChange={e=>setReason(e.target.value)} minLength={12} maxLength={300} required rows={3} style={{padding:10,border:"1px solid #DDD4EE",borderRadius:8}} placeholder="Explica el motivo (mínimo 12 caracteres)"/>
+    </label>
+    <label style={{display:"grid",gap:5,fontSize:12,fontWeight:700}}>Confirmación: escribe el correo completo {action==="invite"?inviteEmail:target?.email}
+     <input value={confirmation} onChange={e=>setConfirmation(e.target.value)} required autoComplete="off" style={{padding:10,border:"1px solid #DDD4EE",borderRadius:8}}/>
+    </label>
+    <div style={{display:"flex",gap:9}}>
+     <button type="submit" disabled={actionBusy||reason.trim().length<12||confirmation.trim().toLowerCase()!==(action==="invite"?inviteEmail:target?.email||"").trim().toLowerCase()} style={{padding:"11px 15px",background:"#5B40F5",color:"white",border:0,borderRadius:9,cursor:"pointer"}}>{actionBusy?"Procesando…":"Confirmar operación"}</button>
+     <button type="button" disabled={actionBusy} onClick={()=>{setAction(null);setActionNotice("")}} style={{padding:"11px 15px",background:"white",border:"1px solid #DDD4EE",borderRadius:9}}>Cancelar</button>
+    </div>
+   </form>
+  </section>}
+  <p style={{fontSize:11,color:"#847C91",marginTop:19}}>Las cuentas superadministradoras permanecen protegidas. La sección no concede acceso a datos clínicos de otras personas.</p>
  </main>;
 }
