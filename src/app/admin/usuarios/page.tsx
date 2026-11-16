@@ -1,6 +1,6 @@
 "use client";
 import {useCallback,useEffect,useMemo,useState} from "react";
-import {useWellnessAuth} from "../../../components/WellnessAuthProvider";
+import {useWellnessAuth} from "../../components/WellnessAuthProvider";
 
 type UserRow={id:string;email:string|null;created_at:string;email_confirmed:boolean;last_sign_in_at:string|null;admin_role:string|null};
 type Response={page:number;perPage:number;total:number|null;users:UserRow[];error?:string};
