@@ -22,6 +22,17 @@ export async function verifySuperadmin(request:Request):Promise<SuperadminSessio
   if(uErr||cErr||!user.user||!claims?.claims||claims.claims.sub!==user.user.id)return reply({error:"Sesión inválida."},401);
   if(claims.claims.aal!=="aal2")return reply({error:"Se requiere verificación administrativa en dos pasos."},403);
   const operator=createClient(url,secret,{auth:{autoRefreshToken:false,persistSession:false}});
+  const sessionId=claims.claims.session_id;
+  if(typeof sessionId!=="string"||!/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(sessionId)){
+    return reply({error:"La sesión carece de identidad verificable."},401);
+  }
+  // A signed JWT can remain cryptographically valid after logout or suspension.
+  // Confirm the session exists in auth.sessions and the user is not banned.
+  const {data:sessionActive,error:sessionError}=await operator.rpc("admin_session_is_active",{
+   p_user_id:user.user.id,p_session_id:sessionId
+  });
+  if(sessionError)return reply({error:"No fue posible comprobar la vigencia de la sesión."},503);
+  if(sessionActive!==true)return reply({error:"La sesión está revocada, caducada o suspendida."},401);
   const {data:role,error:rErr}=await operator.from("platform_admin_roles")
    .select("role,is_active").eq("user_id",user.user.id).maybeSingle();
   if(rErr)return reply({error:"No fue posible comprobar permisos."},503);
