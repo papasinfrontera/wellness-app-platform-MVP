@@ -21,6 +21,7 @@ jobs:
       - name: Verify PDF parser and safety
         run: |
           node --experimental-strip-types --test tests/pdf-v2-1-layout.test.mjs
+          node --experimental-strip-types --test tests/pdf-v2-1-geometry.test.mjs
           npm run test:pdf
           npm run test:pdf-unmatched
           npm run test:pdf-reconcile
