@@ -18,8 +18,32 @@ export function reconstructPdfRows(items:PositionedPdfText[]):string{
   if(last&&Math.abs(last[0].y-current.y)<=2)last.push(current);
   else lines.push([current]);
  }
- return lines.map(line=>{
-  line.sort((a,b)=>a.x-b.x);
+ // Some lab exports vertically center the value and row number between two
+ // lines of a wrapped label (e.g. CHCM). Rejoin label-only fragments by their
+ // proximity to a numbered measurement row, without joining adjacent tests.
+ const absorbed=new Set<number>();
+ for(let anchorIndex=0;anchorIndex<lines.length;anchorIndex++){
+  const anchor=lines[anchorIndex];
+  const number=anchor.find(x=>x.x<100&&/^\d{1,3}$/.test(x.text));
+  const result=anchor.find(x=>x.x>(number?.x??0)+150&&/^[<>≤≥]?\s*\d/.test(x.text));
+  if(!number||!result)continue;
+  const anchorY=number.y;
+  for(let fragmentIndex=0;fragmentIndex<lines.length;fragmentIndex++){
+   if(fragmentIndex===anchorIndex||absorbed.has(fragmentIndex))continue;
+   const fragment=lines[fragmentIndex];
+   if(fragment.length!==1)continue;
+   const part=fragment[0];
+   if(Math.abs(part.y-anchorY)>8.5)continue;
+   if(part.x<=number.x+12||part.x>=result.x-10)continue;
+   if(!/[\p{L}]/u.test(part.text)||/^\d{1,3}$/.test(part.text))continue;
+   if(anchor.some(x=>x.x>=number.x+12&&x.x<result.x-10&&
+      /[\p{L}]/u.test(x.text)))continue;
+   anchor.push(part);
+   absorbed.add(fragmentIndex);
+  }
+ }
+ return lines.filter((_,i)=>!absorbed.has(i)).map(line=>{
+  line.sort((a,b)=>a.x-b.x||b.y-a.y);
   let output="",right:number|null=null;
   for(const item of line){
    if(right!==null)output+=item.x-right>12?"\t":" ";
