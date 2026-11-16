@@ -9,6 +9,7 @@ const normalize=(text:string)=>text.normalize("NFKD").replace(/[\u0300-\u036f]/g
 const aliases:Record<string,{code:string;methodSensitive?:boolean}>={
  "recuento de globulos rojos":{code:"REF-023"},
  "concentracion de hb corp media chcm":{code:"REF-009"},
+ "concentracion de hb corpuscular media chcm":{code:"REF-009"},
  "volumen plaquetario medio mpv":{code:"REF-046"},
  "hemoglobina glicada hba1c":{code:"REF-019"},
  "nivel de nitrogeno ureico":{code:"REF-004"},
