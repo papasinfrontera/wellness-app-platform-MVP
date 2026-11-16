@@ -35,7 +35,7 @@ test("UI paginates and communicates restrictions accurately",()=>{
  assert.match(page,/Página \{page\}/);
  assert.match(page,/Buscar en esta página/);
  assert.match(page,/roles/);
- assert.match(page,/solo lectura/);
+ assert.match(page,/Confirma|Confirmación/);
  assert.match(page,/role/);
  assert.match(page,/status==="mfa"/);
  assert.match(page,/status==="denied"/);
