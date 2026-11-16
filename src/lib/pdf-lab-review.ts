@@ -1,6 +1,6 @@
 import {curatedIdentity,validateExistingIdentity} from "./pdf-indicator-identity.ts";
 export type ReferenceIndicator={id:number;code?:string;name:string;name_en?:string;aliases?:string[]};
-export type PdfRow={id:string;raw:string;original:string;value:string;unit:string;indicatorCode:string;indicatorName:string;status:"candidate"|"review";reason:string;};
+export type PdfRow={id:string;raw:string;original:string;value:string;unit:string;indicatorCode:string;indicatorName:string;status:"candidate"|"review";reason:string;section?:string;specimen?:"blood"|"urine"|"unknown";};
 export type PdfReview={rows:PdfRow[];linesExamined:number;truncated:boolean;warning:string|null};
 export const normalizePdfLabel=(s:string)=>s.normalize("NFKD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim().replace(/\s+/g," ");
 export type UnmatchedKind="unmapped"|"qualitative"|"complementary";
@@ -129,9 +129,26 @@ export function analyzeExtractedText(text:string,catalog:ReferenceIndicator[],ma
  if(typeof text!=="string"||!text.trim())return {rows:[],linesExamined:0,truncated:false,warning:"No se detectó texto. Puede tratarse de un PDF escaneado; OCR fuera de este sprint."};
  const lines=text.split(/\r?\n/).map(x=>x.trim()).filter(Boolean);
  const rows:PdfRow[]=[];
+ let section="";
+ let specimen:"blood"|"urine"|"unknown"="unknown";
+ const sectionHeading=(line:string)=>{
+  const h=normalizePdfLabel(line);
+  if(/^(?:hematologia|hematologia completa)$/.test(h))return "Hematología";
+  if(h==="bioquimica")return "Bioquímica";
+  if(h==="serologia")return "Serología";
+  if(h==="uroanalisis"||h==="examen de orina")return "Uroanálisis";
+  if(h==="electrolitos")return "Electrolitos";
+  return "";
+ };
  for(let i=0;i<lines.length;i++){
   if(rows.length>=maxRows)break;
   const line=lines[i];
+  const detectedSection=sectionHeading(line);
+  if(detectedSection){
+   section=detectedSection;
+   specimen=section==="Uroanálisis"?"urine":"blood";
+   continue;
+  }
   if(line.length>400||line.length<4||/^(?:N\.?º|N\.?°|Indicador|Resultado|Valor de referencia|Área|Nombre:|Edad:|Página\s*\d*\s*$|P[aá]gina\s*\d*\s*$)/i.test(line))continue;
   // HDL and other reference legends are *not* measured indicators. In the
   // test report they occur on independent lines: "Bajo: <55 / Moderado: ..."
@@ -141,8 +158,11 @@ export function analyzeExtractedText(text:string,catalog:ReferenceIndicator[],ma
   if(/^\s*(?:\d{1,3}\s+)?total\s*:\s*\d+(?:\s*(?:indicadores|pruebas|an[aá]lisis|resultados))?\s*$/i.test(line))continue;
   const parsed=parseRow(line);
   if(!parsed||parsed.original.length>120)continue;
-  const {original,value,unit}=parsed,match=identifyPdfIndicator(original,unit,catalog);
-  rows.push({id:String(i+1),raw:line,original,value,unit,indicatorCode:match.code,indicatorName:match.name,status:match.status,reason:match.reason});
+  const {original,value,unit}=parsed;
+  const match=specimen==="urine"
+   ?{status:"review" as const,code:"",name:"",reason:"Uroanálisis: no asociar con indicadores sanguíneos. Requiere identidad y catálogo específicos de orina."}
+   :identifyPdfIndicator(original,unit,catalog);
+  rows.push({id:String(i+1),raw:line,original,value,unit,indicatorCode:match.code,indicatorName:match.name,status:match.status,reason:match.reason,section,specimen});
  }
  return {rows,linesExamined:lines.length,truncated:rows.length>=maxRows,warning:rows.length?"Resultados extraídos para revisión; no se almacena ninguno.":"No se identificaron filas: comprueba el formato del PDF o revisa manualmente."};
 }
