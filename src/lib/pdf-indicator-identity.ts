@@ -15,7 +15,8 @@ const aliases:Record<string,{code:string;methodSensitive?:boolean}>={
  "colesterol":{code:"REF-013"},
  "indice a g":{code:"REF-028"},
  "colesterol ldl calculado":{code:"REF-005",methodSensitive:true},
- "ancho de distribucion eritrocitaria rdwc":{code:"REF-052",methodSensitive:true}
+ "ancho de distribucion eritrocitaria rdwc":{code:"REF-052",methodSensitive:true},
+ "ancho de distribucion eritrocitaria rdw c":{code:"REF-052",methodSensitive:true}
 };
 const units:Record<string,RegExp>={
  "REF-023":/^10\^?6\/[µμu]l$/i,
