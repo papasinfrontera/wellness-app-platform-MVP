@@ -2,6 +2,7 @@ import {NextResponse} from "next/server";
 import pdfParse from "pdf-parse/lib/pdf-parse.js";
 import catalog from "@/app/(dashboard)/mi-analisis/catalog-reference.json";
 import {analyzeExtractedText} from "@/lib/pdf-lab-review";
+import {reconstructPdfRows} from "@/lib/pdf-layout-reconstruction";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 type PdfItem={str:string;transform:number[];width:number};
@@ -24,16 +25,7 @@ export async function POST(request:Request){
   if(new TextDecoder("ascii").decode(bytes.subarray(0,5))!=="%PDF-")return fail("El archivo no tiene una cabecera PDF válida.",415);
   const extracted=await pdfParse(Buffer.from(bytes),{max:12,pagerender:async(page:PdfPage)=>{
     const content=await page.getTextContent({normalizeWhitespace:false,disableCombineTextItems:false});
-    let output="",lastY:number|null=null,lastRight:number|null=null;
-    for(const item of content.items){
-      if(typeof item.str!=="string"||!item.str.trim())continue;
-      const x=item.transform[4],y=item.transform[5];
-      if(lastY===null||Math.abs(lastY-y)>2){if(output)output+="\n";lastRight=null;}
-      else if(lastRight!==null)output+=x-lastRight>12?"\t":" ";
-      output+=item.str;
-      lastY=y;lastRight=x+item.width;
-    }
-    return output;
+    return reconstructPdfRows(content.items);
   }});
   if(!extracted.numpages||extracted.numpages>12)return fail("El piloto admite documentos digitales de hasta 12 páginas.",422);
   const review=analyzeExtractedText(extracted.text,catalog,80);
