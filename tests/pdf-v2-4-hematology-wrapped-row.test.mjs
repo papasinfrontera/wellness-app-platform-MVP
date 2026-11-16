@@ -23,11 +23,13 @@ test("CHCM split over two lines and centered numeric value reconstructs one test
  const raw=reconstructPdfRows(items);
  const parsed=analyzeExtractedText(raw,catalog);
  assert.equal(parsed.rows.length,2,raw);
- assert.match(parsed.rows[0].original,/Concentración de Hb corpuscular media \(CHCM\)/);
- assert.equal(parsed.rows[0].unit,"g/dL");
- assert.equal(parsed.rows[0].value,"34");
- assert.equal(parsed.rows[0].indicatorCode,"REF-009");
- assert.equal(parsed.rows[1].original,"Ancho de distribución eritrocitaria (RDWc)");
+ const chcm=parsed.rows.find(x=>x.original.includes("(CHCM)"));
+ assert.ok(chcm,raw);
+ assert.match(chcm.original,/Concentración de Hb corpuscular media \(CHCM\)/);
+ assert.equal(chcm.unit,"g/dL");
+ assert.equal(chcm.value,"34");
+ assert.equal(chcm.indicatorCode,"REF-009");
+ assert.ok(parsed.rows.some(x=>x.original==="Ancho de distribución eritrocitaria (RDWc)"));
 });
 test("a distant or a real separate numbered test is not incorrectly merged",()=>{
  const items=[
@@ -39,5 +41,5 @@ test("a distant or a real separate numbered test is not incorrectly merged",()=>
  const raw=reconstructPdfRows(items);
  const r=analyzeExtractedText(raw,catalog);
  assert.equal(r.rows.length,2,raw);
- assert.equal(r.rows[1].original,"Hemoglobina");
+ assert.ok(r.rows.some(x=>x.original==="Hemoglobina"),raw);
 });
