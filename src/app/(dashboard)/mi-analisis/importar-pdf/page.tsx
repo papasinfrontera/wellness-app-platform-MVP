@@ -314,6 +314,10 @@ export default function PdfPilotPage(){
   </div>:<>
    <h2>2. Revisa los resultados</h2>
    <p className="wa-subtitle">{report.pages} página(s) · {report.linesExamined} líneas examinadas · {rows.length} resultados extraídos. Las propuestas son textuales, no validaciones clínicas.</p>
+   <p style={{fontSize:12,color:"#5c5270",padding:"9px 12px",border:"1px solid #e6e1f4",borderRadius:10,marginTop:10}}>
+    Por muestra: sangre y serología <strong>{rows.filter(r=>r.specimen==="blood").length}</strong> · orina <strong>{rows.filter(r=>r.specimen==="urine").length}</strong> · sin sección identificada <strong>{rows.filter(r=>!r.specimen||r.specimen==="unknown").length}</strong>.
+    {rows.some(r=>r.specimen==="urine")&&<span style={{display:"block",marginTop:5,color:"#925320"}}>Los resultados de orina se conservarán para revisión; no se pueden confirmar mediante indicadores sanguíneos.</span>}
+   </p>
    {report.warning&&<p style={{fontSize:12,color:"#594880",background:"#f5f0ff",padding:10,borderRadius:10,marginTop:11}}>{report.warning}</p>}
    {reconcileMessage&&<div role="status" style={{marginTop:10,padding:12,border:"1px solid #e0d9f3",background:"#f8f5ff",borderRadius:10,fontSize:12,color:"#463578"}}>
     {reconcileMessage}
