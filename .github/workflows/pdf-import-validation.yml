@@ -23,6 +23,7 @@ jobs:
           node --experimental-strip-types --test tests/pdf-v2-1-layout.test.mjs
           node --experimental-strip-types --test tests/pdf-v2-1-geometry.test.mjs
           node --experimental-strip-types --test tests/pdf-v2-2-identity.test.mjs
+          node --experimental-strip-types --test tests/pdf-v2-2-blood-54-labels.test.mjs
           npm run test:pdf
           npm run test:pdf-unmatched
           npm run test:pdf-reconcile
