@@ -7,12 +7,12 @@ const catalog=JSON.parse(readFileSync("src/app/(dashboard)/mi-analisis/catalog-r
 const item=(str,x,y,width=25)=>({str,transform:[1,0,0,1,x,y],width});
 test("CHCM split over two lines and centered numeric value reconstructs one test",()=>{
  const items=[
-  item("(CHCM)",66,282,30),
+  item("(CHCM)",66,272,30),
   item("31 g/dL",246,277,35),
   item("32-36 g/dL",342,277,45),
   item("6",38,277,5),
   item("Hematología",488,277,55),
-  item("Concentración de Hb corpuscular media",66,272,160),
+  item("Concentración de Hb corpuscular media",66,282,160),
   item("7",38,306,5),
   item("Ancho de distribución eritrocitaria (RDWc)",66,306,170),
   item("12,3 %",246,306,30),
