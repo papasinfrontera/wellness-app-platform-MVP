@@ -1,4 +1,4 @@
-import {curatedIdentity,validateExistingIdentity} from "./pdf-indicator-identity";
+import {curatedIdentity,validateExistingIdentity} from "./pdf-indicator-identity.ts";
 export type ReferenceIndicator={id:number;code?:string;name:string;name_en?:string;aliases?:string[]};
 export type PdfRow={id:string;raw:string;original:string;value:string;unit:string;indicatorCode:string;indicatorName:string;status:"candidate"|"review";reason:string;};
 export type PdfReview={rows:PdfRow[];linesExamined:number;truncated:boolean;warning:string|null};
