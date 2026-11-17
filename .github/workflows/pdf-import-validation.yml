@@ -2,7 +2,7 @@ name: Wellness platform validation
 on:
   push:
     branches:
-      - sprint-pdf-v2-4-hematology-26
+      - sprint-pdf-v2-5-hematology-audit
   workflow_dispatch:
 
 permissions:
@@ -26,6 +26,7 @@ jobs:
           node --experimental-strip-types --test tests/pdf-v2-2-blood-54-labels.test.mjs
           node --experimental-strip-types --test tests/pdf-v2-3-original-report-72.test.mjs
           node --experimental-strip-types --test tests/pdf-v2-4-hematology-wrapped-row.test.mjs
+          node --experimental-strip-types --test tests/pdf-v2-5-hematology-26-identity.test.mjs
           npm run test:pdf
           npm run test:pdf-unmatched
           npm run test:pdf-reconcile
