@@ -35,6 +35,20 @@ export function identifyPdfIndicator(original:string,unit:string,catalog:Referen
  }
  // Footers and method/specimen qualifiers must not become automatic identities.
  if(/\b(?:rdws|rdw s)\b/.test(labelKey))return {status:"review" as const,code:"",name:"",reason:"RDW-SD no equivale a RDW-CV; requiere indicador y unidad específicos."};
+ // Hematology-only unmapped tests: provide exact review guidance but do not
+ // manufacture an indicator ID or equate clinically different platelet metrics.
+ const hematologyPending:Record<string,{expected:string;reason:string}>={
+  "ancho de distribucion eritrocitaria rdws":{expected:"µm³",reason:"RDW-SD (dispersión absoluta del volumen eritrocitario) es distinto de RDW-CV (%). Requiere indicador separado y validar la unidad original."},
+  "plaquetocrito":{expected:"%",reason:"Plaquetocrito (PCT plaquetario), no procalcitonina. Requiere indicador específico y escala porcentual validada."},
+  "indice de distribucion plaquetaria pdwc":{expected:"%",reason:"PDW-CV: amplitud relativa de distribución plaquetaria. No equiparar con PDW-SD; verificar denominación y unidad."},
+  "p lcr":{expected:"%",reason:"P-LCR: proporción de plaquetas grandes; no confundir con recuento absoluto P-LCC."},
+  "p lcc":{expected:"10³/µL",reason:"P-LCC: recuento de plaquetas grandes por volumen; no confundir con P-LCR en porcentaje."},
+  "lic":{expected:"10⁹/µL",reason:"LIC (#): identidad celular y escala de la unidad requieren validación con el laboratorio; no convertir 10⁹/µL sin aclaración."}
+ };
+ const pending=hematologyPending[labelKey];
+ if(pending){
+  return {status:"review" as const,code:"",name:"",reason:pending.reason+(unit&&unit!==pending.expected?" Unidad extraída: "+unit+"; unidad del documento de referencia: "+pending.expected+".":"")};
+ }
  // Curated synonyms are checked before raw text matching. Never trust a fuzzy match.
  const vetted=curatedIdentity(original,unit);
  if(vetted){
